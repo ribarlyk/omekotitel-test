@@ -11,6 +11,7 @@
   "dependencies": {
     "@apollo/client": "^4.1.6",
     "@apollo/client-integration-nextjs": "^0.14.4",
+    "@marsidev/react-turnstile": "^1.4.2",
     "@types/lodash": "^4.17.24",
     "graphql": "^16.13.1",
     "graphql-tag": "^2.12.6",

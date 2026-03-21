@@ -18,13 +18,14 @@ enum Panel {
 }
 
 const PANEL_TITLES: Record<Panel, string> = {
-  [Panel.Profile]: "Профил",
+  [Panel.Profile]: "Влез в профил",
   [Panel.Cart]: "Количка",
   [Panel.Wishlist]: "Любими",
 };
 
 export const UserCartWishSection = () => {
   const [openPanel, setOpenPanel] = useState<Panel | null>(null);
+  const [authTitle, setAuthTitle] = useState<string>(PANEL_TITLES[Panel.Profile]);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { itemCount, refreshCart } = useCart();
@@ -115,14 +116,20 @@ export const UserCartWishSection = () => {
 
       <SidePanel
         isOpen={openPanel !== null}
-        onClose={() => setOpenPanel(null)}
-        title={openPanel ? PANEL_TITLES[openPanel] : ""}
+        onClose={() => { setOpenPanel(null); setAuthTitle(PANEL_TITLES[Panel.Profile]); }}
+        title={openPanel ? (openPanel === Panel.Profile ? authTitle : PANEL_TITLES[openPanel]) : ""}
         width={openPanel === Panel.Cart ? "w-[480px]" : "w-96"}
         customLayout={openPanel === Panel.Cart}
       >
         {openPanel === Panel.Cart && <CartPanel />}
         {openPanel === Panel.Profile && (
-          <LoginPanel onSuccess={() => { setOpenPanel(null); refreshCart(); refreshWishlist(); }} />
+          <LoginPanel
+            onSuccess={() => { setOpenPanel(null); refreshCart(); refreshWishlist(); }}
+            onViewChange={(view) => {
+              const titles = { login: "Влез в профил", register: "Регистрация на профил", "forgot-password": "Забравена парола" };
+              setAuthTitle(titles[view]);
+            }}
+          />
         )}
         {openPanel === Panel.Wishlist && <WishlistPanel />}
       </SidePanel>

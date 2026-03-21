@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Mutations } from "@/src/app/utils/graphql";
 import { print } from "graphql";
+import { verifyTurnstile } from "@/src/app/utils/turnstile";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, repass, firstname, lastname, is_subscribed } =
+    const { email, password, repass, firstname, lastname, is_subscribed, cfToken } =
       await request.json();
+
+    if (!cfToken || !(await verifyTurnstile(cfToken))) {
+      return NextResponse.json({ error: "Невалидна CAPTCHA. Опитайте отново." }, { status: 400 });
+    }
 
     if (!email || !password || !firstname || !lastname) {
       return NextResponse.json(

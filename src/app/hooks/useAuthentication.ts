@@ -8,8 +8,8 @@ import { useWishlist } from "@/src/app/contexts/WishlistContext";
 
 export interface UseAuthenticateReturns {
   loginLoading: boolean;
-  handleLogin: (event: FormEvent<HTMLFormElement>) => Promise<boolean>;
-  handleRegister: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+  handleLogin: (event: FormEvent<HTMLFormElement>, cfToken?: string) => Promise<boolean>;
+  handleRegister: (event: FormEvent<HTMLFormElement>, cfToken?: string) => Promise<boolean>;
   handleLogout: () => Promise<void>;
 }
 
@@ -43,20 +43,20 @@ export const useAuthenticate = (): UseAuthenticateReturns => {
     }
   };
 
-  const handleLogin = async (event: FormEvent<HTMLFormElement>): Promise<boolean> => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>, cfToken?: string): Promise<boolean> => {
     try {
       event.preventDefault();
       setLoading(true);
 
       const formData = new FormData(event.currentTarget);
-      const email = String(formData.get("email") ?? "").trim();
-      const password = String(formData.get("password") ?? "").trim();
+      const email = String(formData.get("email") ?? "").trim().replace(/[<>"'&]/g, "");
+      const password = String(formData.get("password") ?? "");
 
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, cfToken }),
       });
 
       if (response.ok) {
@@ -81,47 +81,62 @@ export const useAuthenticate = (): UseAuthenticateReturns => {
     }
   };
 
-  const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (event: FormEvent<HTMLFormElement>, cfToken?: string): Promise<boolean> => {
     event.preventDefault();
     setLoading(true);
 
     try {
       const formData = new FormData(event.currentTarget);
+      const sanitize = (v: unknown) => String(v ?? "").trim().replace(/[<>"'&]/g, "");
       const email = String(formData.get("email") ?? "").trim();
-      const password = String(formData.get("password") ?? "").trim();
-      const repass = String(formData.get("repass") ?? "").trim();
-      const firstname = String(formData.get("name") ?? "").trim();
-      const lastname = String(formData.get("lastname") ?? "").trim();
+      const password = String(formData.get("password") ?? "");
+      const repass = String(formData.get("repass") ?? "");
+      const firstname = sanitize(formData.get("name"));
+      const lastname = sanitize(formData.get("lastname"));
       const is_subscribed = Boolean(formData.get("is_subscribed"));
 
       const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({
-          email,
-          password,
-          repass,
-          firstname,
-          lastname,
-          is_subscribed,
-        }),
+        body: JSON.stringify({ email, password, repass, firstname, lastname, is_subscribed, cfToken }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        console.error("Registration failed:", data.error || "Unknown error");
-        alert(data.error || "Registration failed");
-        return;
+        toast.error(data.error || "Регистрацията не успя.");
+        return false;
       }
 
-      alert("Registration successful!");
+      // Auto-login after successful registration
+      const loginResponse = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (loginResponse.ok) {
+        const meResponse = await fetch("/api/me", {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (meResponse.ok) {
+          const userData = await meResponse.json();
+          setUser(userData);
+        }
+        refreshCart();
+        refreshWishlist();
+      }
+
+      toast.success("Регистрацията е успешна!");
+      return true;
     } catch (error) {
       console.error("Registration error:", error);
-      alert("Registration failed. Please try again.");
+      toast.error("Регистрацията не успя. Опитайте отново.");
+      return false;
     } finally {
       setLoading(false);
     }

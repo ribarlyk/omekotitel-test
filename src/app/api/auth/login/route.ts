@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { Mutations } from "@/src/app/utils/graphql";
 import { print } from "graphql";
+import { verifyTurnstile } from "@/src/app/utils/turnstile";
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, cfToken } = await request.json();
     if (!email || !password) {
-      return NextResponse.json(
-        { error: "Email and password are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
+    }
+    if (!cfToken || !(await verifyTurnstile(cfToken))) {
+      return NextResponse.json({ error: "Невалидна CAPTCHA. Опитайте отново." }, { status: 400 });
     }
 
     const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
