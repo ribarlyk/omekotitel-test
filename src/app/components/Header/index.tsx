@@ -4,7 +4,7 @@ import { UserCartWishSection } from "./UserCartWishSection";
 
 export const Header = () => {
   return (
-    <header className="w-full px-4 py-4 lg:px-6 bg-white z-30">
+    <header className="hidden lg:block w-full px-4 py-4 lg:px-6 bg-white z-30">
       {/* Top row: logo + search + icons */}
       <div className="flex items-center w-full">
         <div className="shrink-0">

@@ -12,6 +12,9 @@ export async function POST(request: NextRequest) {
     if (!email) {
       return NextResponse.json({ error: "Имейлът е задължителен" }, { status: 400 });
     }
+    if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Невалиден имейл адрес" }, { status: 400 });
+    }
 
     const baseUrl = (process.env.GRAPHQL_URL ?? "").replace("/graphql", "");
     if (!baseUrl) {

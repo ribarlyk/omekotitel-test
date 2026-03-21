@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import debounce from "lodash/debounce";
 
-export const SearchBar = () => {
+export const SearchBar = ({ inputRef }: { inputRef?: React.RefObject<HTMLInputElement | null> } = {}) => {
   const [value, setValue] = useState("");
   const router = useRouter();
 
@@ -26,16 +26,18 @@ export const SearchBar = () => {
 
   return (
     <form
-      className="flex items-center w-full h-14 border border-gray-300 rounded-lg px-4 gap-2"
+      className="flex items-center w-full h-full lg:h-14 border border-gray-300 rounded-lg px-3 lg:px-4 gap-2"
       onSubmit={handleSubmit}
     >
       <input
+        ref={inputRef}
         type="text"
         placeholder="Търсене на продукти..."
         className="flex-1 outline-none bg-transparent"
         value={value}
         onChange={(e) => setValue(e.target.value)}
         autoComplete="off"
+        maxLength={200}
       />
       <button
         type="submit"

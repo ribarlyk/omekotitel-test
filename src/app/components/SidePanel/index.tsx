@@ -1,7 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface SidePanelProps {
   isOpen: boolean;
@@ -13,6 +14,12 @@ interface SidePanelProps {
 }
 
 export const SidePanel = ({ isOpen, onClose, title, children, width = "w-96", customLayout = false }: SidePanelProps) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
@@ -20,7 +27,9 @@ export const SidePanel = ({ isOpen, onClose, title, children, width = "w-96", cu
     };
   }, [isOpen]);
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       <div
         className={`fixed inset-0 z-40 bg-black/40 transition-opacity duration-300 ${
@@ -41,6 +50,7 @@ export const SidePanel = ({ isOpen, onClose, title, children, width = "w-96", cu
         </div>
         <div className={customLayout ? "flex-1 flex flex-col overflow-hidden" : "flex-1 overflow-y-auto p-6"}>{children}</div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };

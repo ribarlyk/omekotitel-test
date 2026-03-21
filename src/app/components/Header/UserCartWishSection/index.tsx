@@ -23,7 +23,17 @@ const PANEL_TITLES: Record<Panel, string> = {
   [Panel.Wishlist]: "Любими",
 };
 
-export const UserCartWishSection = () => {
+export const UserCartWishSection = ({
+  showWishlist = true,
+  showPhone = true,
+  showLabels = true,
+  iconSize = 24,
+}: {
+  showWishlist?: boolean;
+  showPhone?: boolean;
+  showLabels?: boolean;
+  iconSize?: number;
+} = {}) => {
   const [openPanel, setOpenPanel] = useState<Panel | null>(null);
   const [authTitle, setAuthTitle] = useState<string>(PANEL_TITLES[Panel.Profile]);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -55,26 +65,28 @@ export const UserCartWishSection = () => {
 
   return (
     <>
-      <div className="flex items-center gap-6">
-        <div className="hidden xl:flex items-center gap-3">
-          <div className="border border-gray-300 rounded-xl p-3">
-            <Phone className="text-brand-action" strokeWidth={2} size={30} />
+      <div className="flex items-center gap-3 lg:gap-6">
+        {showPhone && (
+          <div className="hidden xl:flex items-center gap-3">
+            <div className="border border-gray-300 rounded-xl p-3">
+              <Phone className="text-brand-action" strokeWidth={2} size={30} />
+            </div>
+            <address className="flex flex-col not-italic gap-1">
+              <p className="text-[12px]! text-brand-nav">За поръчки и запитвания</p>
+              <a href="tel:08888787852" className="text-[25px]! font-bold text-brand-nav">
+                0888787852
+              </a>
+            </address>
           </div>
-          <address className="flex flex-col not-italic gap-1">
-            <p className="text-[12px]! text-brand-nav">За поръчки и запитвания</p>
-            <a href="tel:08888787852" className="text-[25px]! font-bold text-brand-nav">
-              0888787852
-            </a>
-          </address>
-        </div>
+        )}
 
         <div ref={profileRef} className="relative">
           <button
             onClick={handleProfileClick}
             className="flex flex-col items-center cursor-pointer"
           >
-            <User className="text-brand-action" strokeWidth={2} size={24} />
-            <span className="text-xs text-brand-action">Профил</span>
+            <User className="text-brand-action" strokeWidth={2} size={iconSize} />
+            {showLabels && <span className="text-xs text-brand-action">Профил</span>}
           </button>
           {isLoggedIn && profileMenuOpen && (
             <ProfileDropdown
@@ -83,34 +95,36 @@ export const UserCartWishSection = () => {
           )}
         </div>
 
-        <button
-          onClick={() => toggle(Panel.Wishlist)}
-          className="flex flex-col items-center cursor-pointer"
-        >
-          <div className="relative">
-            <Heart className="text-brand-action" strokeWidth={2} size={24} />
-            {wishlistCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-brand-action text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                {wishlistCount}
-              </span>
-            )}
-          </div>
-          <span className="text-xs text-brand-action">Любими</span>
-        </button>
+        {showWishlist && (
+          <button
+            onClick={() => toggle(Panel.Wishlist)}
+            className="flex flex-col items-center cursor-pointer"
+          >
+            <div className="relative">
+              <Heart className="text-brand-action" strokeWidth={2} size={iconSize} />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-brand-action text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
+                  {wishlistCount}
+                </span>
+              )}
+            </div>
+            {showLabels && <span className="text-xs text-brand-action">Любими</span>}
+          </button>
+        )}
 
         <button
           onClick={() => toggle(Panel.Cart)}
           className="flex flex-col items-center cursor-pointer"
         >
           <div className="relative">
-            <ShoppingCart className="text-brand-action" strokeWidth={2} size={24} />
+            <ShoppingCart className="text-brand-action" strokeWidth={2} size={iconSize} />
             {itemCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-brand-action text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
                 {itemCount}
               </span>
             )}
           </div>
-          <span className="text-xs text-brand-action">Количка</span>
+          {showLabels && <span className="text-xs text-brand-action">Количка</span>}
         </button>
       </div>
 

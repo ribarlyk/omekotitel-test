@@ -10,6 +10,12 @@ export async function POST(request: NextRequest) {
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
+    if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+    }
+    if (typeof password !== "string" || password.length > 128) {
+      return NextResponse.json({ error: "Invalid password" }, { status: 400 });
+    }
     if (!cfToken || !(await verifyTurnstile(cfToken))) {
       return NextResponse.json({ error: "Невалидна CAPTCHA. Опитайте отново." }, { status: 400 });
     }
@@ -31,7 +37,6 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query: genQuery, variables: { email, password } }),
     });
-    console.log(genResp)
     if (!genResp.ok) {
       console.error(
         "GraphQL HTTP error during token generation",

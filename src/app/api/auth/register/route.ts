@@ -18,6 +18,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    if (typeof email !== "string" || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+    }
+    if (typeof password !== "string" || password.length < 8 || password.length > 128) {
+      return NextResponse.json({ error: "Password must be 8–128 characters" }, { status: 400 });
+    }
+    if (typeof firstname !== "string" || firstname.length > 100 || typeof lastname !== "string" || lastname.length > 100) {
+      return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+    }
 
     if (password !== repass) {
       return NextResponse.json(

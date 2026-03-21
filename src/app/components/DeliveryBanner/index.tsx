@@ -1,8 +1,8 @@
 import { Truck } from "lucide-react";
 
-export const DeliveryBanner = () => (
-  <div className="w-full bg-brand-nav text-white text-m py-2 px-4 flex items-center justify-center gap-2">
-    <Truck size={24} className="shrink-0" />
-    <span>Безплатна доставка при поръчки над 40,90 €</span>
+export const DeliveryBanner = ({ className }: { className?: string } = {}) => (
+  <div className={`w-full bg-brand-nav text-white text-sm sm:text-base py-2 px-3 sm:px-4 flex items-center justify-center gap-2 overflow-hidden ${className ?? ""}`}>
+    <Truck size={20} className="shrink-0 sm:w-6 sm:h-6" />
+    <span className="truncate">Безплатна доставка при поръчки над 40,90 €</span>
   </div>
 );

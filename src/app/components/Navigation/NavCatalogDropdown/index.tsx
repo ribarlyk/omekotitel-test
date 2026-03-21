@@ -32,10 +32,10 @@ export const NavCatalogDropdown = ({
   const displayChildren = active?.children ?? [];
 
   return (
-    <div className="absolute left-0 right-0 z-50 bg-white shadow-xl">
-      <div className="flex">
+    <div className="absolute left-0 right-0 z-50 bg-white shadow-xl max-h-[75vh] overflow-y-auto lg:max-h-none lg:overflow-visible">
+      <div className="flex flex-col lg:flex-row">
         {/* Left: category list */}
-        <ul className="w-104 shrink-0 border-r border-gray-100 py-4">
+        <ul className="w-full lg:w-104 shrink-0 border-b lg:border-b-0 lg:border-r border-gray-100 py-4">
           {topCategories.map((cat) => {
             const isActive = active?.id === cat.id;
             return (
@@ -70,8 +70,8 @@ export const NavCatalogDropdown = ({
           })}
         </ul>
 
-        {/* Right: subcategories */}
-        <div className="flex-1 px-10 py-6">
+        {/* Right: subcategories (desktop only) */}
+        <div className="hidden lg:block flex-1 px-10 py-6">
           {active && (
             <>
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 pb-3 mb-5 border-b border-gray-200">

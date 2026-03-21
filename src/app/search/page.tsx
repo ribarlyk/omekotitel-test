@@ -7,7 +7,7 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  const query = q?.trim() ?? "";
+  const query = q?.trim().slice(0, 200) ?? "";
 
   if (!query) {
     return (
