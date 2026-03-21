@@ -7,30 +7,22 @@ import TurnstileWidget from "@/src/app/components/Turnstile";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function Rule({ ok, text }: { ok: boolean; text: string }) {
+function Rule({ ok, touched, text }: { ok: boolean; touched: boolean; text: string }) {
+  const color = !touched ? "text-gray-400" : ok ? "text-green-600" : "text-red-500";
   return (
-    <li
-      className={`flex items-center gap-1.5 text-xs leading-none transition-colors ${ok ? "text-green-600" : "text-red-500"}`}
-    >
+    <li className={`flex items-center gap-1.5 text-xs leading-none transition-colors ${color}`}>
       <span className="flex items-center justify-center w-3 h-3 shrink-0">
-        {ok ? (
+        {!touched ? (
           <svg width="12" height="12" fill="none" viewBox="0 0 12 12">
-            <path
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M2 6l3 3 5-5"
-            />
+            <circle cx="6" cy="6" r="4" stroke="currentColor" strokeWidth="1.8" />
+          </svg>
+        ) : ok ? (
+          <svg width="12" height="12" fill="none" viewBox="0 0 12 12">
+            <path stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" d="M2 6l3 3 5-5" />
           </svg>
         ) : (
           <svg width="12" height="12" fill="none" viewBox="0 0 12 12">
-            <path
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              d="M3 3l6 6M9 3l-6 6"
-            />
+            <path stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" d="M3 3l6 6M9 3l-6 6" />
           </svg>
         )}
       </span>
@@ -123,7 +115,7 @@ export default function Register({ onLogin, onSuccess }: Props) {
           <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
         </div>
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
-          <Rule ok={rules.firstname.minLen} text="Минимум 2 символа" />
+          <Rule ok={rules.firstname.minLen} touched={!!touched.firstname} text="Минимум 2 символа" />
         </ul>
       </div>
 
@@ -142,7 +134,7 @@ export default function Register({ onLogin, onSuccess }: Props) {
           <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
         </div>
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
-          <Rule ok={rules.lastname.minLen} text="Минимум 2 символа" />
+          <Rule ok={rules.lastname.minLen} touched={!!touched.lastname} text="Минимум 2 символа" />
         </ul>
       </div>
 
@@ -161,7 +153,7 @@ export default function Register({ onLogin, onSuccess }: Props) {
           <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
         </div>
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
-          <Rule ok={rules.email.valid} text="Валиден имейл адрес" />
+          <Rule ok={rules.email.valid} touched={!!touched.email} text="Валиден имейл адрес" />
         </ul>
       </div>
 
@@ -180,20 +172,11 @@ export default function Register({ onLogin, onSuccess }: Props) {
           <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
         </div>
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
-          <Rule ok={rules.password.minLen} text="Минимум 8 символа" />
-          <Rule
-            ok={rules.password.uppercase}
-            text="Поне една главна буква (A-Z)"
-          />
-          <Rule
-            ok={rules.password.lowercase}
-            text="Поне една малка буква (a-z)"
-          />
-          <Rule ok={rules.password.digit} text="Поне една цифра (0-9)" />
-          <Rule
-            ok={rules.password.special}
-            text="Поне един специален символ (!@#...)"
-          />
+          <Rule ok={rules.password.minLen} touched={!!touched.password} text="Минимум 8 символа" />
+          <Rule ok={rules.password.uppercase} touched={!!touched.password} text="Поне една главна буква (A-Z)" />
+          <Rule ok={rules.password.lowercase} touched={!!touched.password} text="Поне една малка буква (a-z)" />
+          <Rule ok={rules.password.digit} touched={!!touched.password} text="Поне една цифра (0-9)" />
+          <Rule ok={rules.password.special} touched={!!touched.password} text="Поне един специален символ (!@#...)" />
         </ul>
       </div>
 
@@ -212,7 +195,7 @@ export default function Register({ onLogin, onSuccess }: Props) {
           <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
         </div>
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
-          <Rule ok={rules.repass.match} text="Паролите съвпадат" />
+          <Rule ok={rules.repass.match} touched={!!touched.repass} text="Паролите съвпадат" />
         </ul>
       </div>
 

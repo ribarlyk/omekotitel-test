@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { Logo } from "@/src/app/components/Header/Logo";
 import { SearchBar } from "@/src/app/components/Header/SearchBar";
@@ -32,7 +33,15 @@ const BurgerIcon = ({ isOpen }: { isOpen: boolean }) => (
 export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategory[] }) => {
   const [navOpen, setNavOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [searchLocked, setSearchLocked] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setSearchLocked(false);
+    setScrolled(false);
+    setNavOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -40,15 +49,17 @@ export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategor
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const showSearch = scrolled || searchLocked;
+
   const openSearch = () => {
-    setScrolled(true);
+    setSearchLocked(true);
     setTimeout(() => searchRef.current?.focus(), 320);
   };
 
   return (
     <div className="lg:hidden bg-white">
       {/* Top bar: burger + logo + icons */}
-      <div className="flex items-center h-14 px-3 gap-2">
+      <div className="flex items-center h-16 px-3 gap-2">
         <button
           onClick={() => setNavOpen((p) => !p)}
           className="flex items-center justify-center w-10 h-10 shrink-0"
@@ -57,14 +68,16 @@ export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategor
           <BurgerIcon isOpen={navOpen} />
         </button>
         <div className="shrink-0">
-          <Logo imgClassName="h-10 w-auto" />
+          <Logo imgClassName="h-12 w-auto" />
         </div>
         <div className="ml-auto shrink-0 flex items-center gap-3">
-          {!scrolled && (
-            <button onClick={openSearch} aria-label="Търсене" className="flex flex-col items-center cursor-pointer">
-              <Search size={32} className="text-brand-action" strokeWidth={2} />
-            </button>
-          )}
+          <button
+            onClick={openSearch}
+            aria-label="Търсене"
+            className={`flex flex-col items-center cursor-pointer transition-opacity duration-300 ${showSearch ? "opacity-0 pointer-events-none" : "opacity-100"}`}
+          >
+            <Search size={32} className="text-brand-action" strokeWidth={2} />
+          </button>
           <UserCartWishSection showWishlist={false} showPhone={false} showLabels={false} iconSize={32} />
         </div>
       </div>
@@ -72,7 +85,7 @@ export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategor
       {/* Scroll-aware second row: delivery banner → search bar */}
       <div className="h-13 overflow-hidden">
         <div
-          className={`transition-transform duration-300 ${scrolled ? "-translate-y-13" : "translate-y-0"}`}
+          className={`transition-transform duration-300 ${showSearch ? "-translate-y-13" : "translate-y-0"}`}
         >
           <div className="h-13">
             <DeliveryBanner className="h-full py-0" />

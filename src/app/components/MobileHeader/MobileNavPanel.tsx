@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { X, ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Logo } from "@/src/app/components/Header/Logo";
 import { NavCatalogCategory, NAVGATIOM_ITEMS } from "@/src/app/constants";
 
 function categoryHref(cat: NavCatalogCategory): string {
@@ -88,22 +89,20 @@ export const MobileNavPanel = ({
         }`}
       >
         {/* Header — fixed height to prevent wobble */}
-        <div className="flex items-center h-14 px-4 border-b border-gray-200 shrink-0">
-          <div className="flex-1 min-w-0">
-            {view === "sub" ? (
-              <button
-                onClick={goBack}
-                className="flex items-center gap-1 text-brand-nav font-semibold text-base cursor-pointer"
-              >
-                <ChevronLeft size={22} className="shrink-0" />
-                <span className="truncate">{activeCategory?.name}</span>
-              </button>
-            ) : (
-              <span className="text-lg font-semibold text-brand-nav">Меню</span>
-            )}
-          </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer shrink-0 ml-4">
-            <X size={24} />
+        <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 shrink-0">
+          {view === "sub" ? (
+            <button
+              onClick={goBack}
+              className="flex items-center gap-1 text-brand-nav font-semibold text-base cursor-pointer"
+            >
+              <ChevronLeft size={32} className="shrink-0" />
+              <span className="truncate">{activeCategory?.name}</span>
+            </button>
+          ) : (
+            <Logo imgClassName="h-12 w-auto" />
+          )}
+          <button onClick={onClose} className="text-brand-action cursor-pointer shrink-0">
+            <X size={32} />
           </button>
         </div>
 

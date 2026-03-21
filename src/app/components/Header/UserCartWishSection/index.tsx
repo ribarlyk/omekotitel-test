@@ -38,8 +38,8 @@ export const UserCartWishSection = ({
   const [authTitle, setAuthTitle] = useState<string>(PANEL_TITLES[Panel.Profile]);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  const { itemCount, refreshCart } = useCart();
-  const { itemCount: wishlistCount, refreshWishlist } = useWishlist();
+  const { itemCount, loading: cartLoading, refreshCart } = useCart();
+  const { itemCount: wishlistCount, loading: wishlistLoading, refreshWishlist } = useWishlist();
   const { isLoggedIn } = useAuth();
 
   useEffect(() => {
@@ -102,7 +102,11 @@ export const UserCartWishSection = ({
           >
             <div className="relative">
               <Heart className="text-brand-action" strokeWidth={2} size={iconSize} />
-              {wishlistCount > 0 && (
+              {isLoggedIn && wishlistLoading ? (
+                <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center">
+                  <span className="w-3.5 h-3.5 rounded-full border-2 border-brand-action/30 border-t-brand-action animate-spin" />
+                </span>
+              ) : wishlistCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-brand-action text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
                   {wishlistCount}
                 </span>
@@ -118,7 +122,11 @@ export const UserCartWishSection = ({
         >
           <div className="relative">
             <ShoppingCart className="text-brand-action" strokeWidth={2} size={iconSize} />
-            {itemCount > 0 && (
+            {isLoggedIn && cartLoading ? (
+              <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center">
+                <span className="w-3.5 h-3.5 rounded-full border-2 border-brand-action/30 border-t-brand-action animate-spin" />
+              </span>
+            ) : itemCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-brand-action text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
                 {itemCount}
               </span>
@@ -132,7 +140,7 @@ export const UserCartWishSection = ({
         isOpen={openPanel !== null}
         onClose={() => { setOpenPanel(null); setAuthTitle(PANEL_TITLES[Panel.Profile]); }}
         title={openPanel ? (openPanel === Panel.Profile ? authTitle : PANEL_TITLES[openPanel]) : ""}
-        width={openPanel === Panel.Cart ? "w-[480px]" : "w-96"}
+        width={openPanel === Panel.Cart ? "w-full lg:w-[480px]" : "w-full lg:w-96"}
         customLayout={openPanel === Panel.Cart}
       >
         {openPanel === Panel.Cart && <CartPanel />}
