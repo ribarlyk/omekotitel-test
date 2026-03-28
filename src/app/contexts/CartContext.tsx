@@ -25,19 +25,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch or create cart only when user is authenticated
+  // Fetch cart for both guests and logged-in users
   useEffect(() => {
-    if (!authLoading && isLoggedIn) {
+    if (!authLoading) {
       fetchCart();
-    } else if (!authLoading && !isLoggedIn) {
-      setCartId(null);
-      setCart(null);
-      setLoading(false);
     }
   }, [authLoading, isLoggedIn]);
 
   const fetchCart = async () => {
-    if (!isLoggedIn) return;
     
     try {
       setLoading(true);
@@ -64,7 +59,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const addToCart = async (sku: string, quantity: number) => {
-    if (!isLoggedIn) return;
     
     try {
       setLoading(true);
@@ -97,7 +91,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const removeFromCart = async (cartItemId: string) => {
-    if (!isLoggedIn) return;
 
     try {
       setError(null);
@@ -134,7 +127,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const updateQuantity = async (cartItemId: string, quantity: number) => {
-    if (!isLoggedIn) return;
 
     try {
       setError(null);

@@ -9,6 +9,7 @@ import { Logo } from "@/src/app/components/Header/Logo";
 import { NavCatalogCategory, NAVGATIOM_ITEMS } from "@/src/app/constants";
 
 function categoryHref(cat: NavCatalogCategory): string {
+  if (cat.url_path) return `/${cat.url_path}`;
   if (cat.url_key) return `/${cat.url_key}`;
   return `/catalog?category=${cat.id}`;
 }
@@ -30,6 +31,7 @@ export const MobileNavPanel = ({
   const [view, setView] = useState<"root" | "sub">("root");
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

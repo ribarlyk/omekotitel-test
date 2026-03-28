@@ -38,6 +38,7 @@ export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategor
   const pathname = usePathname();
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSearchLocked(false);
     setScrolled(false);
     setNavOpen(false);

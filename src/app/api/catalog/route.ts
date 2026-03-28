@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { Queries } from "@/src/app/utils/graphql";
 import { print } from "graphql";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const query = print(Queries.GET_CATALOG);
 

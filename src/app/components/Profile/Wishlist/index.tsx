@@ -21,7 +21,7 @@ export const ProfileWishlist = () => {
           const price = item.product.price_range.minimum_price.final_price;
           return (
             <div key={item.id} className="border border-gray-100 rounded-xl p-4 flex flex-col gap-3">
-              <Link href={`/product/${item.product.url_key}`} className="relative w-full aspect-square rounded-lg overflow-hidden block">
+              <Link href={`/${item.product.url_key}`} className="relative w-full aspect-square rounded-lg overflow-hidden block">
                 <Image
                   src={magentoImageUrl(item.product.thumbnail.url)}
                   alt={item.product.thumbnail.label || item.product.name}
@@ -31,7 +31,7 @@ export const ProfileWishlist = () => {
               </Link>
               <div className="flex-1">
                 <Link
-                  href={`/product/${item.product.url_key}`}
+                  href={`/${item.product.url_key}`}
                   className="text-sm font-medium text-brand-nav line-clamp-2 hover:underline"
                 >
                   {item.product.name}

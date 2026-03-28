@@ -47,6 +47,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     } else if (!authLoading && !isLoggedIn) {
       setWishlist(null);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, isLoggedIn]);
 
   const isInWishlist = (sku: string): boolean => {

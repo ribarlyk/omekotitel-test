@@ -55,7 +55,7 @@ export default function ProductsList({
         {products.map((product, index) => (
           <Link
             key={product.id}
-            href={`/product/${product.url_key}`}
+            href={`/${product.url_key}`}
             className="border rounded-lg p-4 hover:shadow-lg transition-shadow block"
           >
             <Image

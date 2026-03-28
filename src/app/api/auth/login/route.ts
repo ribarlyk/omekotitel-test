@@ -61,6 +61,9 @@ export async function POST(request: NextRequest) {
 
     const cookieStore = await cookies();
 
+    // Capture guest cart ID before it gets overwritten
+    const guestCartId = cookieStore.get("cart-id")?.value ?? null;
+
     cookieStore.set("auth-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -69,37 +72,61 @@ export async function POST(request: NextRequest) {
       path: "/",
     });
 
+    const authHeaders = {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+
     // Create an empty cart for the signed-in customer (server-side)
     let cartId: string | null = null;
     try {
-      const cartQuery = print(Mutations.CREATE_CART_AFTER_SIGNIN);
-
       const cartResp = await fetch(GRAPHQL_ENDPOINT, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ query: cartQuery }),
+        headers: authHeaders,
+        body: JSON.stringify({ query: print(Mutations.CREATE_CART_AFTER_SIGNIN) }),
       });
 
       if (cartResp.ok) {
         const cartData = await cartResp.json();
         cartId = cartData?.data?.cartId ?? null;
-        if (cartId) {
-          cookieStore.set("cart-id", cartId, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 60 * 60 * 24 * 7,
-            path: "/",
-          });
-        }
       } else {
         console.warn("Cart creation HTTP error", cartResp.status);
       }
     } catch (err) {
       console.warn("Failed to create cart after sign-in:", err);
+    }
+
+    // Merge guest cart into customer cart if guest had items
+    if (cartId && guestCartId && guestCartId !== cartId) {
+      try {
+        const mergeResp = await fetch(GRAPHQL_ENDPOINT, {
+          method: "POST",
+          headers: authHeaders,
+          body: JSON.stringify({
+            query: print(Mutations.MERGE_CARTS),
+            variables: { sourceCartId: guestCartId, destinationCartId: cartId },
+          }),
+        });
+        if (mergeResp.ok) {
+          const mergeData = await mergeResp.json();
+          // mergeCarts returns the destination cart — id stays the same
+          if (mergeData.errors) {
+            console.warn("Cart merge errors:", mergeData.errors);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to merge guest cart:", err);
+      }
+    }
+
+    if (cartId) {
+      cookieStore.set("cart-id", cartId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      });
     }
 
     return NextResponse.json({ success: true, cartId });

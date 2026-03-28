@@ -17,6 +17,7 @@ export const SidePanel = ({ isOpen, onClose, title, children, width = "w-96", cu
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

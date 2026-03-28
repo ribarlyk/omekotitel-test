@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Loader2, Trash2, Plus, Minus } from "lucide-react";
 import { useOptimistic, useState, useTransition, useEffect, useRef } from "react";
 import debounce from "lodash/debounce";
@@ -61,7 +62,8 @@ const QuantityInput = ({ id, quantity, isUpdating, onUpdate }: QuantityInputProp
   );
 };
 
-export const CartPanel = () => {
+export const CartPanel = ({ onClose }: { onClose: () => void }) => {
+  const router = useRouter();
   const { cart, itemCount, loading, removeFromCart, updateQuantity } = useCart();
   const [optimisticItems, updateOptimisticItems] = useOptimistic(
     cart?.items ?? [],
@@ -71,6 +73,7 @@ export const CartPanel = () => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
+  const [navigating, startNavigate] = useTransition();
 
   const handleRemove = async (id: string) => {
     setRemovingId(id);
@@ -114,12 +117,42 @@ export const CartPanel = () => {
             <span>Общо</span>
             <span>{total.value.toFixed(2)} {total.currency}</span>
           </div>
-          <a
-            href="/checkout"
-            className="block w-full bg-brand-action text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity"
+          <button
+            onClick={() =>
+              startNavigate(async () => {
+                try {
+                  const res = await fetch("/api/checkout/address", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                      shippingAddress: {
+                        firstname: "Customer", lastname: "Customer",
+                        street: "ул. Витоша 1", city: "София",
+                        region: "София", postcode: "1000",
+                        country_code: "BG", telephone: "0888000000",
+                      },
+                    }),
+                  });
+                  const data = await res.json();
+                  sessionStorage.setItem("checkout_prefetch", JSON.stringify(data));
+                } catch {}
+                router.push("/onestepcheckout");
+                onClose();
+              })
+            }
+            disabled={navigating}
+            className="flex items-center justify-center gap-2 w-full bg-brand-action disabled:opacity-70 text-white text-center py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity cursor-pointer disabled:cursor-not-allowed"
           >
-            Към плащане
-          </a>
+            {navigating ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                Зареждане…
+              </>
+            ) : (
+              "Към плащане"
+            )}
+          </button>
         </>
       }
     >
@@ -128,7 +161,7 @@ export const CartPanel = () => {
           const price = item.product.price_range.minimum_price.final_price;
           return (
             <li key={item.id} className="flex gap-3 rounded-xl hover:bg-gray-50 transition-colors -mx-2 px-2 py-1">
-              <Link href={`/product/${item.product.url_key}`} className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-gray-100">
+              <Link href={`/${item.product.url_key}`} className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-gray-100">
                 <Image
                   src={magentoImageUrl(item.product.thumbnail.url)}
                   alt={item.product.thumbnail.label || item.product.name}
@@ -137,7 +170,7 @@ export const CartPanel = () => {
                 />
               </Link>
               <div className="flex-1 min-w-0">
-                <Link href={`/product/${item.product.url_key}`} className="text-sm font-medium text-brand-nav line-clamp-2 hover:text-brand-action transition-colors">
+                <Link href={`/${item.product.url_key}`} className="text-sm font-medium text-brand-nav line-clamp-2 hover:text-brand-action transition-colors">
                   {item.product.name}
                 </Link>
                 <div className="flex items-center gap-3 mt-1">

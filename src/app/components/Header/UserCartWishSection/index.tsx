@@ -143,7 +143,7 @@ export const UserCartWishSection = ({
         width={openPanel === Panel.Cart ? "w-full lg:w-[480px]" : "w-full lg:w-96"}
         customLayout={openPanel === Panel.Cart}
       >
-        {openPanel === Panel.Cart && <CartPanel />}
+        {openPanel === Panel.Cart && <CartPanel onClose={() => setOpenPanel(null)} />}
         {openPanel === Panel.Profile && (
           <LoginPanel
             onSuccess={() => { setOpenPanel(null); refreshCart(); refreshWishlist(); }}

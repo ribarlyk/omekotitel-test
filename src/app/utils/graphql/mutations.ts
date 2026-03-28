@@ -7,6 +7,13 @@ import ADD_PRODUCT_TO_CART from "@/src/app/qraphql/mutation/add-product-to-cart.
 import MERGE_CARTS from "@/src/app/qraphql/mutation/merge-carts.graphql";
 import REMOVE_ITEM_FROM_CART from "@/src/app/qraphql/mutation/remove-item-from-cart.graphql";
 import UPDATE_CART_ITEM_QUANTITY from "@/src/app/qraphql/mutation/update-cart-item-quantity.graphql";
+import SET_GUEST_EMAIL_ON_CART from "@/src/app/qraphql/mutation/set-guest-email-on-cart.graphql";
+import SET_SHIPPING_ADDRESSES_ON_CART from "@/src/app/qraphql/mutation/set-shipping-addresses-on-cart.graphql";
+import SET_SHIPPING_METHOD_ON_CART from "@/src/app/qraphql/mutation/set-shipping-method-on-cart.graphql";
+import SET_BILLING_SAME_AS_SHIPPING from "@/src/app/qraphql/mutation/set-billing-same-as-shipping.graphql";
+import SET_BILLING_ADDRESS_ON_CART from "@/src/app/qraphql/mutation/set-billing-address-on-cart.graphql";
+import SET_PAYMENT_METHOD_ON_CART from "@/src/app/qraphql/mutation/set-payment-method-on-cart.graphql";
+import PLACE_ORDER from "@/src/app/qraphql/mutation/place-order.graphql";
 
 export const Mutations = {
   CREATE_CART_AFTER_SIGNIN,
@@ -18,4 +25,11 @@ export const Mutations = {
   MERGE_CARTS,
   REMOVE_ITEM_FROM_CART,
   UPDATE_CART_ITEM_QUANTITY,
+  SET_GUEST_EMAIL_ON_CART,
+  SET_SHIPPING_ADDRESSES_ON_CART,
+  SET_SHIPPING_METHOD_ON_CART,
+  SET_BILLING_SAME_AS_SHIPPING,
+  SET_BILLING_ADDRESS_ON_CART,
+  SET_PAYMENT_METHOD_ON_CART,
+  PLACE_ORDER,
 };

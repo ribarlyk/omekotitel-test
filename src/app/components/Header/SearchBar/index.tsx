@@ -9,17 +9,17 @@ export const SearchBar = ({ inputRef }: { inputRef?: React.RefObject<HTMLInputEl
   const [value, setValue] = useState("");
   const router = useRouter();
 
-  const debouncedNavigate = useRef(
+  const debouncedNavigateRef = useRef(
     debounce((q: string) => {
       if (q.trim()) router.push(`/search?q=${encodeURIComponent(q.trim())}`);
     }, 300)
-  ).current;
+  );
 
-  useEffect(() => () => debouncedNavigate.cancel(), [debouncedNavigate]);
+  useEffect(() => () => debouncedNavigateRef.current.cancel(), []);
 
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    debouncedNavigate.cancel();
+    debouncedNavigateRef.current.cancel();
     if (value.trim()) {
       router.push(`/search?q=${encodeURIComponent(value.trim())}`);
       setValue("");

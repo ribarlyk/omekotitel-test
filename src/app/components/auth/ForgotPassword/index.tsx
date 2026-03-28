@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 import TurnstileWidget from "@/src/app/components/Turnstile";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -123,13 +124,13 @@ export default function ForgotPassword({ onBack, onSuccess }: Props) {
             Обратно към вход
           </button>
         ) : (
-          <a href="/login" className="text-brand-action hover:underline uppercase">
+          <Link href="/login" className="text-brand-action hover:underline uppercase">
             Обратно към вход
-          </a>
+          </Link>
         )}
-        <a href="/register" className="text-brand-action hover:underline uppercase">
+        <Link href="/register" className="text-brand-action hover:underline uppercase">
           Създай нов профил
-        </a>
+        </Link>
       </div>
     </form>
   );

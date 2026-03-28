@@ -20,7 +20,7 @@ export const WishlistPanel = () => {
         return (
           <li key={item.id} className="flex gap-3">
             <Link
-              href={`/product/${item.product.url_key}`}
+              href={`/${item.product.url_key}`}
               className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-gray-100"
             >
               <Image
@@ -32,7 +32,7 @@ export const WishlistPanel = () => {
             </Link>
             <div className="flex-1 min-w-0">
               <Link
-                href={`/product/${item.product.url_key}`}
+                href={`/${item.product.url_key}`}
                 className="text-sm font-medium text-brand-nav line-clamp-2 hover:underline"
               >
                 {item.product.name}

@@ -8,7 +8,6 @@
 }
 
 article,
-aside,
 details,
 figcaption,
 figure,
@@ -20,8 +19,10 @@ nav,
 section {
   display: block;
 }
-html {
+html,
+body {
   overflow-x: clip;
+  max-width: 100%;
 }
 body {
   line-height: 1;
@@ -44,4 +45,9 @@ q:after {
 table {
   border-collapse: collapse;
   border-spacing: 0;
+}
+
+/* Prevent mobile browsers from zooming on input focus (requires font-size >= 16px) */
+input, select, textarea {
+  font-size: 16px !important;
 }

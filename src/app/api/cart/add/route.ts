@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { Mutations, Queries } from "@/src/app/utils/graphql";
+import { Mutations } from "@/src/app/utils/graphql";
 import { print } from "graphql";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";

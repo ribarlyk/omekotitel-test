@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { Mutations, Queries } from "@/src/app/utils/graphql";
 import { print } from "graphql";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     if (!GRAPHQL_ENDPOINT) {
       return NextResponse.json(

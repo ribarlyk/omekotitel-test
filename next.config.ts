@@ -24,6 +24,30 @@ const nextConfig: NextConfig = {
     // Covers all fixed-width images: thumbnails(100), logo(190), list cards(200), product detail(600)
     imageSizes: [100, 200, 400, 600],
   },
+  async redirects() {
+    return [
+      {
+        source: "/:path*.html",
+        destination: "/:path*",
+        permanent: true,
+      },
+      {
+        source: "/product/:urlKey",
+        destination: "/:urlKey",
+        permanent: true,
+      },
+      {
+        source: "/checkout",
+        destination: "/onestepcheckout",
+        permanent: true,
+      },
+      {
+        source: "/checkout/success",
+        destination: "/onestepcheckout/success",
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

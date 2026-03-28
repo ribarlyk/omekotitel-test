@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import { useAuthenticate } from "@/src/app/hooks/useAuthentication";
 import TurnstileWidget from "@/src/app/components/Turnstile";
@@ -108,18 +109,18 @@ export default function Login({ onSuccess, onRegister, onForgotPassword }: Props
             Забравена парола?
           </button>
         ) : (
-          <a href="/forgot-password" className="text-brand-action hover:underline uppercase">
+          <Link href="/forgot-password" className="text-brand-action hover:underline uppercase">
             Забравена парола?
-          </a>
+          </Link>
         )}
         {onRegister ? (
           <button type="button" onClick={onRegister} className="text-brand-action hover:underline uppercase cursor-pointer">
             Създай нов профил
           </button>
         ) : (
-          <a href="/register" className="text-brand-action hover:underline uppercase">
+          <Link href="/register" className="text-brand-action hover:underline uppercase">
             Създай нов профил
-          </a>
+          </Link>
         )}
       </div>
     </form>
