@@ -648,10 +648,11 @@ export default function CheckoutPage() {
         instance = RC.createCardField({
           target: cardFieldContainer,
           locale: "bg",
+          showLoadingIndicator: true,
           styles: {
             default: {
               color: "#111827",
-              fontSize: "14px",
+              fontSize: "16px",
               fontFamily: "inherit",
             },
             focused: {

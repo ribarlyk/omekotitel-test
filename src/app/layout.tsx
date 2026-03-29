@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   description: "Онлайн магазин за омекотители и аксесоари",
 };
 
+
 export default async function RootLayout({
   children,
 }: Readonly<{
