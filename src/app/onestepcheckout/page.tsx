@@ -7,14 +7,12 @@ import { z } from "zod";
 import RevolutCheckout from "@revolut/checkout";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/src/app/contexts/CartContext";
-import { Loader2, ChevronDown, ChevronUp, Plus, Minus, Trash2, Check, ShieldCheck } from "lucide-react";
-import { CourierOfficeSelector } from "@/src/app/components/CourierOfficeSelector";
+import { Loader2, ChevronDown, ChevronUp, Plus, Minus, Trash2, Check } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { magentoImageUrl } from "@/src/app/utils/image";
 import debounce from "lodash/debounce";
 import { toast } from "sonner";
-import TurnstileWidget from "@/src/app/components/Turnstile";
 
 // ─── Form schema ──────────────────────────────────────────────────────────────
 const addressSchema = z.object({
@@ -43,7 +41,7 @@ interface ShippingAddress {
   firstname: string;
   lastname: string;
   telephone: string;
-  street: string | string[];
+  street: string;
   city: string;
   postcode: string;
   region: string;
@@ -103,24 +101,22 @@ function SectionHeader({ number, title }: { number: string; title: string }) {
 
 function CheckoutProgress({
   contactValid,
-  shippingSelected,
   shippingValid,
-  addressSkipped,
+  shippingSelected,
   billingValid,
   paymentDone,
 }: {
   contactValid: boolean;
-  shippingSelected: boolean;
   shippingValid: boolean;
-  addressSkipped: boolean;
+  shippingSelected: boolean;
   billingValid: boolean;
   paymentDone: boolean;
 }) {
   const steps = [
     { label: "Контакти", done: contactValid },
-    { label: "Доставка", done: shippingSelected },
-    { label: "Адрес", done: shippingValid, skipped: addressSkipped },
+    { label: "Адрес", done: shippingValid },
     { label: "Фактуриране", done: billingValid },
+    { label: "Доставка", done: shippingSelected },
     { label: "Плащане", done: paymentDone },
   ];
   const currentStep = steps.findIndex((s) => !s.done);
@@ -128,61 +124,57 @@ function CheckoutProgress({
   return (
     <div className="flex items-start mb-6 w-full">
       {steps.map((step, i) => (
-        <div key={i} className="flex-1 flex flex-col items-center relative">
-          {i > 0 && (
+        <div key={i} className={`flex items-center ${i < steps.length - 1 ? "flex-1" : ""}`}>
+          <div className="flex flex-col items-center gap-1">
             <div
-              className={`absolute top-3 sm:top-4 right-1/2 left-0 h-0.5 transition-all ${
-                steps[i - 1].done || steps[i - 1].skipped ? "bg-brand-action" : "bg-gray-200"
+              className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold border-2 transition-all ${
+                step.done
+                  ? "bg-brand-action border-brand-action text-white"
+                  : currentStep === i
+                  ? "border-brand-action text-brand-action bg-white"
+                  : "border-gray-200 text-gray-400 bg-white"
               }`}
-            />
-          )}
+            >
+              {step.done ? <Check size={10} strokeWidth={3} className="sm:hidden" /> : null}
+              {step.done ? <Check size={13} strokeWidth={3} className="hidden sm:block" /> : null}
+              {!step.done && i + 1}
+            </div>
+            <span
+              className={`text-[9px] sm:text-xs whitespace-nowrap ${
+                step.done || currentStep === i
+                  ? "text-gray-700 font-medium"
+                  : "text-gray-400"
+              }`}
+            >
+              {step.label}
+            </span>
+          </div>
           {i < steps.length - 1 && (
             <div
-              className={`absolute top-3 sm:top-4 left-1/2 right-0 h-0.5 transition-all ${
-                step.done || step.skipped ? "bg-brand-action" : "bg-gray-200"
+              className={`h-0.5 flex-1 mx-1 sm:mx-1.5 mb-4 sm:mb-5 transition-all ${
+                step.done ? "bg-brand-action" : "bg-gray-200"
               }`}
             />
           )}
-          <div
-            className={`relative z-10 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-bold border-2 transition-all ${
-              step.done
-                ? "bg-brand-action border-brand-action text-white"
-                : step.skipped
-                ? "bg-white border-brand-action text-brand-action"
-                : currentStep === i
-                ? "border-brand-action text-brand-action bg-white"
-                : "border-gray-200 text-gray-400 bg-white"
-            }`}
-          >
-            {step.done ? <Check size={10} strokeWidth={3} className="sm:hidden" /> : null}
-            {step.done ? <Check size={13} strokeWidth={3} className="hidden sm:block" /> : null}
-            {step.skipped && !step.done ? <Check size={10} strokeWidth={3} className="sm:hidden" /> : null}
-            {step.skipped && !step.done ? <Check size={13} strokeWidth={3} className="hidden sm:block" /> : null}
-            {!step.done && !step.skipped && i + 1}
-          </div>
-          <span
-            className={`mt-1 text-[9px] sm:text-xs whitespace-nowrap ${
-              step.done || step.skipped || currentStep === i
-                ? "text-gray-700 font-medium"
-                : "text-gray-400"
-            }`}
-          >
-            {step.label}
-          </span>
         </div>
       ))}
     </div>
   );
 }
 
-function SectionTeaser({ number, title }: { number: string; title: string }) {
+function SectionTeaser({ number, title, rows = 2 }: { number: string; title: string; rows?: number }) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-3 sm:px-6 sm:py-4 select-none">
-      <div className="flex items-center gap-3">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 select-none">
+      <div className="flex items-center gap-3 mb-5">
         <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 shrink-0">
           {number}
         </div>
         <h2 className="font-semibold text-gray-300 text-base">{title}</h2>
+      </div>
+      <div className="space-y-2">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="h-14 bg-gray-50 rounded-xl border border-gray-100" />
+        ))}
       </div>
     </div>
   );
@@ -479,13 +471,13 @@ export default function CheckoutPage() {
   const watchedValues = watchForm();
   const contactValid =
     !!watchedValues.email?.trim() &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedValues.email.trim()) &&
+    watchedValues.email.includes("@") &&
     !!watchedValues.telephone?.trim() &&
-    watchedValues.telephone.trim().length >= 6 &&
-    !!watchedValues.firstname?.trim() &&
-    !!watchedValues.lastname?.trim();
+    watchedValues.telephone.trim().length >= 6;
   const shippingValid =
     contactValid &&
+    !!watchedValues.firstname?.trim() &&
+    !!watchedValues.lastname?.trim() &&
     !!watchedValues.street?.trim() &&
     !!watchedValues.city?.trim() &&
     !!watchedValues.postcode?.trim() &&
@@ -503,7 +495,6 @@ export default function CheckoutPage() {
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedShipping, setSelectedShipping] = useState("");
   const [selectedPayment, setSelectedPayment] = useState("");
-  const [selectedOffice, setSelectedOffice] = useState<{ id: number; name: string; address: { city: { name: string; postCode: string }; fullAddress: string } } | null>(null);
   const [methodsLoading, setMethodsLoading] = useState(false);
 
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
@@ -511,21 +502,20 @@ export default function CheckoutPage() {
     firstname: "", lastname: "", street: "", city: "", region: "",
     postcode: "", country_code: "BG", telephone: "",
   });
+  // Derived shipping address — exclude email (not a shipping address field)
+  const { email, ...addressFields } = getShipping();
+  const shippingAddress: ShippingAddress = { ...addressFields, country_code: "BG" };
 
   const [placing, setPlacing] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
-  const [cfToken, setCfToken] = useState<string | null>(null);
 
-  // ── Revolut card field state ─────────────────────────────────────────────────
+  // ── Revolut Pay state ────────────────────────────────────────────────────────
   const [revolutPublicId, setRevolutPublicId] = useState<string | null>(null);
   const [revolutOrderId, setRevolutOrderId] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [cardField, setCardField] = useState<any>(null);
-  const [cardFieldReady, setCardFieldReady] = useState(false);
-  const [cardFieldContainer, setCardFieldContainer] = useState<HTMLDivElement | null>(null);
-  const [cardholderName, setCardholderName] = useState("");
-  const [prContainer, setPrContainer] = useState<HTMLDivElement | null>(null);
-  const cardSubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [revolutModule, setRevolutModule] = useState<any>(null);
+  // Callback ref — React sets this when the container div is committed to the DOM
+  const [revolutContainer, setRevolutContainer] = useState<HTMLDivElement | null>(null);
 
   // Form restoring from sessionStorage (avoids flash of empty inputs on mount/Revolut redirect)
   const [formRestoring, setFormRestoring] = useState(true);
@@ -533,111 +523,90 @@ export default function CheckoutPage() {
   // Mobile order summary toggle
   const [summaryOpen, setSummaryOpen] = useState(true);
 
-  // ── Init card field when revolut_pay is selected and container is in DOM ─────
+  // ── Init Revolut SDK eagerly as soon as we know revolut_pay is available ────
   useEffect(() => {
-    const isRevolutSelected = selectedPayment === "revolut_pay" || selectedPayment === "revolut_pay_later";
-    if (!isRevolutSelected || !cardFieldContainer) return;
+    if (!paymentMethods.find((m) => m.code === "revolut_pay")) return;
+    if (revolutModule) return;
+    const publicToken = process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY;
+    if (!publicToken) return;
+    RevolutCheckout.payments({
+      publicToken,
+      locale: "bg",
+      mode: process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox" ? "sandbox" : "prod",
+    }).then(setRevolutModule).catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paymentMethods]);
 
-    let instance: any = null; // eslint-disable-line @typescript-eslint/no-explicit-any
-    let destroyed = false;
+  // ── Mount widget — fires only once React has committed the container to the DOM
+  useEffect(() => {
+    if (!cart || !revolutModule || !revolutContainer) return;
 
-    (async () => {
-      try {
-        // Create Revolut order to get the token
-        const res = await fetch("/api/checkout/revolut-order", { method: "POST", credentials: "include" });
-        const data = await res.json();
-        if (!res.ok || destroyed) return;
+    let capturedPublicId: string | null = null;
+    let capturedOrderId: string | null = null;
 
-        const token: string = data.publicId;
-        const ordId: string = data.orderId;
-        setRevolutOrderId(ordId);
-
-        const RC = await RevolutCheckout(token, process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox" ? "sandbox" : "prod");
-        if (destroyed) return;
-
-        instance = RC.createCardField({
-          target: cardFieldContainer,
-          locale: "bg",
-          styles: {
-            default: {
-              color: "#111827",
-              fontSize: "14px",
-              fontFamily: "inherit",
-            },
-            focused: {
-              color: "#111827",
-            },
-            invalid: {
-              color: "#ef4444",
-            },
-          },
-          onSuccess() {
-            if (cardSubmitTimerRef.current) clearTimeout(cardSubmitTimerRef.current);
-            setRevolutPublicId(token);
-          },
-          onError(error: { message?: string }) {
-            if (cardSubmitTimerRef.current) clearTimeout(cardSubmitTimerRef.current);
-            setPlaceError(error?.message ?? "Грешка при плащането с карта");
-            setPlacing(false);
-          },
-        });
-        setCardField(instance);
-        setCardFieldReady(true);
-      } catch (e) {
-        if (!destroyed) setPlaceError("Грешка при зареждане на формата за карта");
+    revolutModule.revolutPay.on("payment", (payload: { type: string; error?: { message?: string } }) => {
+      if (payload.type === "success") {
+        let publicId = capturedPublicId;
+        let orderId = capturedOrderId;
+        if (!publicId) {
+          try {
+            const saved = sessionStorage.getItem("revolut_checkout_state");
+            if (saved) {
+              const parsed = JSON.parse(saved);
+              publicId = parsed.pendingPublicId ?? null;
+              orderId = parsed.pendingOrderId ?? null;
+            }
+          } catch {}
+        }
+        try { sessionStorage.removeItem("revolut_checkout_state"); } catch {}
+        setRevolutPublicId(publicId);
+        setRevolutOrderId(orderId);
+      } else if (payload.type === "error") {
+        setPlaceError(payload.error?.message ?? "Грешка при Revolut плащането");
+      } else if (payload.type === "cancel") {
+        setRevolutPublicId(null);
+        setRevolutOrderId(null);
+        try { sessionStorage.removeItem("revolut_checkout_state"); } catch {}
       }
-    })();
+    });
 
-    return () => {
-      destroyed = true;
-      try { instance?.destroy(); } catch {}
-      setCardField(null);
-      setCardFieldReady(false);
-      setRevolutPublicId(null);
-      setRevolutOrderId(null);
-    };
-   
-  }, [selectedPayment, cardFieldContainer]);
-
-  // ── Payment request (Apple Pay / Google Pay) ────────────────────────────────
-  useEffect(() => {
-    if (!prContainer) return;
-    let destroyed = false;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let instance: any = null;
-    (async () => {
-      try {
+    revolutModule.revolutPay.mount(revolutContainer, {
+      currency: cart.prices.grand_total.currency,
+      totalAmount: Math.round(cart.prices.grand_total.value * 100),
+      redirectUrl: window.location.href,
+      createOrder: async () => {
+        try {
+          sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
+            shippingAddress,
+            billingAddress,
+            billingSameAsShipping,
+            selectedPayment: "revolut_pay",
+          }));
+        } catch {}
         const res = await fetch("/api/checkout/revolut-order", { method: "POST", credentials: "include" });
         const data = await res.json();
-        if (!res.ok || destroyed) return;
-        const token: string = data.publicId;
-        const orderId: string = data.orderId;
-        const env = process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox" ? "sandbox" : "prod";
-        const RC = await RevolutCheckout(token, env);
-        if (destroyed) return;
-        instance = RC.paymentRequest({
-          target: prContainer,
-          requestShipping: false,
-          locale: "bg",
-          onSuccess() {
-            setRevolutOrderId(orderId);
-            setSelectedPayment("revolut_pay");
-            setRevolutPublicId(token);
-          },
-          onError(error: { message?: string }) {
-            setPlaceError(error?.message ?? "Грешка при Apple/Google Pay");
-          },
-          onCancel() {},
-        });
-      } catch {}
-    })();
-    return () => { destroyed = true; try { instance?.destroy(); } catch {} };
-   
-  }, [prContainer]);
+        if (!res.ok) throw new Error(data.message ?? "Грешка при стартиране на Revolut");
+        capturedPublicId = data.publicId as string;
+        capturedOrderId = data.orderId as string;
+        try {
+          const existing = JSON.parse(sessionStorage.getItem("revolut_checkout_state") ?? "{}");
+          sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
+            ...existing,
+            pendingPublicId: capturedPublicId,
+            pendingOrderId: capturedOrderId,
+          }));
+        } catch {}
+        return { publicId: capturedPublicId };
+      },
+    } as Parameters<typeof revolutModule.revolutPay.mount>[1]);
 
-  // ── Auto-place order the moment card payment succeeds ────────────────────────
+    return () => { try { revolutModule.revolutPay.destroy(); } catch {} };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cart, revolutModule, revolutContainer]);
+
+  // ── Auto-place order the moment Revolut payment succeeds ────────────────────
   useEffect(() => {
-    if (!revolutPublicId) return;
+    if (!revolutPublicId || selectedPayment !== "revolut_pay" || placing) return;
     handlePlaceOrder();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revolutPublicId]);
@@ -650,23 +619,35 @@ export default function CheckoutPage() {
     country_code: "BG", telephone: "0888000000",
   };
 
-  function applyMethodsData(data: { shippingMethods?: ShippingMethod[]; paymentMethods?: PaymentMethod[] }) {
-    const shipping: ShippingMethod[] = data.shippingMethods ?? [];
-    const payment: PaymentMethod[] = data.paymentMethods ?? [];
-    setShippingMethods(shipping);
-    setPaymentMethods(payment);
-    if (payment.length > 0) {
-      let savedPayment: string | null = null;
-      try {
-        const saved = sessionStorage.getItem("revolut_checkout_state");
-        if (saved) savedPayment = JSON.parse(saved).selectedPayment ?? null;
-      } catch {}
-      const preferred = savedPayment ?? (payment.find((m) => m.code === "revolut_pay")?.code ?? payment[0].code);
-      setSelectedPayment(preferred);
+  useEffect(() => {
+    function applyMethodsData(data: { shippingMethods?: ShippingMethod[]; paymentMethods?: PaymentMethod[] }) {
+      const shipping: ShippingMethod[] = data.shippingMethods ?? [];
+      const payment: PaymentMethod[] = data.paymentMethods ?? [];
+      setShippingMethods(shipping);
+      setPaymentMethods(payment);
+      // No default — user must explicitly choose a shipping method
+      if (payment.length > 0) {
+        let savedPayment: string | null = null;
+        try {
+          const saved = sessionStorage.getItem("revolut_checkout_state");
+          if (saved) savedPayment = JSON.parse(saved).selectedPayment ?? null;
+        } catch {}
+        const preferred = savedPayment ?? (payment.find((m) => m.code === "revolut_pay")?.code ?? payment[0].code);
+        setSelectedPayment(preferred);
+      }
     }
-  }
 
-  function fetchShippingMethods() {
+    // Use data pre-fetched by the CartPanel button if available
+    try {
+      const cached = sessionStorage.getItem("checkout_prefetch");
+      if (cached) {
+        sessionStorage.removeItem("checkout_prefetch");
+        applyMethodsData(JSON.parse(cached));
+        return;
+      }
+    } catch {}
+
+    // Fallback: fetch directly (e.g. hard refresh or direct URL visit)
     setMethodsLoading(true);
     fetch("/api/checkout/address", {
       method: "POST",
@@ -678,76 +659,32 @@ export default function CheckoutPage() {
       .then(applyMethodsData)
       .catch(() => {})
       .finally(() => setMethodsLoading(false));
-  }
-
-  // Fetch shipping methods once cart is loaded, then re-fetch on total change
-  const cartTotal = cart?.prices?.grand_total?.value;
-  const didFetchRef = useRef(false);
-  useEffect(() => {
-    if (cartTotal === undefined) return;
-    // On first run, try the prefetch cache before hitting the API
-    if (!didFetchRef.current) {
-      didFetchRef.current = true;
-      try {
-        const cached = sessionStorage.getItem("checkout_prefetch");
-        if (cached) {
-          sessionStorage.removeItem("checkout_prefetch");
-          applyMethodsData(JSON.parse(cached));
-          return;
-        }
-      } catch {}
-    }
-    fetchShippingMethods();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartTotal]);
+  }, []);
 
   // ── Shipping cost for summary ───────────────────────────────────────────────
   const selectedShippingMethod = shippingMethods.find(
     (m) => `${m.carrier_code}|${m.method_code}` === selectedShipping
   );
-  const isAddressDelivery = !!selectedShippingMethod && (
-    selectedShippingMethod.carrier_title + " " + selectedShippingMethod.method_title
-  ).toLowerCase().includes("адрес");
-  const isOfficeDelivery = selectedShipping !== "" && !isAddressDelivery;
-  const effectiveShippingValid = isOfficeDelivery ? contactValid : shippingValid;
 
   // ── Place order ─────────────────────────────────────────────────────────────
   async function handlePlaceOrder() {
     setPlaceError(null);
     setPlacing(true);
     try {
-      const { email: rawEmail, ...currentAddressFields } = getShipping();
-      const currentEmail = rawEmail?.trim();
-      const currentShippingAddress: ShippingAddress = { ...currentAddressFields, country_code: "BG" };
       const [carrierCode, methodCode] = selectedShipping.split("|");
-      const effectiveShippingAddress: ShippingAddress = (!isAddressDelivery && selectedOffice)
-        ? {
-            firstname: currentShippingAddress.firstname,
-            lastname: currentShippingAddress.lastname,
-            telephone: currentShippingAddress.telephone,
-            street: [
-              selectedShippingMethod?.carrier_title ?? "",
-              selectedOffice.address.fullAddress.replace(selectedOffice.address.city.name, "").trim(),
-            ],
-            city: selectedOffice.address.city.name,
-            postcode: selectedOffice.address.city.postCode || "0000",
-            region: selectedOffice.address.city.name,
-            country_code: "BG",
-          }
-        : currentShippingAddress;
       const res = await fetch("/api/checkout/place", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          email: currentEmail,
-          shippingAddress: effectiveShippingAddress,
+          email,
+          shippingAddress,
           shippingMethod: { carrier_code: carrierCode, method_code: methodCode },
-          billingAddress: billingSameAsShipping ? effectiveShippingAddress : billingAddress,
+          billingAddress: billingSameAsShipping ? shippingAddress : billingAddress,
           paymentMethod: (revolutPublicId && isRevolutPay)
             ? { method: selectedPayment, additional_data: { public_id: revolutPublicId, order_id: revolutOrderId ?? "" } }
             : { method: selectedPayment },
-          cfToken,
         }),
       });
       const data = await res.json();
@@ -775,20 +712,18 @@ export default function CheckoutPage() {
     billingAddress.firstname.trim() !== "" &&
     billingAddress.lastname.trim() !== "" &&
     billingAddress.telephone.trim().length >= 6 &&
-    (Array.isArray(billingAddress.street) ? billingAddress.street[0] : billingAddress.street).trim() !== "" &&
+    billingAddress.street.trim() !== "" &&
     billingAddress.city.trim() !== "" &&
     billingAddress.postcode.trim() !== "" &&
     billingAddress.region.trim() !== ""
   );
   const canPlaceOrder =
-    effectiveShippingValid &&
+    shippingValid &&
     billingValid &&
     methodsReady &&
     selectedShipping !== "" &&
     selectedPayment !== "" &&
-    (!isRevolutPay || cardFieldReady || revolutPublicId !== null) &&
-    (isAddressDelivery || !!selectedOffice) &&
-    !!cfToken &&
+    (!isRevolutPay || revolutPublicId !== null) &&
     !placing;
 
   // ── Empty cart guard ────────────────────────────────────────────────────────
@@ -805,49 +740,57 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 overflow-x-clip">
+      {/* ── Mobile order summary toggle ── */}
+      <div className="lg:hidden bg-white border-b border-gray-100">
+        <button
+          onClick={() => setSummaryOpen((p) => !p)}
+          className="w-full flex items-center justify-between px-4 py-3.5 text-sm font-medium text-brand-nav"
+        >
+          <span className="flex items-center gap-2">
+            {summaryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {summaryOpen ? "Скрий" : "Покажи"} резюмето на поръчката
+          </span>
+          <span className="font-bold text-gray-900">
+            {cart?.prices.grand_total.value.toFixed(2)}&nbsp;
+            {cart?.prices.grand_total.currency}
+          </span>
+        </button>
+        {summaryOpen && (
+          <div className="px-4 pb-5 border-t border-gray-100">
+            <OrderSummary shippingCost={selectedShippingMethod?.amount.value} />
+          </div>
+        )}
+      </div>
+
       {/* ── Main layout ── */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 lg:py-12">
         <div className="flex flex-col lg:flex-row gap-10 xl:gap-16">
           {/* ══ LEFT: Form ══════════════════════════════════════════════════ */}
           <div className="flex-1 min-w-0 max-w-lg space-y-6">
 
-            <div className="sticky top-29 lg:top-40 z-20 bg-gray-50 py-3 -mx-4 sm:-mx-6 px-4 sm:px-6">
+            <div className="lg:sticky lg:top-40 z-20 bg-gray-50 py-3 -mx-4 sm:-mx-6 px-4 sm:px-6">
               <CheckoutProgress
                 contactValid={contactValid}
-                shippingSelected={contactValid && selectedShipping !== ""}
-                shippingValid={isOfficeDelivery ? false : shippingValid}
-                addressSkipped={isOfficeDelivery}
-                billingValid={effectiveShippingValid && billingValid}
-                paymentDone={effectiveShippingValid && billingValid && selectedPayment !== "" && (!isRevolutPay || !!revolutPublicId)}
+                shippingValid={shippingValid}
+                shippingSelected={shippingValid && selectedShipping !== ""}
+                billingValid={shippingValid && billingValid}
+                paymentDone={shippingValid && billingValid && selectedPayment !== "" && (!isRevolutPay || !!revolutPublicId)}
               />
             </div>
 
             {/* 01 · Contact */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-              <SectionHeader number="1" title="Данни за контакт" />
+              <SectionHeader number="01" title="Данни за контакт" />
               {formRestoring ? (
                 <div className="space-y-4 animate-pulse">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="h-11 bg-gray-100 rounded-lg" />
-                    <div className="h-11 bg-gray-100 rounded-lg" />
-                  </div>
                   <div className="h-11 bg-gray-100 rounded-lg" />
                   <div className="h-11 bg-gray-100 rounded-lg" />
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Име" required error={shippingErrors.firstname?.message}>
-                      <input className={inputBase} placeholder="Иван" autoComplete="given-name" {...register("firstname")} />
-                    </Field>
-                    <Field label="Фамилия" required error={shippingErrors.lastname?.message}>
-                      <input className={inputBase} placeholder="Иванов" autoComplete="family-name" {...register("lastname")} />
-                    </Field>
-                  </div>
                   <Field label="Имейл адрес" required error={shippingErrors.email?.message}>
                     <input
-                      type="text"
-                      inputMode="email"
+                      type="email"
                       className={inputBase}
                       placeholder="you@example.com"
                       autoComplete="email"
@@ -861,53 +804,15 @@ export default function CheckoutPage() {
               )}
             </div>
 
-            {/* 02-05 */}
-            <div className="space-y-6">
-
-            {/* 02 · Shipping method */}
-            {!contactValid ? <SectionTeaser number="2" title="Метод на доставка" rows={2} /> :
+            {/* 02 · Shipping address */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-              <SectionHeader number="2" title="Метод на доставка" />
-              {methodsLoading ? (
-                <MethodsSkeleton />
-              ) : shippingMethods.length > 0 ? (
-                <div className="space-y-2">
-                  {shippingMethods.map((m) => {
-                    const value = `${m.carrier_code}|${m.method_code}`;
-                    return (
-                      <MethodRadio
-                        key={value}
-                        name="shippingMethod"
-                        value={value}
-                        checked={selectedShipping === value}
-                        onChange={() => setSelectedShipping(value)}
-                        label={`${m.carrier_title} — ${m.method_title}`}
-                        price={
-                          m.amount.value === 0
-                            ? "Безплатна"
-                            : `${m.amount.value.toFixed(2)} ${m.amount.currency}`
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              ) : null}
-              {selectedShipping !== "" && !isAddressDelivery && (
-                <div className="mt-4">
-                  <CourierOfficeSelector
-                    value={selectedOffice}
-                    onChange={setSelectedOffice}
-                  />
-                </div>
-              )}
-            </div>}
-
-            {/* 03 · Shipping address */}
-            {!isAddressDelivery ? <SectionTeaser number="3" title="Адрес за доставка" rows={4} /> :
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-              <SectionHeader number="3" title="Адрес за доставка" />
+              <SectionHeader number="02" title="Адрес за доставка" />
               {formRestoring ? (
                 <div className="space-y-4 animate-pulse">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="h-11 bg-gray-100 rounded-lg" />
+                    <div className="h-11 bg-gray-100 rounded-lg" />
+                  </div>
                   <div className="h-11 bg-gray-100 rounded-lg" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="h-11 bg-gray-100 rounded-lg" />
@@ -920,6 +825,14 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Име" required error={shippingErrors.firstname?.message}>
+                      <input className={inputBase} placeholder="Иван" autoComplete="given-name" {...register("firstname")} />
+                    </Field>
+                    <Field label="Фамилия" required error={shippingErrors.lastname?.message}>
+                      <input className={inputBase} placeholder="Иванов" autoComplete="family-name" {...register("lastname")} />
+                    </Field>
+                  </div>
                   <Field label="Адрес" required error={shippingErrors.street?.message}>
                     <input className={inputBase} placeholder="ул. Витоша 1" autoComplete="street-address" {...register("street")} />
                   </Field>
@@ -941,12 +854,15 @@ export default function CheckoutPage() {
                   </div>
                 </div>
               )}
-            </div>}
+            </div>
 
-            {/* 04 · Billing address */}
-            {!effectiveShippingValid ? <SectionTeaser number="4" title="Адрес за фактуриране" rows={3} /> :
+            {/* 03-05 */}
+            <div className="space-y-6">
+
+            {/* 03 · Billing address */}
+            {!shippingValid ? <SectionTeaser number="03" title="Адрес за фактуриране" rows={3} /> :
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-              <SectionHeader number="4" title="Адрес за фактуриране" />
+              <SectionHeader number="03" title="Адрес за фактуриране" />
               <label className="flex items-center gap-3 cursor-pointer group mb-4">
                 <div
                   onClick={() => setBillingSameAsShipping((p: boolean) => !p)}
@@ -1043,134 +959,85 @@ export default function CheckoutPage() {
               )}
             </div>}
 
-            {/* 05 · Payment method */}
-            {!effectiveShippingValid ? <SectionTeaser number="5" title="Начин на плащане" rows={2} /> :
+            {/* 04 · Shipping method */}
+            {!shippingValid ? <SectionTeaser number="04" title="Метод на доставка" rows={2} /> :
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-              <SectionHeader number="5" title="Начин на плащане" />
+              <SectionHeader number="04" title="Метод на доставка" />
               {methodsLoading ? (
                 <MethodsSkeleton />
-              ) : (
+              ) : shippingMethods.length > 0 ? (
                 <div className="space-y-2">
-                  {/* Apple Pay / Google Pay — self-hides if not supported on this device/browser */}
-                  <div ref={setPrContainer} className="w-full" />
-
-                  {/* Revolut card field — standalone (не зависи от Magento revolut_pay метод) */}
-                  <div>
-                    <MethodRadio
-                      name="paymentMethod"
-                      value="revolut_pay"
-                      checked={selectedPayment === "revolut_pay"}
-                      onChange={() => {
-                        setSelectedPayment("revolut_pay");
-                        setRevolutPublicId(null);
-                      }}
-                      label="Плащане с карта"
-                    />
-                    <div className={`mt-3 ${selectedPayment === "revolut_pay" ? "block" : "hidden"}`}>
-                      {/* Loading state */}
-                      {!cardFieldReady && !revolutPublicId && (
-                        <div className="flex items-center gap-2 py-3 text-sm text-gray-400">
-                          <Loader2 size={14} className="animate-spin" />
-                          Зареждане на формата за карта…
-                        </div>
-                      )}
-                      {/* Payment confirmed state */}
-                      {revolutPublicId && (
-                        <div className="flex items-center gap-2 py-3 text-sm text-brand-nav font-medium">
-                          <svg viewBox="0 0 16 16" className="w-4 h-4 fill-brand-action shrink-0">
-                            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.54 5.46-4.25 4.25-1.83-1.83a.75.75 0 1 0-1.06 1.06l2.36 2.36a.75.75 0 0 0 1.06 0l4.78-4.78a.75.75 0 1 0-1.06-1.06z"/>
-                          </svg>
-                          Плащането е потвърдено — готово за поръчка
-                        </div>
-                      )}
-                      {/* Card form — always mounted so Revolut has a stable DOM node; hidden until ready */}
-                      <div className={cardFieldReady && !revolutPublicId ? "rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3" : "hidden"}>
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Име на картодържателя</label>
-                          <input
-                            type="text"
-                            value={cardholderName}
-                            onChange={(e) => setCardholderName(e.target.value)}
-                            placeholder="Иван Иванов"
-                            autoComplete="cc-name"
-                            className={inputBase}
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs text-gray-500 mb-1">Данни на картата</label>
-                          <div className="w-full rounded-lg border border-gray-200 bg-white py-3 pl-3 pr-4 hover:border-gray-300 transition-colors">
-                            <div ref={setCardFieldContainer} className="w-full" />
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-center gap-2 pt-1 text-xs text-gray-400">
-                          <ShieldCheck size={18} className="shrink-0" />
-                          <span>Защитено от <span className="font-semibold text-gray-500">Revolut</span></span>
-                          <div className="flex items-center gap-1 ml-1">
-                            {/* Visa */}
-                            <svg viewBox="0 0 38 24" className="h-5 w-auto opacity-70" role="img" aria-label="Visa">
-                              <rect width="38" height="24" rx="3" fill="#fff" stroke="#e5e7eb" strokeWidth="1"/>
-                              <text x="19" y="17" textAnchor="middle" fontFamily="Arial,sans-serif" fontWeight="700" fontSize="13" fill="#1A1F71" letterSpacing="1">VISA</text>
-                            </svg>
-                            {/* Mastercard */}
-                            <svg viewBox="0 0 38 24" className="h-5 w-auto opacity-70" role="img" aria-label="Mastercard">
-                              <rect width="38" height="24" rx="3" fill="#fff" stroke="#e5e7eb" strokeWidth="1"/>
-                              <circle cx="15" cy="12" r="7" fill="#EB001B"/>
-                              <circle cx="23" cy="12" r="7" fill="#F79E1B"/>
-                              <path d="M19 6.8a7 7 0 0 1 0 10.4A7 7 0 0 1 19 6.8z" fill="#FF5F00"/>
-                            </svg>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Other Magento payment methods (excluding revolut_pay — handled above) */}
-                  {/* When revolut_pay is re-enabled on Magento, filter it out here:
-                  {paymentMethods.filter(m => m.code !== "revolut_pay" && m.code !== "revolut_pay_later").map((m) => (
-                    <MethodRadio
-                      key={m.code}
-                      name="paymentMethod"
-                      value={m.code}
-                      checked={selectedPayment === m.code}
-                      onChange={() => { setSelectedPayment(m.code); setRevolutPublicId(null); }}
-                      label={m.title}
-                    />
-                  ))} */}
-                  {paymentMethods.filter(m => m.code !== "revolut_pay" && m.code !== "revolut_pay_later").map((m) => (
-                    <MethodRadio
-                      key={m.code}
-                      name="paymentMethod"
-                      value={m.code}
-                      checked={selectedPayment === m.code}
-                      onChange={() => { setSelectedPayment(m.code); setRevolutPublicId(null); }}
-                      label={m.title}
-                    />
-                  ))}
+                  {shippingMethods.map((m) => {
+                    const value = `${m.carrier_code}|${m.method_code}`;
+                    return (
+                      <MethodRadio
+                        key={value}
+                        name="shippingMethod"
+                        value={value}
+                        checked={selectedShipping === value}
+                        onChange={() => setSelectedShipping(value)}
+                        label={`${m.carrier_title} — ${m.method_title}`}
+                        price={
+                          m.amount.value === 0
+                            ? "Безплатна"
+                            : `${m.amount.value.toFixed(2)} ${m.amount.currency}`
+                        }
+                      />
+                    );
+                  })}
                 </div>
-              )}
+              ) : null}
             </div>}
 
-            {/* Order summary — mobile only */}
-            <div className="lg:hidden bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-              <h2 className="font-semibold text-gray-900 text-base mb-5">Резюме на поръчката</h2>
-              <OrderSummary shippingCost={selectedShippingMethod?.amount.value} />
-            </div>
+            {/* 05 · Payment method */}
+            {!shippingValid ? <SectionTeaser number="05" title="Начин на плащане" rows={2} /> :
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
+              <SectionHeader number="05" title="Начин на плащане" />
+              {methodsLoading ? (
+                <MethodsSkeleton />
+              ) : paymentMethods.length > 0 ? (
+                <div className="space-y-2">
+                  {paymentMethods.map((m) => (
+                    <div key={m.code}>
+                      <MethodRadio
+                        name="paymentMethod"
+                        value={m.code}
+                        checked={selectedPayment === m.code}
+                        onChange={() => {
+                          setSelectedPayment(m.code);
+                          setRevolutPublicId(null);
+                        }}
+                        label={m.code === "revolut_pay" ? "Плащане с карта" : m.title}
+                      />
+
+                      {/* Revolut Pay widget — always in DOM, visibility toggled via CSS */}
+                      {(m.code === "revolut_pay" || m.code === "revolut_pay_later") && (
+                        <div className={`mt-2 ${selectedPayment === m.code ? "block" : "hidden"}`}>
+                          {revolutPublicId ? (
+                            <div className="flex items-center gap-2 py-3 text-sm text-brand-nav font-medium">
+                              <svg viewBox="0 0 16 16" className="w-4 h-4 fill-brand-action shrink-0">
+                                <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.54 5.46-4.25 4.25-1.83-1.83a.75.75 0 1 0-1.06 1.06l2.36 2.36a.75.75 0 0 0 1.06 0l4.78-4.78a.75.75 0 1 0-1.06-1.06z"/>
+                              </svg>
+                              Авторизирано — готово за поръчка
+                            </div>
+                          ) : (
+                            <div ref={setRevolutContainer} className="w-full overflow-hidden" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>}
 
             {/* Place order — mobile only */}
             <div className="lg:hidden bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
               {placeError && (
                 <p className="text-sm text-red-500 mb-4">{placeError}</p>
               )}
-              <div className="mb-4">
-                <TurnstileWidget onSuccess={setCfToken} onExpire={() => setCfToken(null)} onError={() => setCfToken(null)} />
-              </div>
               <button
-                onClick={isRevolutPay ? () => {
-                                setPlacing(true);
-                                if (cardSubmitTimerRef.current) clearTimeout(cardSubmitTimerRef.current);
-                                cardSubmitTimerRef.current = setTimeout(() => { setPlacing(false); setPlaceError("Моля, попълнете данните на картата."); }, 3000);
-                                try { cardField?.submit({ email: getShipping().email?.trim(), name: cardholderName.trim() }); } catch { setPlacing(false); }
-                              } : handlePlaceOrder}
+                onClick={isRevolutPay ? undefined : handlePlaceOrder}
                 disabled={!canPlaceOrder}
                 className="w-full flex items-center justify-center gap-2.5 bg-brand-action hover:bg-brand-action-light disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-4 rounded-xl transition-colors text-base shadow-sm cursor-pointer disabled:cursor-not-allowed"
               >
@@ -1179,8 +1046,8 @@ export default function CheckoutPage() {
                     <Loader2 className="w-5 h-5 animate-spin" />
                     Обработва се…
                   </>
-                ) : isRevolutPay ? (
-                  "Плати с карта"
+                ) : isRevolutPay && !revolutPublicId ? (
+                  "Плащане с карта"
                 ) : (
                   "Потвърди поръчката"
                 )}
@@ -1208,16 +1075,8 @@ export default function CheckoutPage() {
               {placeError && (
                 <p className="text-sm text-red-500 mb-4">{placeError}</p>
               )}
-              <div className="mb-4">
-                <TurnstileWidget onSuccess={setCfToken} onExpire={() => setCfToken(null)} onError={() => setCfToken(null)} />
-              </div>
               <button
-                onClick={isRevolutPay ? () => {
-                                setPlacing(true);
-                                if (cardSubmitTimerRef.current) clearTimeout(cardSubmitTimerRef.current);
-                                cardSubmitTimerRef.current = setTimeout(() => { setPlacing(false); setPlaceError("Моля, попълнете данните на картата."); }, 3000);
-                                try { cardField?.submit({ email: getShipping().email?.trim(), name: cardholderName.trim() }); } catch { setPlacing(false); }
-                              } : handlePlaceOrder}
+                onClick={isRevolutPay ? undefined : handlePlaceOrder}
                 disabled={!canPlaceOrder}
                 className="w-full flex items-center justify-center gap-2.5 bg-brand-action hover:bg-brand-action-light disabled:bg-gray-200 disabled:text-gray-400 text-white font-semibold py-4 rounded-xl transition-colors text-base shadow-sm cursor-pointer disabled:cursor-not-allowed"
               >
@@ -1226,8 +1085,8 @@ export default function CheckoutPage() {
                     <Loader2 className="w-5 h-5 animate-spin" />
                     Обработва се…
                   </>
-                ) : isRevolutPay ? (
-                  "Плати с карта"
+                ) : isRevolutPay && !revolutPublicId ? (
+                  "Плащане с карта"
                 ) : (
                   "Потвърди поръчката"
                 )}

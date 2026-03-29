@@ -32,7 +32,7 @@ export async function GET() {
     if (data.errors) {
       console.error("GraphQL errors:", data.errors);
       return NextResponse.json(
-        { error: "Failed to fetch catalog" },
+        { error: "GraphQL query failed", details: data.errors },
         { status: 400 },
       );
     }

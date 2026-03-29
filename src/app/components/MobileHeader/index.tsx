@@ -50,8 +50,7 @@ export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategor
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const isCheckout = pathname === "/onestepcheckout";
-  const showSearch = !isCheckout && (scrolled || searchLocked);
+  const showSearch = scrolled || searchLocked;
 
   const openSearch = () => {
     setSearchLocked(true);
