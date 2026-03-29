@@ -1,12 +1,17 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 
 export const revalidate = 86400;
 export const dynamic = "force-static";
 
 import ProductsList from "@/src/app/components/ProductsList";
 import ProductDetail from "@/src/app/components/ProductDetail";
-import { fetchCatalog, fetchProductsByCategory, fetchProductDetail } from "@/src/app/utils/graphql/fetchers";
+import {
+  fetchCatalog,
+  fetchProductsByCategory,
+  fetchProductDetail,
+} from "@/src/app/utils/graphql/fetchers";
 
 interface Category {
   id: number;
@@ -16,8 +21,29 @@ interface Category {
   children?: Category[];
 }
 
+// Collect all category url_paths from the tree recursively
+function collectUrlPaths(list: Category[]): string[] {
+  const paths: string[] = [];
+  for (const cat of list) {
+    if (cat.url_path) paths.push(cat.url_path);
+    if (cat.children?.length) paths.push(...collectUrlPaths(cat.children));
+  }
+  console.log("Collected category paths:", paths);
+  return paths;
+}
+
+export async function generateStaticParams() {
+  const catalog = await fetchCatalog();
+  if (!catalog) return [];
+  const urlPaths = collectUrlPaths(catalog.categoryList as Category[]);
+  return urlPaths.map((urlPath) => ({ slug: urlPath.split("/") }));
+}
+
 // Recursively search the tree by url_path (e.g. "parent/child/grandchild")
-function findCategoryByUrlPath(list: Category[], urlPath: string): Category | null {
+function findCategoryByUrlPath(
+  list: Category[],
+  urlPath: string,
+): Category | null {
   for (const cat of list) {
     if (cat.url_path === urlPath) return cat;
     if (cat.children?.length) {
@@ -49,10 +75,15 @@ async function PageData({ slugs }: { slugs: string[] }) {
   // Category match — match against Magento's url_path (e.g. "parent/child")
   if (catalog) {
     const urlPath = slugs.join("/");
-    const category = findCategoryByUrlPath(catalog.categoryList as Category[], urlPath);
+    const category = findCategoryByUrlPath(
+      catalog.categoryList as Category[],
+      urlPath,
+    );
     if (category) {
       const data = await fetchProductsByCategory(String(category.id));
-      const products = (data?.products?.items ?? []) as Parameters<typeof ProductsList>[0]["products"];
+      const products = (data?.products?.items ?? []).filter(
+        Boolean,
+      ) as Parameters<typeof ProductsList>[0]["products"];
       const totalCount = data?.products?.total_count ?? 0;
 
       return (
@@ -83,7 +114,13 @@ export default async function SlugPage({
   const { slug } = await params;
 
   return (
-    <Suspense fallback={<div className="container mx-auto px-4 py-8">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="fixed inset-0 flex items-center justify-center">
+          <Loader2 className="w-16 h-16 animate-spin text-brand-action" />
+        </div>
+      }
+    >
       <PageData slugs={slug} />
     </Suspense>
   );

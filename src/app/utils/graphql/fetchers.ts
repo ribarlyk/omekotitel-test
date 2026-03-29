@@ -20,8 +20,8 @@ async function gql<T>(
     const json = await res.json();
     if (json.errors) {
       console.error("GraphQL errors:", json.errors);
-      return null;
     }
+    if (!json.data) return null;
     return json.data as T;
   } catch (e) {
     console.error("GraphQL fetch error:", e);

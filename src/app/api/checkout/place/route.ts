@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { Mutations } from "@/src/app/utils/graphql";
+import { Mutations, Queries } from "@/src/app/utils/graphql";
+import { verifyTurnstile } from "@/src/app/utils/turnstile";
 import { print } from "graphql";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
@@ -17,7 +18,7 @@ const REVOLUT_API_BASE =
 interface ShippingAddress {
   firstname: string;
   lastname: string;
-  street: string;
+  street: string | string[];
   city: string;
   region: string;
   postcode: string;
@@ -28,7 +29,10 @@ interface ShippingAddress {
 export async function POST(request: NextRequest) {
   try {
     if (!GRAPHQL_ENDPOINT) {
-      return NextResponse.json({ message: "Server not configured" }, { status: 500 });
+      return NextResponse.json(
+        { message: "Server not configured" },
+        { status: 500 },
+      );
     }
 
     const cookieStore = await cookies();
@@ -45,19 +49,46 @@ export async function POST(request: NextRequest) {
       shippingMethod,
       billingAddress,
       paymentMethod,
+      cfToken,
     }: {
       email?: string;
       shippingAddress: ShippingAddress;
       shippingMethod: { carrier_code: string; method_code: string };
       billingAddress: ShippingAddress;
-      paymentMethod: { method: string; additional_data?: Record<string, string> };
+      paymentMethod: {
+        method: string;
+        additional_data?: Record<string, string>;
+      };
+      cfToken?: string;
     } = await request.json();
+
+    if (!cfToken || !(await verifyTurnstile(cfToken))) {
+      return NextResponse.json(
+        { message: "Невалидна CAPTCHA. Опитайте отново." },
+        { status: 400 },
+      );
+    }
 
     const headers: HeadersInit = { "Content-Type": "application/json" };
     if (authToken) headers.Authorization = `Bearer ${authToken}`;
 
-    // For guest checkouts, set email on cart so Magento sends order confirmation emails
-    if (!authToken && email) {
+    // For authenticated users, verify the cookie cart belongs to them
+    if (authToken) {
+      const ownerResp = await fetch(GRAPHQL_ENDPOINT, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ query: print(Queries.GET_CUSTOMER_CART_ID) }),
+      });
+      const ownerData = await ownerResp.json();
+      const customerCartId: string | undefined =
+        ownerData.data?.customerCart?.id;
+      if (customerCartId && customerCartId !== cartId) {
+        return NextResponse.json({ message: "Cart mismatch" }, { status: 403 });
+      }
+    }
+
+    // Always set guest email — even if authToken exists it may be stale/expired
+    if (email) {
       const geResp = await fetch(GRAPHQL_ENDPOINT, {
         method: "POST",
         headers,
@@ -67,12 +98,18 @@ export async function POST(request: NextRequest) {
         }),
       });
       const geData = await geResp.json();
-      if (geData.errors) {
+      // For logged-in users this mutation will fail (not a guest cart) — ignore that specific error
+      if (geData.errors && !authToken) {
         return NextResponse.json(
           { message: geData.errors[0]?.message ?? "Failed to set guest email" },
-          { status: 400 }
+          { status: 400 },
         );
       }
+    } else if (!authToken) {
+      return NextResponse.json(
+        { message: "Email is required" },
+        { status: 400 },
+      );
     }
 
     // Re-apply the user's real shipping address before placing
@@ -85,7 +122,9 @@ export async function POST(request: NextRequest) {
           cartId,
           firstname: shippingAddress.firstname,
           lastname: shippingAddress.lastname,
-          street: [shippingAddress.street],
+          street: Array.isArray(shippingAddress.street)
+            ? shippingAddress.street
+            : [shippingAddress.street],
           city: shippingAddress.city,
           region: shippingAddress.region,
           postcode: shippingAddress.postcode,
@@ -97,8 +136,11 @@ export async function POST(request: NextRequest) {
     const saData = await saResp.json();
     if (saData.errors) {
       return NextResponse.json(
-        { message: saData.errors[0]?.message ?? "Failed to set shipping address" },
-        { status: 400 }
+        {
+          message:
+            saData.errors[0]?.message ?? "Failed to set shipping address",
+        },
+        { status: 400 },
       );
     }
 
@@ -118,8 +160,10 @@ export async function POST(request: NextRequest) {
     const smData = await smResp.json();
     if (smData.errors) {
       return NextResponse.json(
-        { message: smData.errors[0]?.message ?? "Failed to set shipping method" },
-        { status: 400 }
+        {
+          message: smData.errors[0]?.message ?? "Failed to set shipping method",
+        },
+        { status: 400 },
       );
     }
 
@@ -133,7 +177,9 @@ export async function POST(request: NextRequest) {
           cartId,
           firstname: billingAddress.firstname,
           lastname: billingAddress.lastname,
-          street: [billingAddress.street],
+          street: Array.isArray(billingAddress.street)
+            ? billingAddress.street
+            : [billingAddress.street],
           city: billingAddress.city,
           region: billingAddress.region,
           postcode: billingAddress.postcode,
@@ -145,17 +191,22 @@ export async function POST(request: NextRequest) {
     const baData = await baResp.json();
     if (baData.errors) {
       return NextResponse.json(
-        { message: baData.errors[0]?.message ?? "Failed to set billing address" },
-        { status: 400 }
+        {
+          message: baData.errors[0]?.message ?? "Failed to set billing address",
+        },
+        { status: 400 },
       );
     }
 
-    const isRevolut = paymentMethod.method === "revolut_pay" || paymentMethod.method === "revolut_pay_later";
+    const isRevolut =
+      paymentMethod.method === "revolut_pay" ||
+      paymentMethod.method === "revolut_pay_later";
     const hasPublicId = !!paymentMethod.additional_data?.public_id;
 
     // The Revolut Magento module is incompatible with Pay 2.0 SDK — place with
     // cashondelivery as a bridge method, then auto-invoice via admin REST.
-    const placeAsMethod = (isRevolut && hasPublicId) ? "cashondelivery" : paymentMethod.method;
+    const placeAsMethod =
+      isRevolut && hasPublicId ? "cashondelivery" : paymentMethod.method;
 
     const pmResp = await fetch(GRAPHQL_ENDPOINT, {
       method: "POST",
@@ -168,8 +219,10 @@ export async function POST(request: NextRequest) {
     const pmData = await pmResp.json();
     if (pmData.errors) {
       return NextResponse.json(
-        { message: pmData.errors[0]?.message ?? "Failed to set payment method" },
-        { status: 400 }
+        {
+          message: pmData.errors[0]?.message ?? "Failed to set payment method",
+        },
+        { status: 400 },
       );
     }
 
@@ -185,7 +238,7 @@ export async function POST(request: NextRequest) {
     if (poData.errors) {
       return NextResponse.json(
         { message: poData.errors[0]?.message ?? "Failed to place order" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -193,7 +246,7 @@ export async function POST(request: NextRequest) {
     if (!orderNumber) {
       return NextResponse.json(
         { message: "Order placed but no order number returned" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -206,7 +259,10 @@ export async function POST(request: NextRequest) {
         const tokenResp = await fetch(`${REST_BASE}/integration/admin/token`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: MAGENTO_ADMIN_USER, password: MAGENTO_ADMIN_PASSWORD }),
+          body: JSON.stringify({
+            username: MAGENTO_ADMIN_USER,
+            password: MAGENTO_ADMIN_PASSWORD,
+          }),
         });
         const adminToken: string = await tokenResp.json();
 
@@ -219,10 +275,11 @@ export async function POST(request: NextRequest) {
           // Find order entity_id by increment_id
           const searchResp = await fetch(
             `${REST_BASE}/orders?searchCriteria[filter_groups][0][filters][0][field]=increment_id&searchCriteria[filter_groups][0][filters][0][value]=${orderNumber}&searchCriteria[filter_groups][0][filters][0][condition_type]=eq`,
-            { headers: adminHeaders }
+            { headers: adminHeaders },
           );
           const searchData = await searchResp.json();
-          const entityId: number | undefined = searchData?.items?.[0]?.entity_id;
+          const entityId: number | undefined =
+            searchData?.items?.[0]?.entity_id;
 
           if (entityId) {
             // Always send order confirmation email (bypasses Magento async email queue)
@@ -238,12 +295,15 @@ export async function POST(request: NextRequest) {
               // Verify Revolut order is completed/authorised before invoicing
               let canInvoice = true;
               if (revolutOrderId && REVOLUT_API_SECRET_KEY) {
-                const verifyResp = await fetch(`${REVOLUT_API_BASE}/orders/${revolutOrderId}`, {
-                  headers: {
-                    Authorization: `Bearer ${REVOLUT_API_SECRET_KEY}`,
-                    "Revolut-Api-Version": "2024-09-01",
+                const verifyResp = await fetch(
+                  `${REVOLUT_API_BASE}/orders/${revolutOrderId}`,
+                  {
+                    headers: {
+                      Authorization: `Bearer ${REVOLUT_API_SECRET_KEY}`,
+                      "Revolut-Api-Version": "2024-09-01",
+                    },
                   },
-                });
+                );
                 if (verifyResp.ok) {
                   const revolutOrder = await verifyResp.json();
                   const state: string = revolutOrder.state ?? "";
@@ -262,7 +322,8 @@ export async function POST(request: NextRequest) {
                 });
 
                 // Add order comment with Revolut Order ID
-                const revolutCommentId = revolutOrderId || paymentMethod.additional_data?.public_id;
+                const revolutCommentId =
+                  revolutOrderId || paymentMethod.additional_data?.public_id;
                 await fetch(`${REST_BASE}/orders/${entityId}/comments`, {
                   method: "POST",
                   headers: adminHeaders,
@@ -275,7 +336,9 @@ export async function POST(request: NextRequest) {
                   }),
                 });
               } else {
-                console.error("Revolut order not authorised — skipping invoice");
+                console.error(
+                  "Revolut order not authorised — skipping invoice",
+                );
               }
             }
           }
@@ -289,8 +352,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("/api/checkout/place error:", error);
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : "Place order failed" },
-      { status: 500 }
+      {
+        message: error instanceof Error ? error.message : "Place order failed",
+      },
+      { status: 500 },
     );
   }
 }

@@ -7,7 +7,7 @@ import { CartProvider } from "./contexts/CartContext";
 import { WishlistProvider } from "./contexts/WishlistContext";
 import { Header } from "./components/Header";
 import { Navigation } from "./components/Navigation";
-import { DeliveryBanner } from "./components/DeliveryBanner";
+import { DesktopDeliveryBanner } from "./components/DeliveryBanner/DesktopDeliveryBanner";
 import { MobileHeader } from "./components/MobileHeader";
 import type { NavCatalogCategory } from "./constants";
 import { fetchCatalog } from "./utils/graphql/fetchers";
@@ -43,14 +43,12 @@ export default async function RootLayout({
             <CartProvider>
               <WishlistProvider>
                 <Toaster position="top-center" richColors />
-                {/* Desktop: delivery banner scrolls away above the sticky header */}
-                <div className="hidden lg:block">
-                  <DeliveryBanner />
-                </div>
                 {/* Mobile sticky header */}
                 <div className="lg:hidden sticky top-0 z-30 shadow-md">
                   <MobileHeader categoryList={categoryList} />
                 </div>
+                {/* Desktop: delivery banner sticky on its own */}
+                <DesktopDeliveryBanner />
                 {/* Desktop sticky header + nav */}
                 <div className="hidden lg:sticky lg:top-0 lg:z-30 lg:shadow-md lg:block">
                   <Header />
