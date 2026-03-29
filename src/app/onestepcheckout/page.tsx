@@ -608,7 +608,7 @@ export default function CheckoutPage() {
     useState<HTMLDivElement | null>(null);
   const [cardholderName, setCardholderName] = useState("");
   const [prContainer, setPrContainer] = useState<HTMLDivElement | null>(null);
-  const cardSubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const cardSubmittingRef = useRef(false);
 
   // Form restoring from sessionStorage (avoids flash of empty inputs on mount/Revolut redirect)
   const [formRestoring, setFormRestoring] = useState(true);
@@ -662,15 +662,20 @@ export default function CheckoutPage() {
             },
           },
           onSuccess() {
-            if (cardSubmitTimerRef.current)
-              clearTimeout(cardSubmitTimerRef.current);
+            cardSubmittingRef.current = false;
             setRevolutPublicId(token);
           },
           onError(error: { message?: string }) {
-            if (cardSubmitTimerRef.current)
-              clearTimeout(cardSubmitTimerRef.current);
+            cardSubmittingRef.current = false;
             setPlaceError(error?.message ?? "Грешка при плащането с карта");
             setPlacing(false);
+          },
+          onValidation(errors: { message: string }[]) {
+            if (cardSubmittingRef.current && errors.length > 0) {
+              cardSubmittingRef.current = false;
+              setPlacing(false);
+              setPlaceError("Моля, попълнете данните на картата.");
+            }
           },
         });
         setCardField(instance);
@@ -958,7 +963,7 @@ export default function CheckoutPage() {
         <div className="flex flex-col lg:flex-row gap-10 xl:gap-16">
           {/* ══ LEFT: Form ══════════════════════════════════════════════════ */}
           <div className="flex-1 min-w-0 max-w-lg space-y-6">
-            <div className="sticky top-29 lg:top-40 z-20 bg-gray-50 py-3 -mx-4 sm:-mx-6 px-4 sm:px-6">
+            <div className="lg:sticky lg:top-40 z-20 bg-gray-50 py-3 -mx-4 sm:-mx-6 px-4 sm:px-6">
               <CheckoutProgress
                 contactValid={contactValid}
                 shippingSelected={contactValid && selectedShipping !== ""}
@@ -1519,21 +1524,15 @@ export default function CheckoutPage() {
                   onClick={
                     isRevolutPay
                       ? () => {
+                          cardSubmittingRef.current = true;
                           setPlacing(true);
-                          if (cardSubmitTimerRef.current)
-                            clearTimeout(cardSubmitTimerRef.current);
-                          cardSubmitTimerRef.current = setTimeout(() => {
-                            setPlacing(false);
-                            setPlaceError(
-                              "Моля, попълнете данните на картата.",
-                            );
-                          }, 4000);
                           try {
                             cardField?.submit({
                               email: getShipping().email?.trim(),
                               name: cardholderName.trim(),
                             });
                           } catch {
+                            cardSubmittingRef.current = false;
                             setPlacing(false);
                           }
                         }
@@ -1588,21 +1587,15 @@ export default function CheckoutPage() {
                   onClick={
                     isRevolutPay
                       ? () => {
+                          cardSubmittingRef.current = true;
                           setPlacing(true);
-                          if (cardSubmitTimerRef.current)
-                            clearTimeout(cardSubmitTimerRef.current);
-                          cardSubmitTimerRef.current = setTimeout(() => {
-                            setPlacing(false);
-                            setPlaceError(
-                              "Моля, попълнете данните на картата.",
-                            );
-                          }, 4000);
                           try {
                             cardField?.submit({
                               email: getShipping().email?.trim(),
                               name: cardholderName.trim(),
                             });
                           } catch {
+                            cardSubmittingRef.current = false;
                             setPlacing(false);
                           }
                         }
