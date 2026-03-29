@@ -6,8 +6,8 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const categoryId = searchParams.get("categoryId");
-    const pageSize = parseInt(searchParams.get("pageSize") || "20");
-    const currentPage = parseInt(searchParams.get("currentPage") || "1");
+    const pageSize = Math.min(Math.max(parseInt(searchParams.get("pageSize") || "20") || 20, 1), 100);
+    const currentPage = Math.max(parseInt(searchParams.get("currentPage") || "1") || 1, 1);
 
     if (!categoryId) {
       return NextResponse.json(
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     if (data.errors) {
       console.error("GraphQL errors:", data.errors);
       return NextResponse.json(
-        { error: "GraphQL query failed", details: data.errors },
+        { error: "Failed to fetch products" },
         { status: 400 }
       );
     }

@@ -45,14 +45,16 @@ export async function POST(request: NextRequest) {
       });
 
       if (!createResp.ok) {
-        throw new Error("Failed to create cart");
+        const errorText = await createResp.text();
+        console.error("HTTP error creating cart:", createResp.status, errorText);
+        throw new Error(`Failed to create cart: ${createResp.status} ${errorText.slice(0, 200)}`);
       }
 
       const createData = await createResp.json();
 
       if (createData.errors) {
         console.error("GraphQL errors:", createData.errors);
-        throw new Error("Failed to create cart");
+        throw new Error(`Failed to create cart: ${createData.errors[0]?.message || "Unknown error"}`);
       }
 
       cartId = createData.data?.createEmptyCart;
@@ -90,7 +92,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (!addResp.ok) {
-      throw new Error("Failed to add product to cart");
+      const errorText = await addResp.text();
+      console.error("HTTP error adding to cart:", addResp.status, errorText);
+      throw new Error(`Failed to add product to cart: ${addResp.status} ${errorText.slice(0, 200)}`);
     }
 
     const addData = await addResp.json();
