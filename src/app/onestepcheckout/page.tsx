@@ -1348,11 +1348,12 @@ export default function CheckoutPage() {
                             </div>
                           )}
                           {/* Card form — always mounted so Revolut has a stable DOM node; hidden until ready */}
+                          {/* Use invisible+h-0 instead of display:none so iOS Safari initialises the iframe JS context */}
                           <div
                             className={
                               cardFieldReady && !revolutPublicId
                                 ? "rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3"
-                                : "hidden"
+                                : "invisible h-0 overflow-hidden"
                             }
                           >
                             <div>
@@ -1526,7 +1527,7 @@ export default function CheckoutPage() {
                             setPlaceError(
                               "Моля, попълнете данните на картата.",
                             );
-                          }, 3000);
+                          }, 4000);
                           try {
                             cardField?.submit({
                               email: getShipping().email?.trim(),
@@ -1595,7 +1596,7 @@ export default function CheckoutPage() {
                             setPlaceError(
                               "Моля, попълнете данните на картата.",
                             );
-                          }, 3000);
+                          }, 4000);
                           try {
                             cardField?.submit({
                               email: getShipping().email?.trim(),
