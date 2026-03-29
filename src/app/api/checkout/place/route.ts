@@ -280,6 +280,8 @@ export async function POST(request: NextRequest) {
           const searchData = await searchResp.json();
           const entityId: number | undefined =
             searchData?.items?.[0]?.entity_id;
+          const magentoTotal: number | undefined =
+            searchData?.items?.[0]?.grand_total;
 
           if (entityId) {
             // Always send order confirmation email (bypasses Magento async email queue)
@@ -293,23 +295,33 @@ export async function POST(request: NextRequest) {
               const revolutOrderId = paymentMethod.additional_data?.order_id;
 
               // Verify Revolut order is completed/authorised before invoicing
-              let canInvoice = true;
+              let canInvoice = false;
               if (revolutOrderId && REVOLUT_API_SECRET_KEY) {
-                const verifyResp = await fetch(
-                  `${REVOLUT_API_BASE}/orders/${revolutOrderId}`,
-                  {
-                    headers: {
-                      Authorization: `Bearer ${REVOLUT_API_SECRET_KEY}`,
-                      "Revolut-Api-Version": "2024-09-01",
-                    },
-                  },
-                );
-                if (verifyResp.ok) {
-                  const revolutOrder = await verifyResp.json();
-                  const state: string = revolutOrder.state ?? "";
-                  canInvoice = state === "completed" || state === "authorised";
-                } else {
+                if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(revolutOrderId)) {
                   canInvoice = false;
+                } else {
+                  const verifyResp = await fetch(
+                    `${REVOLUT_API_BASE}/orders/${revolutOrderId}`,
+                    {
+                      headers: {
+                        Authorization: `Bearer ${REVOLUT_API_SECRET_KEY}`,
+                        "Revolut-Api-Version": "2024-09-01",
+                      },
+                    },
+                  );
+                  if (verifyResp.ok) {
+                    const revolutOrder = await verifyResp.json();
+                    const state: string = revolutOrder.state ?? "";
+                    const stateOk = state === "completed" || state === "authorised";
+                    const revolutAmountMinor: number | undefined = revolutOrder.order_amount?.value;
+                    const amountOk =
+                      magentoTotal === undefined ||
+                      revolutAmountMinor === undefined ||
+                      revolutAmountMinor === Math.round(magentoTotal * 100);
+                    canInvoice = stateOk && amountOk;
+                  } else {
+                    canInvoice = false;
+                  }
                 }
               }
 
@@ -321,20 +333,23 @@ export async function POST(request: NextRequest) {
                   body: JSON.stringify({ capture: true, notify: true }),
                 });
 
-                // Add order comment with Revolut Order ID
-                const revolutCommentId =
-                  revolutOrderId || paymentMethod.additional_data?.public_id;
-                await fetch(`${REST_BASE}/orders/${entityId}/comments`, {
-                  method: "POST",
-                  headers: adminHeaders,
-                  body: JSON.stringify({
-                    statusHistory: {
-                      comment: `Платено чрез Revolut Pay. Revolut Order ID: ${revolutCommentId}`,
-                      is_customer_notified: 0,
-                      is_visible_on_front: 0,
-                    },
-                  }),
-                });
+                // Add order comment with Revolut Order ID (only UUID-safe values)
+                const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                const rawCommentId = revolutOrderId || paymentMethod.additional_data?.public_id;
+                const revolutCommentId = rawCommentId && uuidRe.test(rawCommentId) ? rawCommentId : null;
+                if (revolutCommentId) {
+                  await fetch(`${REST_BASE}/orders/${entityId}/comments`, {
+                    method: "POST",
+                    headers: adminHeaders,
+                    body: JSON.stringify({
+                      statusHistory: {
+                        comment: `Платено чрез Revolut Pay. Revolut Order ID: ${revolutCommentId}`,
+                        is_customer_notified: 0,
+                        is_visible_on_front: 0,
+                      },
+                    }),
+                  });
+                }
               } else {
                 console.error(
                   "Revolut order not authorised — skipping invoice",

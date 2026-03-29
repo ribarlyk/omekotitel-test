@@ -15,8 +15,6 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/src/app/contexts/CartContext";
 import {
   Loader2,
-  ChevronDown,
-  ChevronUp,
   Plus,
   Minus,
   Trash2,
@@ -615,9 +613,6 @@ export default function CheckoutPage() {
   // Form restoring from sessionStorage (avoids flash of empty inputs on mount/Revolut redirect)
   const [formRestoring, setFormRestoring] = useState(true);
 
-  // Mobile order summary toggle
-  const [summaryOpen, setSummaryOpen] = useState(true);
-
   // ── Init card field when revolut_pay is selected and container is in DOM ─────
   useEffect(() => {
     const isRevolutSelected =
@@ -680,7 +675,8 @@ export default function CheckoutPage() {
         });
         setCardField(instance);
         setCardFieldReady(true);
-      } catch (e) {
+         
+      } catch (error) {
         if (!destroyed)
           setPlaceError("Грешка при зареждане на формата за карта");
       }
@@ -1341,7 +1337,7 @@ export default function CheckoutPage() {
                           )}
                           {/* Payment confirmed state */}
                           {revolutPublicId && (
-                            <div className="flex items-center gap-2 py-3 text-sm text-brand-nav font-medium">
+                            <div className="flex items-center gap-2 py-3 pl-4 text-sm text-brand-nav font-medium">
                               <svg
                                 viewBox="0 0 16 16"
                                 className="w-4 h-4 fill-brand-action shrink-0"

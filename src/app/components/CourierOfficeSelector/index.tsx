@@ -61,11 +61,12 @@ export function CourierOfficeSelector({
         setQuery("");
       }
     };
+    const isDesktop = window.innerWidth >= 1024;
     document.addEventListener("mousedown", onClickOutside);
-    document.addEventListener("scroll", onScroll, true);
+    if (isDesktop) document.addEventListener("scroll", onScroll, true);
     return () => {
       document.removeEventListener("mousedown", onClickOutside);
-      document.removeEventListener("scroll", onScroll, true);
+      if (isDesktop) document.removeEventListener("scroll", onScroll, true);
     };
   }, []);
 
