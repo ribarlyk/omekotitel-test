@@ -12,15 +12,43 @@ interface Office {
   };
 }
 
+type Courier = "econt" | "speedy";
+
+function formatLabel(o: Office, courier: Courier): string {
+  const street =
+    courier === "econt"
+      ? o.address.fullAddress.replace(o.address.city.name, "").trim()
+      : o.address.fullAddress.trim();
+  return `${o.name} ( ${street} )`;
+}
+
+const COURIER_API: Record<Courier, string> = {
+  econt: "/api/econt/offices",
+  speedy: "/api/speedy/offices",
+};
+
+const COURIER_LABEL: Record<Courier, { text: string; className: string }> = {
+  econt: {
+    text: "ЕКОНТ",
+    className: "font-bold text-[#003087] text-xs tracking-wide",
+  },
+  speedy: {
+    text: "SPEEDY",
+    className: "font-bold text-[#e30613] text-xs tracking-wide",
+  },
+};
+
 interface Props {
   value: Office | null;
   onChange: (office: Office) => void;
+  courier: Courier;
   placeholder?: string;
 }
 
 export function CourierOfficeSelector({
   value,
   onChange,
+  courier,
   placeholder = "Моля, изберете офис на куриер",
 }: Props) {
   const [offices, setOffices] = useState<Office[]>([]);
@@ -29,20 +57,21 @@ export function CourierOfficeSelector({
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-  const hasFetchedRef = useRef(false);
+  const fetchedCourierRef = useRef<Courier | null>(null);
 
   useEffect(() => {
-    if (offices.length > 0 || hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-    
-    // Use promise chain to manage loading state
-    Promise.resolve()
-      .then(() => setLoading(true))
-      .then(() => fetch("/api/econt/offices"))
+    if (fetchedCourierRef.current === courier) return;
+    fetchedCourierRef.current = courier;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setOffices([]);
+     
+    setLoading(true);
+    fetch(COURIER_API[courier])
       .then((r) => r.json())
       .then((d) => setOffices(d.offices ?? []))
+      .catch(() => setOffices([]))
       .finally(() => setLoading(false));
-  }, [offices.length]);
+  }, [courier]);
 
   useEffect(() => {
     if (open) setTimeout(() => searchRef.current?.focus(), 50);
@@ -50,13 +79,19 @@ export function CourierOfficeSelector({
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
         setQuery("");
       }
     };
     const onScroll = (e: Event) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
         setQuery("");
       }
@@ -77,25 +112,23 @@ export function CourierOfficeSelector({
       (o) =>
         o.name.toLowerCase().includes(q) ||
         o.address.city.name.toLowerCase().includes(q) ||
-        o.address.fullAddress.toLowerCase().includes(q)
+        o.address.fullAddress.toLowerCase().includes(q),
     );
   }, [offices, query]);
 
-  const formatLabel = (o: Office) => {
-    const street = o.address.fullAddress.replace(o.address.city.name, "").trim();
-    return `${o.name} ( ${street} )`;
-  };
-
   return (
     <div ref={containerRef} className="relative">
-      {/* Trigger */}
       <button
         type="button"
         onClick={() => setOpen((p) => !p)}
         className="w-full flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-left text-sm transition-colors hover:border-gray-300 focus:outline-none focus:border-brand-action focus:ring-2 focus:ring-brand-action/20"
       >
         <span className={value ? "text-gray-900" : "text-gray-400"}>
-          {value ? formatLabel(value) : loading ? "Зареждане…" : placeholder}
+          {value
+            ? formatLabel(value, courier)
+            : loading
+              ? "Зареждане…"
+              : placeholder}
         </span>
         <ChevronDown
           size={16}
@@ -103,7 +136,6 @@ export function CourierOfficeSelector({
         />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
           {/* Search */}
@@ -124,24 +156,33 @@ export function CourierOfficeSelector({
             )}
           </div>
 
-          {/* List */}
           <ul className="max-h-64 overflow-y-auto divide-y divide-gray-50">
             {loading ? (
               <li className="px-4 py-3 text-sm text-gray-400">Зареждане…</li>
             ) : filtered.length === 0 ? (
-              <li className="px-4 py-3 text-sm text-gray-400">Няма намерени офиси</li>
+              <li className="px-4 py-3 text-sm text-gray-400">
+                Няма намерени офиси
+              </li>
             ) : (
               filtered.map((office) => (
                 <li
                   key={office.id}
-                  onClick={() => { onChange(office); setOpen(false); setQuery(""); }}
+                  onClick={() => {
+                    onChange(office);
+                    setOpen(false);
+                    setQuery("");
+                  }}
                   className={`flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${
                     value?.id === office.id ? "bg-brand-action/5" : ""
                   }`}
                 >
-                  <span className="text-sm text-gray-800">{formatLabel(office)}</span>
-                  <span className="ml-3 shrink-0 font-bold text-[#003087] text-xs tracking-wide">
-                    <span className="text-orange-500">*</span>ЕКОНТ
+                  <span className="text-sm text-gray-800">
+                    {formatLabel(office, courier)}
+                  </span>
+                  <span
+                    className={`ml-3 shrink-0 ${COURIER_LABEL[courier].className}`}
+                  >
+                    {COURIER_LABEL[courier].text}
                   </span>
                 </li>
               ))

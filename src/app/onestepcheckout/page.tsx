@@ -681,7 +681,7 @@ export default function CheckoutPage() {
         setCardField(instance);
         setCardFieldReady(true);
          
-      } catch (error) {
+      } catch (_error) {
         if (!destroyed)
           setPlaceError("Грешка при зареждане на формата за карта");
       }
@@ -835,6 +835,11 @@ export default function CheckoutPage() {
       .toLowerCase()
       .includes("адрес");
   const isOfficeDelivery = selectedShipping !== "" && !isAddressDelivery;
+  const selectedCourier = (
+    (selectedShippingMethod?.carrier_title ?? "") +
+    " " +
+    (selectedShippingMethod?.method_title ?? "")
+  ).toLowerCase().includes("speedy") ? "speedy" : "econt";
   const effectiveShippingValid = isOfficeDelivery
     ? contactValid
     : shippingValid;
@@ -1070,7 +1075,7 @@ export default function CheckoutPage() {
                             name="shippingMethod"
                             value={value}
                             checked={selectedShipping === value}
-                            onChange={() => setSelectedShipping(value)}
+                            onChange={() => { setSelectedShipping(value); setSelectedOffice(null); }}
                             label={`${m.carrier_title} — ${m.method_title}`}
                             price={
                               m.amount.value === 0
@@ -1087,6 +1092,7 @@ export default function CheckoutPage() {
                       <CourierOfficeSelector
                         value={selectedOffice}
                         onChange={setSelectedOffice}
+                        courier={selectedCourier}
                       />
                     </div>
                   )}
