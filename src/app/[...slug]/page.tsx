@@ -2,9 +2,6 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-export const revalidate = 86400;
-export const dynamic = "force-static";
-
 import ProductsList from "@/src/app/components/ProductsList";
 import ProductDetail from "@/src/app/components/ProductDetail";
 import {
@@ -28,14 +25,18 @@ function collectUrlPaths(list: Category[]): string[] {
     if (cat.url_path) paths.push(cat.url_path);
     if (cat.children?.length) paths.push(...collectUrlPaths(cat.children));
   }
-  console.log("Collected category paths:", paths);
   return paths;
 }
+
+// Paths that are too large or too dynamic to pre-generate statically
+const EXCLUDED_STATIC_PREFIXES = ["marki-brands"];
 
 export async function generateStaticParams() {
   const catalog = await fetchCatalog();
   if (!catalog) return [];
-  const urlPaths = collectUrlPaths(catalog.categoryList as Category[]);
+  const urlPaths = collectUrlPaths(catalog.categoryList as Category[]).filter(
+    (p) => !EXCLUDED_STATIC_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix + "/")),
+  );
   return urlPaths.map((urlPath) => ({ slug: urlPath.split("/") }));
 }
 

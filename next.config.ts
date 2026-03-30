@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
     // Only allow the quality value actually used in the codebase (default 75)
     qualities: [75],
     // Covers fill-based grids at 1/2/3-column breakpoints (md=768, lg=1024)
-    deviceSizes: [640, 1080, 1920],
+    deviceSizes: [390, 640, 828, 1080, 1920],
     // Covers all fixed-width images: thumbnails(100), logo(190), list cards(200), product detail(600)
     imageSizes: [100, 200, 400, 600],
   },

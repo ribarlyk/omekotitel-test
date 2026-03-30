@@ -64,9 +64,9 @@ export default function ProductsList({
               className="w-full h-48 object-cover mb-3 rounded"
               width={200}
               height={250}
-              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-              loading={index < 7 ? "eager" : "lazy"}
-              fetchPriority={index < 7 ? "high" : "auto"}
+              sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 1.5rem), (max-width: 1280px) calc(33vw - 1.5rem), calc(25vw - 1.5rem)"
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchPriority={index === 0 ? "high" : "auto"}
             />
             <h3 className="font-medium text-sm mb-2 line-clamp-2">
               {product.name}

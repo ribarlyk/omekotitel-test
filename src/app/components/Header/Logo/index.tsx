@@ -12,7 +12,7 @@ export const Logo = ({ imgClassName }: { imgClassName?: string } = {}) => {
           height={90}
           loading="eager"
           fetchPriority="high"
-          unoptimized
+          sizes="(max-width: 1024px) 130px, 190px"
           className={imgClassName ?? "w-32.5 h-auto lg:w-47.5"}
         />
       </Link>
