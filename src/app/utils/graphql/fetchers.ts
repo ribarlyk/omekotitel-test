@@ -1,103 +1,103 @@
 import { print } from "graphql";
-import { unstable_cache } from "next/cache";
 import { Queries } from ".";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
 
+// Abort slow Magento requests before they stall ISR workers.
+const FETCH_TIMEOUT_MS = 5000;
+
+interface CacheOptions {
+  revalidate?: number | false;
+  tags?: string[];
+}
+
+// gql() now throws on every failure mode instead of returning null.
+// This means:
+//   - Vercel persistent Data Cache never stores a failed/empty result.
+//   - ISR revalidations that fail automatically keep the previous good HTML.
+//   - The first-ever request during a Magento outage gets a 500 (correct —
+//     better than silently caching an empty page).
 async function gql<T>(
   query: ReturnType<typeof print>,
   variables?: Record<string, unknown>,
-): Promise<T | null> {
-  if (!GRAPHQL_ENDPOINT) return null;
+  cacheOptions?: CacheOptions,
+): Promise<T> {
+  if (!GRAPHQL_ENDPOINT) throw new Error("GRAPHQL_URL is not configured");
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  let res: Response;
   try {
-    const res = await fetch(GRAPHQL_ENDPOINT, {
+    res = await fetch(GRAPHQL_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ query, variables }),
-      cache: "no-store",
+      ...(cacheOptions ? { next: cacheOptions } : { cache: "no-store" }),
+      signal: controller.signal,
     });
-    if (!res.ok) return null;
-    const json = await res.json();
-    if (json.errors) {
-      console.error("GraphQL errors:", json.errors);
-    }
-    if (!json.data) return null;
-    return json.data as T;
   } catch (e) {
-    console.error("GraphQL fetch error:", e);
-    return null;
+    clearTimeout(timeout);
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`GraphQL network error: ${msg}`);
   }
+  clearTimeout(timeout);
+
+  if (!res.ok) {
+    throw new Error(`GraphQL HTTP ${res.status} from Magento`);
+  }
+
+  const json = await res.json();
+
+  if (!json.data) {
+    // No data at all — fatal, throw so ISR keeps the previous good page.
+    const detail = json.errors ? JSON.stringify(json.errors) : "empty response";
+    throw new Error(`GraphQL returned no data: ${detail}`);
+  }
+
+  if (json.errors) {
+    // Partial success: Magento returned data alongside field-level errors
+    // (e.g. price_range internal errors on specific products). Log for
+    // observability but do not throw — the page can render with null fields,
+    // and throwing here would break builds / ISR for permanent Magento data issues.
+    console.error("GraphQL partial errors:", json.errors);
+  }
+
+  return json.data as T;
 }
-
-// unstable_cache does NOT store the result when the function throws,
-// so failed/error responses are never cached — next request retries immediately.
-
-const fetchCatalogCached = unstable_cache(
-  async () => {
-    const result = await gql<{ categoryList: unknown[] }>(
-      print(Queries.GET_CATALOG),
-    );
-    if (!result) throw new Error("Catalog fetch failed");
-    return result;
-  },
-  ["catalog"],
-  { revalidate: 3600, tags: ["catalog"] },
-);
 
 export async function fetchCatalog() {
-  try {
-    return await fetchCatalogCached();
-  } catch {
-    return null;
-  }
+  return gql<{ categoryList: unknown[] }>(
+    print(Queries.GET_CATALOG),
+    undefined,
+    // Coarse tag — invalidate all nav when catalog structure changes.
+    { revalidate: 3600, tags: ["catalog"] },
+  );
 }
-
-const fetchProductsByCategoryCached = unstable_cache(
-  async (categoryId: string, pageSize: number, currentPage: number) => {
-    const result = await gql<{ products: { items: unknown[]; total_count: number } }>(
-      print(Queries.GET_PRODUCTS_BY_CATEGORY),
-      { categoryId, pageSize, currentPage },
-    );
-    if (!result) throw new Error("Products fetch failed");
-    return result;
-  },
-  ["products-by-category"],
-  { revalidate: 3600, tags: ["products"] },
-);
 
 export async function fetchProductsByCategory(
   categoryId: string,
   pageSize = 20,
   currentPage = 1,
 ) {
-  try {
-    return await fetchProductsByCategoryCached(categoryId, pageSize, currentPage);
-  } catch {
-    return null;
-  }
+  return gql<{ products: { items: unknown[]; total_count: number } }>(
+    print(Queries.GET_PRODUCTS_BY_CATEGORY),
+    { categoryId, pageSize, currentPage },
+    // Fine-grained tag: invalidate one category without busting all products.
+    { revalidate: 3600, tags: ["products", `products:category:${categoryId}`] },
+  );
 }
-
-const fetchProductDetailCached = unstable_cache(
-  async (urlKey: string) => {
-    const result = await gql<{ products: { items: unknown[] } }>(
-      print(Queries.GET_PRODUCT_DETAIL),
-      { urlKey },
-    );
-    if (!result) throw new Error("Product fetch failed");
-    return result;
-  },
-  ["product-detail"],
-  { revalidate: 1800, tags: ["products"] },
-);
 
 export async function fetchProductDetail(urlKey: string) {
-  try {
-    return await fetchProductDetailCached(urlKey);
-  } catch {
-    return null;
-  }
+  return gql<{ products: { items: unknown[] } }>(
+    print(Queries.GET_PRODUCT_DETAIL),
+    { urlKey },
+    // Fine-grained tag: invalidate one product without busting all products.
+    { revalidate: 1800, tags: ["products", `product:${urlKey}`] },
+  );
 }
 
+// Search is intentionally uncached — results must reflect live inventory.
 export async function fetchSearchProducts(search: string, pageSize = 20) {
   return gql<{ products: { items: unknown[]; total_count: number } }>(
     print(Queries.SEARCH_PRODUCTS),

@@ -81,11 +81,13 @@ async function PageData({ slugs }: { slugs: string[] }) {
       urlPath,
     );
     if (category) {
+      // fetchProductsByCategory throws on any Magento failure — ISR keeps the
+      // previous good HTML automatically; no null guard needed here.
       const data = await fetchProductsByCategory(String(category.id));
-      const products = (data?.products?.items ?? []).filter(
+      const products = (data.products?.items ?? []).filter(
         Boolean,
       ) as Parameters<typeof ProductsList>[0]["products"];
-      const totalCount = data?.products?.total_count ?? 0;
+      const totalCount = data.products?.total_count ?? 0;
 
       return (
         <div className="container mx-auto px-4 py-8">

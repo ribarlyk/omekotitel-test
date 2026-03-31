@@ -14,7 +14,7 @@ interface Product {
         currency: string;
       };
     };
-  };
+  } | null;
   small_image: {
     url: string;
     label: string;
@@ -73,8 +73,9 @@ export default function ProductsList({
             </h3>
             <p className="text-gray-600 text-xs mb-2">SKU: {product.sku}</p>
             <p className="text-lg font-bold text-blue-600">
-              {product.price_range.minimum_price.final_price.value.toFixed(2)}{" "}
-              {product.price_range.minimum_price.final_price.currency}
+              {product.price_range
+                ? `${product.price_range.minimum_price.final_price.value.toFixed(2)} ${product.price_range.minimum_price.final_price.currency}`
+                : "—"}
             </p>
           </Link>
         ))}
