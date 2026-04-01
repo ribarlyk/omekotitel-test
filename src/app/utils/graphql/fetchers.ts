@@ -4,7 +4,9 @@ import { Queries } from ".";
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
 
 // Abort slow Magento requests before they stall ISR workers.
-const FETCH_TIMEOUT_MS = 5000;
+// Use a longer timeout during static build (many concurrent requests flood Magento).
+const FETCH_TIMEOUT_MS =
+  process.env.NEXT_PHASE === "phase-production-build" ? 20000 : 10000;
 
 interface CacheOptions {
   revalidate?: number | false;
@@ -66,12 +68,19 @@ async function gql<T>(
   return json.data as T;
 }
 
+// Spread revalidations over ±20% of base to prevent thundering herd when many
+// pages expire simultaneously after a deploy.
+function jitter(base: number, factor = 0.2) {
+  const spread = base * factor;
+  return Math.round(base - spread / 2 + Math.random() * spread);
+}
+
 export async function fetchCatalog() {
   return gql<{ categoryList: unknown[] }>(
     print(Queries.GET_CATALOG),
     undefined,
     // Coarse tag — invalidate all nav when catalog structure changes.
-    { revalidate: 3600, tags: ["catalog"] },
+    { revalidate: jitter(3600), tags: ["catalog"] },
   );
 }
 
@@ -84,7 +93,7 @@ export async function fetchProductsByCategory(
     print(Queries.GET_PRODUCTS_BY_CATEGORY),
     { categoryId, pageSize, currentPage },
     // Fine-grained tag: invalidate one category without busting all products.
-    { revalidate: 3600, tags: ["products", `products:category:${categoryId}`] },
+    { revalidate: jitter(3600), tags: ["products", `products:category:${categoryId}`] },
   );
 }
 
@@ -93,7 +102,7 @@ export async function fetchProductDetail(urlKey: string) {
     print(Queries.GET_PRODUCT_DETAIL),
     { urlKey },
     // Fine-grained tag: invalidate one product without busting all products.
-    { revalidate: 1800, tags: ["products", `product:${urlKey}`] },
+    { revalidate: jitter(1800), tags: ["products", `product:${urlKey}`] },
   );
 }
 

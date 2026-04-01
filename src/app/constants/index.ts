@@ -1,3 +1,40 @@
+export const FOOTER_COLUMNS = [
+  {
+    heading: "Информация",
+    links: [
+      { label: "За нас", href: "/za-nas" },
+      { label: "Доставка", href: "/dostavka" },
+      { label: "Лични данни и поверителност", href: "/privacy-policy-cookie-restriction-mode" },
+      { label: "Общи условия", href: "/obschi-uslovija" },
+      { label: "Свържи се с нас", href: "/contact" },
+    ],
+  },
+  {
+    heading: "Направени поръчки",
+    links: [
+      { label: "Моят акаунт", href: "/customer/account/login" },
+      { label: "История на поръчките", href: "/sales/order/history" },
+      { label: "Връщане на поръчка", href: "/vr-schane-na-por-chka" },
+      { label: "Любими продукти", href: "/wishlist" },
+      { label: "Сравни продукти", href: "/catalog/product_compare/" },
+    ],
+  },
+  {
+    heading: "Обслужване на клиенти",
+    links: [
+      { label: "Начини за плащане", href: "/nachini-za-plaschane" },
+      { label: "Връщане на поръчка", href: "/vr-schane-na-por-chka" },
+      { label: "Проследяване на поръчка", href: "/sales/order/history" },
+      { label: "Често задавани въпроси", href: "/contact" },
+    ],
+  },
+];
+
+export const FOOTER_SOCIAL = [
+  { label: "Facebook", href: "https://www.facebook.com/omekotitel", icon: "facebook" },
+  { label: "Instagram", href: "https://www.instagram.com/omekotitel", icon: "instagram" },
+];
+
 export interface NavCatalogCategory {
   id: number;
   name: string;
@@ -5,6 +42,24 @@ export interface NavCatalogCategory {
   url_path: string | null;
   children?: NavCatalogCategory[];
 }
+
+export const DELIVERY_INFO = {
+  intro:
+    "Уважаеми клиенти, искаме да Ви информираме, че извършваме доставки в цялата страна посредством куриерските услуги на ЕКОНТ и Speedy. Всички поръчки се потвърждават от наш служител, който ще се свърже с Вас, за да потвърди поръчката Ви. Поръчките се обработват и изпращат в рамките на 2 работни дни. Непотвърдени поръчки не се изпращат.",
+  subIntro:
+    "Предлагаме доставка чрез куриер по Ваш избор – ЕКОНТ или Speedy, както и собствен транспорт за гр. София при предварителна уговорка по телефона.",
+  methods: [
+    "до адрес чрез Еконт или Speedy",
+    "до офис на Еконт или Speedy",
+    "до адрес за гр. София с директна доставка от omekotitel.bg (с предварителна уговорка по телефона)",
+  ],
+  pricing: [
+    { label: "3.07 €", description: "до офис на Еконт или Speedy" },
+    { label: "4.09 €", description: "до адрес на получателя (Еконт или Speedy)" },
+    { label: "БЕЗПЛАТНА ДОСТАВКА", description: "до офис на Еконт или Speedy при поръчка над 50.00 €" },
+    { label: "БЕЗПЛАТНА ДОСТАВКА", description: "до адрес в София с транспорт на omekotitel.bg при поръчка над 50.00 €" },
+  ],
+};
 
 export const NAVGATIOM_ITEMS = [
   { name: "Всички продукти", href: "/catalog", main: true },

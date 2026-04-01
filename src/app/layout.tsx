@@ -12,6 +12,8 @@ import { MobileHeader } from "./components/MobileHeader";
 import type { NavCatalogCategory } from "./constants";
 import { fetchCatalog } from "./utils/graphql/fetchers";
 import { Toaster } from "sonner";
+import { ScrollToTopButton } from "./components/ScrollToTopButton";
+import { Footer } from "./components/Footer";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -56,6 +58,8 @@ export default async function RootLayout({
                   <Navigation categoryList={categoryList} />
                 </div>
                 {children}
+                <Footer />
+                <ScrollToTopButton />
               </WishlistProvider>
             </CartProvider>
           </AuthProvider>

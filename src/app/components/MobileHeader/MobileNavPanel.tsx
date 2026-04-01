@@ -28,7 +28,8 @@ export const MobileNavPanel = ({
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [activeCategory, setActiveCategory] = useState<NavCatalogCategory | null>(null);
-  const [view, setView] = useState<"root" | "sub">("root");
+  const [activeSubCategory, setActiveSubCategory] = useState<NavCatalogCategory | null>(null);
+  const [view, setView] = useState<"root" | "sub" | "subsub">("root");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -47,6 +48,7 @@ export const MobileNavPanel = ({
     if (!isOpen) {
       const t = setTimeout(() => {
         setActiveCategory(null);
+        setActiveSubCategory(null);
         setView("root");
       }, 300);
       return () => clearTimeout(t);
@@ -62,15 +64,27 @@ export const MobileNavPanel = ({
     setView("sub");
   };
 
+  const openSubCategory = (cat: NavCatalogCategory) => {
+    setActiveSubCategory(cat);
+    setView("subsub");
+  };
+
   const goBack = () => {
-    setView("root");
-    setActiveCategory(null);
+    if (view === "subsub") {
+      setActiveSubCategory(null);
+      setView("sub");
+    } else {
+      setActiveCategory(null);
+      setView("root");
+    }
   };
 
   const navigate = (href: string) => {
     onClose();
     router.push(href);
   };
+
+  const backLabel = view === "subsub" ? activeSubCategory?.name : activeCategory?.name;
 
   if (!mounted) return null;
 
@@ -84,21 +98,21 @@ export const MobileNavPanel = ({
         onClick={onClose}
       />
 
-      {/* Panel — slides in from the right, full screen */}
+      {/* Panel */}
       <div
         className={`fixed top-0 right-0 z-50 h-full w-full bg-white flex flex-col transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        {/* Header — fixed height to prevent wobble */}
+        {/* Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 shrink-0">
-          {view === "sub" ? (
+          {view !== "root" ? (
             <button
               onClick={goBack}
               className="flex items-center gap-1 text-brand-nav font-semibold text-base cursor-pointer"
             >
               <ChevronLeft size={32} className="shrink-0" />
-              <span className="truncate">{activeCategory?.name}</span>
+              <span className="truncate">{backLabel}</span>
             </button>
           ) : (
             <Logo imgClassName="h-12 w-auto" />
@@ -158,28 +172,74 @@ export const MobileNavPanel = ({
             </ul>
           </div>
 
-          {/* Subcategory view */}
+          {/* Sub view */}
           <div
             className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ${
-              view === "sub" ? "translate-x-0" : "translate-x-full"
+              view === "sub"
+                ? "translate-x-0"
+                : view === "root"
+                  ? "translate-x-full"
+                  : "-translate-x-full"
             }`}
           >
             {activeCategory && (
               <ul>
-                {(activeCategory.children ?? []).map((child) => (
-                  <li key={child.id} className="border-b border-gray-100">
-                    <button
-                      onClick={() => navigate(categoryHref(child))}
-                      className="w-full flex items-center px-5 py-4 text-gray-800 text-lg cursor-pointer active:bg-gray-50"
-                    >
-                      {child.name}
-                    </button>
-                  </li>
-                ))}
-                {/* "All products" link for the parent category */}
+                {(activeCategory.children ?? []).map((child) => {
+                  const hasChildren = (child.children?.length ?? 0) > 0;
+                  return (
+                    <li key={child.id} className="border-b border-gray-100">
+                      {hasChildren ? (
+                        <button
+                          onClick={() => openSubCategory(child)}
+                          className="w-full flex items-center justify-between px-5 py-4 text-gray-800 text-lg cursor-pointer active:bg-gray-50"
+                        >
+                          <span>{child.name}</span>
+                          <ChevronRight size={20} className="text-brand-action shrink-0" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => navigate(categoryHref(child))}
+                          className="w-full flex items-center px-5 py-4 text-gray-800 text-lg cursor-pointer active:bg-gray-50"
+                        >
+                          {child.name}
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
                 <li className="border-t-4 border-gray-100">
                   <button
                     onClick={() => navigate(categoryHref(activeCategory))}
+                    className="w-full flex items-center px-5 py-4 text-brand-action font-semibold text-base cursor-pointer active:bg-gray-50"
+                  >
+                    Всички продукти
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
+
+          {/* Subsub view */}
+          <div
+            className={`absolute inset-0 overflow-y-auto transition-transform duration-300 ${
+              view === "subsub" ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            {activeSubCategory && (
+              <ul>
+                {(activeSubCategory.children ?? []).map((grandchild) => (
+                  <li key={grandchild.id} className="border-b border-gray-100">
+                    <button
+                      onClick={() => navigate(categoryHref(grandchild))}
+                      className="w-full flex items-center px-5 py-4 text-gray-800 text-lg cursor-pointer active:bg-gray-50"
+                    >
+                      {grandchild.name}
+                    </button>
+                  </li>
+                ))}
+                <li className="border-t-4 border-gray-100">
+                  <button
+                    onClick={() => navigate(categoryHref(activeSubCategory))}
                     className="w-full flex items-center px-5 py-4 text-brand-action font-semibold text-base cursor-pointer active:bg-gray-50"
                   >
                     Всички продукти

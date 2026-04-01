@@ -73,8 +73,8 @@ export const UserCartWishSection = ({
             </div>
             <address className="flex flex-col not-italic gap-1">
               <p className="text-[12px]! text-brand-nav">За поръчки и запитвания</p>
-              <a href="tel:08888787852" className="text-[25px]! font-bold text-brand-nav">
-                0888787852
+              <a href="tel:0884358676" className="text-[25px]! font-bold text-brand-nav">
+                0884358676
               </a>
             </address>
           </div>
