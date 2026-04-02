@@ -32,12 +32,17 @@ function collectUrlPaths(list: Category[]): string[] {
 const EXCLUDED_STATIC_PREFIXES = ["marki-brands"];
 
 export async function generateStaticParams() {
-  const catalog = await fetchCatalog();
-  if (!catalog) return [];
-  const urlPaths = collectUrlPaths(catalog.categoryList as Category[]).filter(
-    (p) => !EXCLUDED_STATIC_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix + "/")),
-  );
-  return urlPaths.map((urlPath) => ({ slug: urlPath.split("/") }));
+  try {
+    const catalog = await fetchCatalog();
+    if (!catalog) return [];
+    const urlPaths = collectUrlPaths(catalog.categoryList as Category[]).filter(
+      (p) => !EXCLUDED_STATIC_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix + "/")),
+    );
+    return urlPaths.map((urlPath) => ({ slug: urlPath.split("/") }));
+  } catch {
+    // Magento unavailable at build time — pages will be generated on first visit via ISR
+    return [];
+  }
 }
 
 // Recursively search the tree by url_path (e.g. "parent/child/grandchild")

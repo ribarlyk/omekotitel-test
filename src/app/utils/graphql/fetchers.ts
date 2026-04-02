@@ -68,19 +68,13 @@ async function gql<T>(
   return json.data as T;
 }
 
-// Spread revalidations over ±20% of base to prevent thundering herd when many
-// pages expire simultaneously after a deploy.
-function jitter(base: number, factor = 0.2) {
-  const spread = base * factor;
-  return Math.round(base - spread / 2 + Math.random() * spread);
-}
 
 export async function fetchCatalog() {
   return gql<{ categoryList: unknown[] }>(
     print(Queries.GET_CATALOG),
     undefined,
     // Coarse tag — invalidate all nav when catalog structure changes.
-    { revalidate: jitter(3600), tags: ["catalog"] },
+    { revalidate: false, tags: ["catalog"] },
   );
 }
 
@@ -93,7 +87,7 @@ export async function fetchProductsByCategory(
     print(Queries.GET_PRODUCTS_BY_CATEGORY),
     { categoryId, pageSize, currentPage },
     // Fine-grained tag: invalidate one category without busting all products.
-    { revalidate: jitter(3600), tags: ["products", `products:category:${categoryId}`] },
+    { revalidate: false, tags: ["products", `products:category:${categoryId}`] },
   );
 }
 
@@ -102,7 +96,7 @@ export async function fetchProductDetail(urlKey: string) {
     print(Queries.GET_PRODUCT_DETAIL),
     { urlKey },
     // Fine-grained tag: invalidate one product without busting all products.
-    { revalidate: jitter(1800), tags: ["products", `product:${urlKey}`] },
+    { revalidate: false, tags: ["products", `product:${urlKey}`] },
   );
 }
 

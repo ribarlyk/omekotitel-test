@@ -7,7 +7,7 @@ export async function GET() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ showLC: false }),
-      next: { revalidate: 3600 },
+      next: { revalidate: 36000 },
     }
   );
 
