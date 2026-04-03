@@ -32,8 +32,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const catalog = await fetchCatalog().catch(() => null);
-  const categoryList = (catalog?.categoryList ?? []) as NavCatalogCategory[];
+  const catalog = await fetchCatalog();
+  const categoryList = catalog.categoryList as NavCatalogCategory[];
 
   return (
     <html lang="bg">

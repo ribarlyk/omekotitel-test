@@ -70,12 +70,16 @@ async function gql<T>(
 
 
 export async function fetchCatalog() {
-  return gql<{ categoryList: unknown[] }>(
+  const data = await gql<{ categoryList: unknown[] }>(
     print(Queries.GET_CATALOG),
     undefined,
     // Coarse tag — invalidate all nav when catalog structure changes.
     { revalidate: false, tags: ["catalog"] },
   );
+  if (!data.categoryList?.length) {
+    throw new Error("fetchCatalog: Magento returned an empty categoryList");
+  }
+  return data;
 }
 
 export async function fetchProductsByCategory(
