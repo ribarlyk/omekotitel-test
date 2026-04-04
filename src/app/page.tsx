@@ -32,7 +32,7 @@ export default function Home() {
             </p>
             <Link
               href="/grizha-za-doma"
-              className="inline-block bg-brand-red text-white font-semibold px-8 py-4 rounded-lg text-lg hover:opacity-90 transition-opacity"
+              className="inline-block bg-brand-red text-black font-semibold px-8 py-4 rounded-lg text-lg hover:opacity-90 transition-opacity"
             >
               Разгледай продуктите
             </Link>

@@ -40,7 +40,7 @@ export const UserCartWishSection = ({
   const profileRef = useRef<HTMLDivElement>(null);
   const { itemCount, loading: cartLoading, refreshCart } = useCart();
   const { itemCount: wishlistCount, loading: wishlistLoading, refreshWishlist } = useWishlist();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -86,7 +86,11 @@ export const UserCartWishSection = ({
             className="flex flex-col items-center cursor-pointer"
           >
             <User className="text-brand-action" strokeWidth={2} size={iconSize} />
-            {showLabels && <span className="text-xs text-brand-action">Профил</span>}
+            {showLabels && (
+              <span className="text-xs text-gray-900">
+                {isLoggedIn && user?.firstname ? user.firstname : "Профил"}
+              </span>
+            )}
           </button>
           {isLoggedIn && profileMenuOpen && (
             <ProfileDropdown
@@ -112,7 +116,7 @@ export const UserCartWishSection = ({
                 </span>
               )}
             </div>
-            {showLabels && <span className="text-xs text-brand-action">Любими</span>}
+            {showLabels && <span className="text-xs text-gray-900">Любими</span>}
           </button>
         )}
 
@@ -132,7 +136,7 @@ export const UserCartWishSection = ({
               </span>
             )}
           </div>
-          {showLabels && <span className="text-xs text-brand-action">Количка</span>}
+          {showLabels && <span className="text-xs text-gray-900">Количка</span>}
         </button>
       </div>
 
