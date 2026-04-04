@@ -11,12 +11,13 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative min-h-160 flex items-center overflow-hidden">
         <Image
-          src="/assets/Gemini_Generated_Image_86ouw886ouw886ou (1).png"
+          src="/assets/hero-omekotitel.png"
           alt="Hero background"
           fill
           className="object-cover object-center"
           sizes="100vw"
           priority
+          fetchPriority="high"
         />
         {/* left-side gradient so text stays readable */}
         <div className="absolute inset-0 bg-linear-to-r from-white/80 via-white/50 to-transparent" />

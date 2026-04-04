@@ -13,7 +13,10 @@ import type { NavCatalogCategory } from "./constants";
 import { fetchCatalog } from "./utils/graphql/fetchers";
 import { Toaster } from "sonner";
 import { ScrollToTopButton } from "./components/ScrollToTopButton";
+import { ScrollToTop } from "./components/ScrollToTop";
 import { Footer } from "./components/Footer";
+import { Breadcrumb } from "./components/Breadcrumb";
+import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -45,6 +48,8 @@ export default async function RootLayout({
           <AuthProvider>
             <CartProvider>
               <WishlistProvider>
+                <BreadcrumbProvider>
+                <ScrollToTop />
                 <Toaster position="top-center" richColors />
                 {/* Mobile sticky header */}
                 <div className="lg:hidden sticky top-0 z-30 shadow-md">
@@ -57,9 +62,11 @@ export default async function RootLayout({
                   <Header />
                   <Navigation categoryList={categoryList} />
                 </div>
-                {children}
+                <Breadcrumb categoryList={categoryList} />
+                <main className="min-h-[70vh]">{children}</main>
                 <Footer />
                 <ScrollToTopButton />
+                </BreadcrumbProvider>
               </WishlistProvider>
             </CartProvider>
           </AuthProvider>

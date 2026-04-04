@@ -95,7 +95,7 @@ async function PageData({ slugs }: { slugs: string[] }) {
       const totalCount = data.products?.total_count ?? 0;
 
       return (
-        <div className="container mx-auto px-4 py-8">
+        <div className="container mx-auto px-4 py-4 lg:py-8">
           <ProductsList
             products={products}
             totalCount={totalCount}

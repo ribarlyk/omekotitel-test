@@ -1,8 +1,10 @@
 "use client";
 
+import { useLayoutEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { magentoImageUrl } from "@/src/app/utils/image";
+import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
 
 interface ProductDetailProps {
   product: {
@@ -48,6 +50,13 @@ interface ProductDetailProps {
 }
 
 export default function ProductDetail({ product }: ProductDetailProps) {
+  const { setLastCrumbLabel } = useBreadcrumb();
+
+  useLayoutEffect(() => {
+    setLastCrumbLabel(product.sku);
+    return () => setLastCrumbLabel(null);
+  }, [product.sku, setLastCrumbLabel]);
+
   const finalPrice = product.price_range.minimum_price.final_price;
   const regularPrice = product.price_range.minimum_price.regular_price;
   const hasDiscount = finalPrice.value < regularPrice.value;
