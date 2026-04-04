@@ -1,33 +1,56 @@
-"use client";
-
-import { useCart } from "@/src/app/contexts/CartContext";
-import { useState } from "react";
-
-const TEST_SKU = "Miss Scrubby No Scratch Жълта Адаптивна Гъба към Hot/ Cold Water";
+import { Suspense } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import CategoryBar from "@/src/app/components/CategoryBar";
+import HomeCategorySection from "@/src/app/components/HomeCategorySection";
+import TestCartButton from "@/src/app/components/TestCartButton";
 
 export default function Home() {
-  const { addToCart } = useCart();
-  const [loading, setLoading] = useState(false);
-
-  const handleAddToCart = async () => {
-    setLoading(true);
-    try {
-      await addToCart(TEST_SKU, 1);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <p className="text-gray-500">Скоро</p>
-      <button
-        onClick={handleAddToCart}
-        disabled={loading}
-        className="px-4 py-2 bg-brand-action text-white rounded-lg text-sm disabled:opacity-50"
-      >
-        {loading ? "Добавя се…" : "🧪 Add test item"}
-      </button>
+    <div className="flex flex-col">
+      {/* Hero Section */}
+      <section className="relative min-h-160 flex items-center overflow-hidden">
+        <Image
+          src="/assets/Gemini_Generated_Image_86ouw886ouw886ou (1).png"
+          alt="Hero background"
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          priority
+        />
+        {/* left-side gradient so text stays readable */}
+        <div className="absolute inset-0 bg-linear-to-r from-white/80 via-white/50 to-transparent" />
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-8 py-20 flex justify-center md:justify-start">
+          <div className="max-w-lg text-center md:text-left">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-5 leading-tight">
+              Грижа за дома и семейството
+            </h1>
+            <p className="text-xl text-gray-600 mb-8">
+              Открийте широк асортимент от козметика, почистващи препарати и
+              продукти за лична хигиена — всичко на едно място, на достъпни цени.
+            </p>
+            <Link
+              href="/grizha-za-doma"
+              className="inline-block bg-brand-red text-white font-semibold px-8 py-4 rounded-lg text-lg hover:opacity-90 transition-opacity"
+            >
+              Разгледай продуктите
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <CategoryBar />
+
+      <Suspense fallback={null}>
+        <HomeCategorySection urlKey="novi-produkti" title="Нови продукти" />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <HomeCategorySection urlKey="oferti-produkti" title="Оферти" />
+      </Suspense>
+
+      {/* Dev test button */}
+      <TestCartButton />
     </div>
   );
 }

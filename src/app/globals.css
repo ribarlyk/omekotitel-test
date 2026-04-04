@@ -1,9 +1,17 @@
 @import "tailwindcss";
 
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @theme {
   --color-brand-action: #98ab3f;
   --color-brand-action-light: #b8cc52;
   --color-brand-nav: #485f27;
+  --color-brand-red: #fc0000;
   --font-sans: var(--font-roboto), sans-serif;
 }
 

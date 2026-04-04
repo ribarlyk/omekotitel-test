@@ -4,9 +4,11 @@ export const FOOTER_COLUMNS = [
     links: [
       { label: "За нас", href: "/za-nas" },
       { label: "Доставка", href: "/dostavka" },
-      { label: "Лични данни и поверителност", href: "/privacy-policy-cookie-restriction-mode" },
+      {
+        label: "Лични данни и поверителност",
+        href: "/privacy-policy-cookie-restriction-mode",
+      },
       { label: "Общи условия", href: "/obschi-uslovija" },
-      { label: "Свържи се с нас", href: "/contact" },
     ],
   },
   {
@@ -22,17 +24,26 @@ export const FOOTER_COLUMNS = [
   {
     heading: "Обслужване на клиенти",
     links: [
+      { label: "Свържи се с нас", href: "/contact" },
       { label: "Начини за плащане", href: "/nachini-za-plaschane" },
-      { label: "Връщане на поръчка", href: "/vr-schane-na-por-chka" },
+      // { label: "Връщане на поръчка", href: "/vr-schane-na-por-chka" },
       // { label: "Проследяване на поръчка", href: "/sales/order/history" },
-      { label: "Често задавани въпроси", href: "/contact" },
+      // { label: "Често задавани въпроси", href: "/contact" },
     ],
   },
 ];
 
 export const FOOTER_SOCIAL = [
-  { label: "Facebook", href: "https://www.facebook.com/omekotitel", icon: "facebook" },
-  { label: "Instagram", href: "https://www.instagram.com/omekotitel", icon: "instagram" },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/omekotitel",
+    icon: "facebook",
+  },
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/omekotitel",
+    icon: "instagram",
+  },
 ];
 
 export interface NavCatalogCategory {
@@ -55,9 +66,19 @@ export const DELIVERY_INFO = {
   ],
   pricing: [
     { label: "3.07 €", description: "до офис на Еконт или Speedy" },
-    { label: "4.09 €", description: "до адрес на получателя (Еконт или Speedy)" },
-    { label: "БЕЗПЛАТНА ДОСТАВКА", description: "до офис на Еконт или Speedy при поръчка над 50.00 €" },
-    { label: "БЕЗПЛАТНА ДОСТАВКА", description: "до адрес в София с транспорт на omekotitel.bg при поръчка над 50.00 €" },
+    {
+      label: "4.09 €",
+      description: "до адрес на получателя (Еконт или Speedy)",
+    },
+    {
+      label: "БЕЗПЛАТНА ДОСТАВКА",
+      description: "до офис на Еконт или Speedy при поръчка над 50.00 €",
+    },
+    {
+      label: "БЕЗПЛАТНА ДОСТАВКА",
+      description:
+        "до адрес в София с транспорт на omekotitel.bg при поръчка над 50.00 €",
+    },
   ],
 };
 
@@ -166,22 +187,81 @@ export const PRIVACY_POLICY = {
   cookieTable: {
     heading: `Списък с „бисквитките", които използваме`,
     rows: [
-      { name: "FORM_KEY", description: "Съхранява произволно генериран ключ, използван за предотвратяване на подправени заявки." },
-      { name: "PHPSESSID", description: "Вашият идентификационен номер на сесията на сървъра." },
-      { name: "GUEST-VIEW", description: "Позволява на гостите да преглеждат и редактират поръчките си." },
-      { name: "PERSISTENT_SHOPPING_CART", description: "Връзка към информация за вашата количка и история на гледане, ако сте поискали това." },
-      { name: "STF", description: "Информация за продукти, които сте изпратили по имейл на приятели." },
-      { name: "STORE", description: "Изгледа на магазина или езика, който сте избрали." },
-      { name: "USER_ALLOWED_SAVE_COOKIE", description: "Показва дали клиент е разрешил да използва бисквитки." },
-      { name: "MAGE-CACHE-SESSID", description: "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците." },
-      { name: "MAGE-CACHE-STORAGE", description: "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците." },
-      { name: "MAGE-CACHE-STORAGE-SECTION-INVALIDATION", description: "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците." },
-      { name: "MAGE-CACHE-TIMEOUT", description: "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците." },
-      { name: "SECTION-DATA-IDS", description: "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците." },
-      { name: "PRIVATE_CONTENT_VERSION", description: "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците." },
-      { name: "X-MAGENTO-VARY", description: "Улеснява кеширането на съдържание на сървъра, за да направи страниците да се зареждат по-бързо." },
-      { name: "MAGE-TRANSLATION-FILE-VERSION", description: "Улеснява превода на съдържание на други езици." },
-      { name: "MAGE-TRANSLATION-STORAGE", description: "Улеснява превода на съдържание на други езици." },
+      {
+        name: "FORM_KEY",
+        description:
+          "Съхранява произволно генериран ключ, използван за предотвратяване на подправени заявки.",
+      },
+      {
+        name: "PHPSESSID",
+        description: "Вашият идентификационен номер на сесията на сървъра.",
+      },
+      {
+        name: "GUEST-VIEW",
+        description:
+          "Позволява на гостите да преглеждат и редактират поръчките си.",
+      },
+      {
+        name: "PERSISTENT_SHOPPING_CART",
+        description:
+          "Връзка към информация за вашата количка и история на гледане, ако сте поискали това.",
+      },
+      {
+        name: "STF",
+        description:
+          "Информация за продукти, които сте изпратили по имейл на приятели.",
+      },
+      {
+        name: "STORE",
+        description: "Изгледа на магазина или езика, който сте избрали.",
+      },
+      {
+        name: "USER_ALLOWED_SAVE_COOKIE",
+        description: "Показва дали клиент е разрешил да използва бисквитки.",
+      },
+      {
+        name: "MAGE-CACHE-SESSID",
+        description:
+          "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците.",
+      },
+      {
+        name: "MAGE-CACHE-STORAGE",
+        description:
+          "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците.",
+      },
+      {
+        name: "MAGE-CACHE-STORAGE-SECTION-INVALIDATION",
+        description:
+          "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците.",
+      },
+      {
+        name: "MAGE-CACHE-TIMEOUT",
+        description:
+          "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците.",
+      },
+      {
+        name: "SECTION-DATA-IDS",
+        description:
+          "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците.",
+      },
+      {
+        name: "PRIVATE_CONTENT_VERSION",
+        description:
+          "Улеснява кеширането на съдържание в браузъра, за да ускори зареждането на страниците.",
+      },
+      {
+        name: "X-MAGENTO-VARY",
+        description:
+          "Улеснява кеширането на съдържание на сървъра, за да направи страниците да се зареждат по-бързо.",
+      },
+      {
+        name: "MAGE-TRANSLATION-FILE-VERSION",
+        description: "Улеснява превода на съдържание на други езици.",
+      },
+      {
+        name: "MAGE-TRANSLATION-STORAGE",
+        description: "Улеснява превода на съдържание на други езици.",
+      },
     ],
   },
   thirdPartyCookies: {
@@ -190,55 +270,165 @@ export const PRIVACY_POLICY = {
       {
         name: "Google Analytics",
         who: "Google Analytics",
-        purpose: "Получаване на представа за поведението на посетителите на уебсайта с цел подобряване на потребителското изживяване на уебсайта.",
+        purpose:
+          "Получаване на представа за поведението на посетителите на уебсайта с цел подобряване на потребителското изживяване на уебсайта.",
         cookies: "__utma, __utmb, __utmc, __utmv, __utmz, _ga",
         retention: "максимум 2 години",
       },
       {
         name: "Google Ads",
         who: "Google-adservices.com",
-        purpose: "Измерване на преобразуването. Тази анонимна информация се използва за определяне на стойността и за уреждане с рекламен партньор.",
+        purpose:
+          "Измерване на преобразуването. Тази анонимна информация се използва за определяне на стойността и за уреждане с рекламен партньор.",
         cookies: "Conversion",
         retention: "максимум 1 година",
       },
       {
         name: "Facebook",
         who: "facebook.com",
-        purpose: "Измерване на преобразуването. Тази анонимна информация се използва за определяне на стойността и за уреждане с рекламен партньор.",
-        cookies: "locale, c_user, csm, datr, fr, lu, xs, pk, s, p, act, x-src, presence",
+        purpose:
+          "Измерване на преобразуването. Тази анонимна информация се използва за определяне на стойността и за уреждане с рекламен партньор.",
+        cookies:
+          "locale, c_user, csm, datr, fr, lu, xs, pk, s, p, act, x-src, presence",
         retention: "максимум 1 година",
       },
     ],
     table: [
-      { name: "_ga", description: "Използва се от Google Analytics за рекламни цели за разграничаване на потребителите." },
-      { name: "_gid", description: "Използва се от Google Analytics за рекламни цели за разграничаване на потребителите." },
-      { name: "_gat", description: "Използва се от Google Analytics за рекламни цели. Използва се за намаляване на скоростта на заявка. Ако Google Analytics се разгърне чрез Google Мениджър на маркери, тази бисквитка ще носи името _dc_gtm_<property-id>." },
-      { name: "AMP_TOKEN", description: "Използва се от Google Analytics за рекламни цели. Съдържа означение, което може да се използва за извличане на клиентски идентификационен номер от услугата AMP Client ID." },
-      { name: "_gac_<property-id>", description: "Съдържа информация, свързана с кампанията за потребителя за Google Ads." },
-      { name: "__utma", description: "Използва се от Google Analytics за рекламни цели. Използва се за разграничаване на потребители и сесии." },
-      { name: "__utmt", description: "Използва се от Google Analytics за намаляване на скоростта на заявките." },
-      { name: "__utmb", description: "Използва се от Google Analytics за рекламни цели. Използва се за определяне на нови сесии / посещения." },
-      { name: "__utmc", description: "Използва се от Google Analytics за рекламни цели. Не се използва в ga.js. Зadadен за оперативна съвместимост с urchin.js." },
-      { name: "__utmz", description: "Използва се от Google Analytics за рекламни цели. Съхранява източника на трафика или кампанията, която обяснява как потребителят е достигнал до вашия сайт." },
-      { name: "__utmv", description: "Използва се от Google Analytics за рекламни цели. Използва се за съхраняване на персонализирани променливи на ниво посетители." },
-      { name: "datr", description: "Използва се от Facebook за рекламни цели. Съдържа ID на браузъра." },
-      { name: "fr", description: "Използва се от Facebook за рекламни цели. Съдържа криптиран идентификационен номер на Facebook и идентификатор на браузъра." },
-      { name: "reg_ext_ref", description: "Използва се от Facebook за рекламни цели. Съдържа URL адрес на външния референт." },
-      { name: "reg_fb_gate", description: "Използва се от Facebook за рекламни цели. Съдържа URL на първата посетена страница във Facebook." },
-      { name: "reg_fb_ref", description: "Използва се от Facebook за рекламни цели. Съдържа URL на последната посетена страница във Facebook." },
+      {
+        name: "_ga",
+        description:
+          "Използва се от Google Analytics за рекламни цели за разграничаване на потребителите.",
+      },
+      {
+        name: "_gid",
+        description:
+          "Използва се от Google Analytics за рекламни цели за разграничаване на потребителите.",
+      },
+      {
+        name: "_gat",
+        description:
+          "Използва се от Google Analytics за рекламни цели. Използва се за намаляване на скоростта на заявка. Ако Google Analytics се разгърне чрез Google Мениджър на маркери, тази бисквитка ще носи името _dc_gtm_<property-id>.",
+      },
+      {
+        name: "AMP_TOKEN",
+        description:
+          "Използва се от Google Analytics за рекламни цели. Съдържа означение, което може да се използва за извличане на клиентски идентификационен номер от услугата AMP Client ID.",
+      },
+      {
+        name: "_gac_<property-id>",
+        description:
+          "Съдържа информация, свързана с кампанията за потребителя за Google Ads.",
+      },
+      {
+        name: "__utma",
+        description:
+          "Използва се от Google Analytics за рекламни цели. Използва се за разграничаване на потребители и сесии.",
+      },
+      {
+        name: "__utmt",
+        description:
+          "Използва се от Google Analytics за намаляване на скоростта на заявките.",
+      },
+      {
+        name: "__utmb",
+        description:
+          "Използва се от Google Analytics за рекламни цели. Използва се за определяне на нови сесии / посещения.",
+      },
+      {
+        name: "__utmc",
+        description:
+          "Използва се от Google Analytics за рекламни цели. Не се използва в ga.js. Зadadен за оперативна съвместимост с urchin.js.",
+      },
+      {
+        name: "__utmz",
+        description:
+          "Използва се от Google Analytics за рекламни цели. Съхранява източника на трафика или кампанията, която обяснява как потребителят е достигнал до вашия сайт.",
+      },
+      {
+        name: "__utmv",
+        description:
+          "Използва се от Google Analytics за рекламни цели. Използва се за съхраняване на персонализирани променливи на ниво посетители.",
+      },
+      {
+        name: "datr",
+        description:
+          "Използва се от Facebook за рекламни цели. Съдържа ID на браузъра.",
+      },
+      {
+        name: "fr",
+        description:
+          "Използва се от Facebook за рекламни цели. Съдържа криптиран идентификационен номер на Facebook и идентификатор на браузъра.",
+      },
+      {
+        name: "reg_ext_ref",
+        description:
+          "Използва се от Facebook за рекламни цели. Съдържа URL адрес на външния референт.",
+      },
+      {
+        name: "reg_fb_gate",
+        description:
+          "Използва се от Facebook за рекламни цели. Съдържа URL на първата посетена страница във Facebook.",
+      },
+      {
+        name: "reg_fb_ref",
+        description:
+          "Използва се от Facebook за рекламни цели. Съдържа URL на последната посетена страница във Facebook.",
+      },
       { name: "sb", description: "Използва се от Facebook за рекламни цели." },
-      { name: "wd", description: "Използва се от Facebook за рекламни цели. Съдържа размери на прозореца на браузъра." },
-      { name: "c_user", description: "Използва се от Facebook за рекламни цели. Facebook ID." },
-      { name: "lu", description: "Използва се от Facebook за рекламни цели. Криптиран идентификационен номер на последния потребител." },
-      { name: "p", description: "Използва се от Facebook за рекламни цели. Дял на канала на потребителя." },
-      { name: "presence", description: "Използва се от Facebook за рекламни цели. Състояние на чата." },
+      {
+        name: "wd",
+        description:
+          "Използва се от Facebook за рекламни цели. Съдържа размери на прозореца на браузъра.",
+      },
+      {
+        name: "c_user",
+        description: "Използва се от Facebook за рекламни цели. Facebook ID.",
+      },
+      {
+        name: "lu",
+        description:
+          "Използва се от Facebook за рекламни цели. Криптиран идентификационен номер на последния потребител.",
+      },
+      {
+        name: "p",
+        description:
+          "Използва се от Facebook за рекламни цели. Дял на канала на потребителя.",
+      },
+      {
+        name: "presence",
+        description:
+          "Използва се от Facebook за рекламни цели. Състояние на чата.",
+      },
       { name: "s", description: "Използва се от Facebook за рекламни цели." },
-      { name: "xs", description: "Използва се от Facebook за рекламни цели. Номер на сесията и тайна." },
-      { name: "csm", description: "Използва се от Facebook за рекламни цели. Несигурен индикатор." },
-      { name: "act", description: "Използва се от Facebook за рекламни цели. Времева маркировка и брояч на действията на потребителите." },
-      { name: "locale", description: "Използва се от Facebook за рекламни цели. Език на последния потребител." },
-      { name: "spin", description: "Използва се от Facebook за рекламни цели." },
-      { name: "Conversion", description: "Използва се от Google Ads за проследяване на реализациите." },
+      {
+        name: "xs",
+        description:
+          "Използва се от Facebook за рекламни цели. Номер на сесията и тайна.",
+      },
+      {
+        name: "csm",
+        description:
+          "Използва се от Facebook за рекламни цели. Несигурен индикатор.",
+      },
+      {
+        name: "act",
+        description:
+          "Използва се от Facebook за рекламни цели. Времева маркировка и брояч на действията на потребителите.",
+      },
+      {
+        name: "locale",
+        description:
+          "Използва се от Facebook за рекламни цели. Език на последния потребител.",
+      },
+      {
+        name: "spin",
+        description: "Използва се от Facebook за рекламни цели.",
+      },
+      {
+        name: "Conversion",
+        description:
+          "Използва се от Google Ads за проследяване на реализациите.",
+      },
     ],
   },
   security: {
@@ -267,11 +457,24 @@ export const OBSCHI_USLOVIJA = {
       ],
       details: [
         { label: "Наименование на Доставчика:", value: "OMEKOTITEL.BG" },
-        { label: "Седалище и адрес на управление:", value: "гр. София, Младост" },
-        { label: "Адрес за упражняване на дейността и адрес за отправяне на жалби от потребители:", value: "гр. София, Люлин" },
-        { label: "Данни за кореспонденция:", value: "info@omekotitel.bg, телефон 0884358676" },
+        {
+          label: "Седалище и адрес на управление:",
+          value: "гр. София, Младост",
+        },
+        {
+          label:
+            "Адрес за упражняване на дейността и адрес за отправяне на жалби от потребители:",
+          value: "гр. София, Люлин",
+        },
+        {
+          label: "Данни за кореспонденция:",
+          value: "info@omekotitel.bg, телефон 0884358676",
+        },
         { label: "Вписване в публични регистри:", value: "ЕИК: " },
-        { label: "Регистрация по Закона за данък върху добавената стойност:", value: "" },
+        {
+          label: "Регистрация по Закона за данък върху добавената стойност:",
+          value: "",
+        },
       ],
       agencies: [
         {
@@ -284,7 +487,7 @@ export const OBSCHI_USLOVIJA = {
         },
         {
           name: "Комисия за защита на потребителите",
-          address: "1000 гр. София, пл.\"Славейков\" №4А, ет.3, 4 и 6",
+          address: '1000 гр. София, пл."Славейков" №4А, ет.3, 4 и 6',
           phone: "02 / 980 25 24",
           fax: "02 / 988 42 18",
           hotline: "0700 111 22",
@@ -306,7 +509,7 @@ export const OBSCHI_USLOVIJA = {
         "Завършване на поръчката",
       ],
       closing: [
-        "С попълване на данните си в потребителската кошница и натискане на бутона \"Поръчай\", между Ползвателя и Доставчика възникват договорни отношения и Ползвателят декларира, че е запознат с тези общи условия, съгласен е с тяхното съдържание и се задължава безусловно да ги спазва. В случаите на поръчка на стоки без извършване на регистрация от страна на Ползвателя, последният приема настоящите общи условия при завършване на поръчката.",
+        'С попълване на данните си в потребителската кошница и натискане на бутона "Поръчай", между Ползвателя и Доставчика възникват договорни отношения и Ползвателят декларира, че е запознат с тези общи условия, съгласен е с тяхното съдържание и се задължава безусловно да ги спазва. В случаите на поръчка на стоки без извършване на регистрация от страна на Ползвателя, последният приема настоящите общи условия при завършване на поръчката.',
         "Доставчикът потвърждава извършената от Ползвателя поръчка по електронна поща.",
         "При извършване на регистрацията или поръчката Ползвателят се задължава да предостави верни и актуални данни. Ползвателят се задължава при промяна своевременно да актуализира данните, посочени в регистрацията или поръчката си.",
       ],
@@ -414,10 +617,7 @@ export const NACHINI_ZA_PLASCHANE = {
         "Плащането се извършва при получаване на пратката чрез избрания от вас куриер.",
         "Можете да платите:",
       ],
-      paymentMethods: [
-        "в брой",
-        "с карта",
-      ],
+      paymentMethods: ["в брой", "с карта"],
       additionalInfo: [
         "Достъпно при доставка до офис, адрес или автомат (box), според избрания куриер.",
         "Трябва да изисквате и съхранявате разписката за платената сума, която е официален платежен документ.",
@@ -482,137 +682,137 @@ export const NAV_CATALOG_ITEMS: NavCategory[] = [
       { name: "Почистване и Детайлинг Автомобили", id: 222 },
     ],
   },
-//   {
-//     name: "Марки",
-//     id: 83,
-//     children: [
-//       { name: "Hygienfresh", id: 103 },
-//       { name: "Chanteclair", id: 97 },
-//       { name: "Lenor", id: 84 },
-//       { name: "Felce Azzurra", id: 102 },
-//       { name: "Ariel", id: 203 },
-//       { name: "Winni's", id: 165 },
-//       { name: "Dash", id: 87 },
-//       { name: "Tesori D'Oriente", id: 86 },
-//       { name: "The Pink Stuff", id: 202 },
-//       { name: "ACE", id: 113 },
-//       { name: "Ambi Pur", id: 140 },
-//       { name: "Coral", id: 204 },
-//       { name: "Nesti Dante", id: 104 },
-//       { name: "Coccolatevi", id: 205 },
-//       { name: "Deo Due", id: 180 },
-//       { name: "Astonish", id: 160 },
-//       { name: "Dalli", id: 157 },
-//       { name: "Vileda", id: 131 },
-//       { name: "Arbre Magique", id: 137 },
-//       { name: "Dr. Beckmann", id: 107 },
-//       { name: "Viakal", id: 143 },
-//       { name: "Omino Bianco", id: 111 },
-//       { name: "Gillette", id: 130 },
-//       { name: "Dual Power", id: 92 },
-//       { name: "Spuma di Sciampagna", id: 105 },
-//       { name: "Fabuloso", id: 163 },
-//       { name: "Sole", id: 117 },
-//       { name: "Leocrema", id: 118 },
-//       { name: "Finish", id: 100 },
-//       { name: "Grey", id: 110 },
-//       { name: "Quasar", id: 136 },
-//       { name: "DIXAN", id: 94 },
-//       { name: "Mon Amour", id: 156 },
-//       { name: "Orphea", id: 90 },
-//       { name: "Vernel", id: 155 },
-//       { name: "WC NET", id: 121 },
-//       { name: "NUNCAS", id: 89 },
-//       { name: "Fairy", id: 101 },
-//       { name: "Cif", id: 85 },
-//       { name: "Mister Magic", id: 138 },
-//       { name: "Svelto", id: 106 },
-//       { name: "Emulsio", id: 96 },
-//       { name: "Nivea", id: 176 },
-//       { name: "Scrub Daddy", id: 161 },
-//       { name: "Mister Proper", id: 171 },
-//       { name: "mil mil", id: 93 },
-//       { name: "Nelsen", id: 150 },
-//       { name: "bio Presto", id: 135 },
-//       { name: "Swiffer", id: 166 },
-//       { name: "Colgate", id: 182 },
-//       { name: "i Provenziali", id: 120 },
-//       { name: "Pronto", id: 109 },
-//       { name: "Pril / Somat", id: 141 },
-//       { name: "BOROTALCO", id: 178 },
-//       { name: "Coccolino", id: 88 },
-//       { name: "Brawn", id: 119 },
-//       { name: "Labello", id: 147 },
-//       { name: "Lysoform", id: 123 },
-//       { name: "Soft", id: 112 },
-//       { name: "Amuchina", id: 114 },
-//       { name: "Autan", id: 132 },
-//       { name: "Breeze", id: 108 },
-//       { name: "Garnier", id: 126 },
-//       { name: "Sunsilk", id: 128 },
-//       { name: "Scholl", id: 129 },
-//       { name: "Passion Gold", id: 158 },
-//       { name: "Genera", id: 134 },
-//       { name: "Pasta del Capitano", id: 99 },
-//       { name: "Atkinsons 1799", id: 151 },
-//       { name: "Listerine", id: 139 },
-//       { name: "Sensodyne", id: 145 },
-//       { name: "Sauber", id: 146 },
-//       { name: "Antica Erboristeria", id: 91 },
-//       { name: "Fresh Passion", id: 152 },
-//       { name: "Smapiu", id: 159 },
-//       { name: "Napisan", id: 153 },
-//       { name: "General Fresh", id: 162 },
-//       { name: "Dove", id: 183 },
-//       { name: "General", id: 164 },
-//       { name: "LUX", id: 170 },
-//       { name: "Denivit", id: 172 },
-//       { name: "Cotoneve", id: 174 },
-//       { name: "CLEAR", id: 177 },
-//       { name: "Regina", id: 142 },
-//       { name: "SMAC", id: 179 },
-//       { name: "Herbal Essences", id: 181 },
-//       { name: "Dermomed", id: 184 },
-//       { name: "PalmPro", id: 154 },
-//       { name: "Proraso", id: 185 },
-//       { name: "Elmex", id: 186 },
-//       { name: "BlanX", id: 187 },
-//       { name: "Smacchio Tutto", id: 188 },
-//       { name: "Marvis", id: 189 },
-//       { name: "Vanish", id: 190 },
-//       { name: "L' Angelica", id: 191 },
-//       { name: "Air Wick", id: 192 },
-//       { name: "Ariasana", id: 193 },
-//       { name: "AZ / Oral B", id: 194 },
-//       { name: "Toffly", id: 195 },
-//       { name: "Carta Corona", id: 196 },
-//       { name: "Vetril", id: 197 },
-//       { name: "Chilly", id: 198 },
-//       { name: "Podovis", id: 199 },
-//       { name: "Dolorelax", id: 200 },
-//       { name: "Chicco", id: 201 },
-//       { name: "Persil", id: 206 },
-//       { name: "Dettol", id: 207 },
-//       { name: "Domestos", id: 208 },
-//       { name: "Old Spice", id: 209 },
-//       { name: "Bold", id: 211 },
-//       { name: "Elbow Grease", id: 212 },
-//       { name: "Swirl", id: 213 },
-//       { name: "Tide", id: 214 },
-//       { name: "Surf", id: 215 },
-//       { name: "Skip", id: 216 },
-//       { name: "Neutradol", id: 217 },
-//       { name: "Bref", id: 218 },
-//       { name: "Goodyear", id: 220 },
-//       { name: "Purox", id: 223 },
-//       { name: "XBC（Xpel Body Care)", id: 225 },
-//       { name: "Perwoll", id: 226 },
-//       { name: "Ajax", id: 230 },
-//       { name: "Nuvenia", id: 227 },
-//       { name: "Carefree", id: 228 },
-//       { name: "Malizia Bon Bons", id: 229 },
-//     ],
-//   },
+  //   {
+  //     name: "Марки",
+  //     id: 83,
+  //     children: [
+  //       { name: "Hygienfresh", id: 103 },
+  //       { name: "Chanteclair", id: 97 },
+  //       { name: "Lenor", id: 84 },
+  //       { name: "Felce Azzurra", id: 102 },
+  //       { name: "Ariel", id: 203 },
+  //       { name: "Winni's", id: 165 },
+  //       { name: "Dash", id: 87 },
+  //       { name: "Tesori D'Oriente", id: 86 },
+  //       { name: "The Pink Stuff", id: 202 },
+  //       { name: "ACE", id: 113 },
+  //       { name: "Ambi Pur", id: 140 },
+  //       { name: "Coral", id: 204 },
+  //       { name: "Nesti Dante", id: 104 },
+  //       { name: "Coccolatevi", id: 205 },
+  //       { name: "Deo Due", id: 180 },
+  //       { name: "Astonish", id: 160 },
+  //       { name: "Dalli", id: 157 },
+  //       { name: "Vileda", id: 131 },
+  //       { name: "Arbre Magique", id: 137 },
+  //       { name: "Dr. Beckmann", id: 107 },
+  //       { name: "Viakal", id: 143 },
+  //       { name: "Omino Bianco", id: 111 },
+  //       { name: "Gillette", id: 130 },
+  //       { name: "Dual Power", id: 92 },
+  //       { name: "Spuma di Sciampagna", id: 105 },
+  //       { name: "Fabuloso", id: 163 },
+  //       { name: "Sole", id: 117 },
+  //       { name: "Leocrema", id: 118 },
+  //       { name: "Finish", id: 100 },
+  //       { name: "Grey", id: 110 },
+  //       { name: "Quasar", id: 136 },
+  //       { name: "DIXAN", id: 94 },
+  //       { name: "Mon Amour", id: 156 },
+  //       { name: "Orphea", id: 90 },
+  //       { name: "Vernel", id: 155 },
+  //       { name: "WC NET", id: 121 },
+  //       { name: "NUNCAS", id: 89 },
+  //       { name: "Fairy", id: 101 },
+  //       { name: "Cif", id: 85 },
+  //       { name: "Mister Magic", id: 138 },
+  //       { name: "Svelto", id: 106 },
+  //       { name: "Emulsio", id: 96 },
+  //       { name: "Nivea", id: 176 },
+  //       { name: "Scrub Daddy", id: 161 },
+  //       { name: "Mister Proper", id: 171 },
+  //       { name: "mil mil", id: 93 },
+  //       { name: "Nelsen", id: 150 },
+  //       { name: "bio Presto", id: 135 },
+  //       { name: "Swiffer", id: 166 },
+  //       { name: "Colgate", id: 182 },
+  //       { name: "i Provenziali", id: 120 },
+  //       { name: "Pronto", id: 109 },
+  //       { name: "Pril / Somat", id: 141 },
+  //       { name: "BOROTALCO", id: 178 },
+  //       { name: "Coccolino", id: 88 },
+  //       { name: "Brawn", id: 119 },
+  //       { name: "Labello", id: 147 },
+  //       { name: "Lysoform", id: 123 },
+  //       { name: "Soft", id: 112 },
+  //       { name: "Amuchina", id: 114 },
+  //       { name: "Autan", id: 132 },
+  //       { name: "Breeze", id: 108 },
+  //       { name: "Garnier", id: 126 },
+  //       { name: "Sunsilk", id: 128 },
+  //       { name: "Scholl", id: 129 },
+  //       { name: "Passion Gold", id: 158 },
+  //       { name: "Genera", id: 134 },
+  //       { name: "Pasta del Capitano", id: 99 },
+  //       { name: "Atkinsons 1799", id: 151 },
+  //       { name: "Listerine", id: 139 },
+  //       { name: "Sensodyne", id: 145 },
+  //       { name: "Sauber", id: 146 },
+  //       { name: "Antica Erboristeria", id: 91 },
+  //       { name: "Fresh Passion", id: 152 },
+  //       { name: "Smapiu", id: 159 },
+  //       { name: "Napisan", id: 153 },
+  //       { name: "General Fresh", id: 162 },
+  //       { name: "Dove", id: 183 },
+  //       { name: "General", id: 164 },
+  //       { name: "LUX", id: 170 },
+  //       { name: "Denivit", id: 172 },
+  //       { name: "Cotoneve", id: 174 },
+  //       { name: "CLEAR", id: 177 },
+  //       { name: "Regina", id: 142 },
+  //       { name: "SMAC", id: 179 },
+  //       { name: "Herbal Essences", id: 181 },
+  //       { name: "Dermomed", id: 184 },
+  //       { name: "PalmPro", id: 154 },
+  //       { name: "Proraso", id: 185 },
+  //       { name: "Elmex", id: 186 },
+  //       { name: "BlanX", id: 187 },
+  //       { name: "Smacchio Tutto", id: 188 },
+  //       { name: "Marvis", id: 189 },
+  //       { name: "Vanish", id: 190 },
+  //       { name: "L' Angelica", id: 191 },
+  //       { name: "Air Wick", id: 192 },
+  //       { name: "Ariasana", id: 193 },
+  //       { name: "AZ / Oral B", id: 194 },
+  //       { name: "Toffly", id: 195 },
+  //       { name: "Carta Corona", id: 196 },
+  //       { name: "Vetril", id: 197 },
+  //       { name: "Chilly", id: 198 },
+  //       { name: "Podovis", id: 199 },
+  //       { name: "Dolorelax", id: 200 },
+  //       { name: "Chicco", id: 201 },
+  //       { name: "Persil", id: 206 },
+  //       { name: "Dettol", id: 207 },
+  //       { name: "Domestos", id: 208 },
+  //       { name: "Old Spice", id: 209 },
+  //       { name: "Bold", id: 211 },
+  //       { name: "Elbow Grease", id: 212 },
+  //       { name: "Swirl", id: 213 },
+  //       { name: "Tide", id: 214 },
+  //       { name: "Surf", id: 215 },
+  //       { name: "Skip", id: 216 },
+  //       { name: "Neutradol", id: 217 },
+  //       { name: "Bref", id: 218 },
+  //       { name: "Goodyear", id: 220 },
+  //       { name: "Purox", id: 223 },
+  //       { name: "XBC（Xpel Body Care)", id: 225 },
+  //       { name: "Perwoll", id: 226 },
+  //       { name: "Ajax", id: 230 },
+  //       { name: "Nuvenia", id: 227 },
+  //       { name: "Carefree", id: 228 },
+  //       { name: "Malizia Bon Bons", id: 229 },
+  //     ],
+  //   },
   {
     name: "Грижа за Дома",
     id: 4,

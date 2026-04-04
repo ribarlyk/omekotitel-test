@@ -51,7 +51,7 @@ export default function ProductsList({
           {categoryName} ({totalCount} products)
         </h2>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {products.map((product, index) => (
           <Link
             key={product.id}
@@ -61,9 +61,10 @@ export default function ProductsList({
             <Image
               src={magentoImageUrl(product.small_image.url)}
               alt={product.small_image.label || product.name}
-              className="w-full h-48 object-cover mb-3 rounded"
               width={200}
-              height={250}
+              height={200}
+              style={{ width: "100%", height: "220px", objectFit: "contain" }}
+              className="mb-3 rounded"
               sizes="(max-width: 640px) calc(100vw - 2rem), (max-width: 1024px) calc(50vw - 1.5rem), (max-width: 1280px) calc(33vw - 1.5rem), calc(25vw - 1.5rem)"
               loading={index === 0 ? "eager" : "lazy"}
               fetchPriority={index === 0 ? "high" : "auto"}
@@ -71,7 +72,7 @@ export default function ProductsList({
             <h3 className="font-medium text-sm mb-2 line-clamp-2">
               {product.name}
             </h3>
-            <p className="text-gray-600 text-xs mb-2">SKU: {product.sku}</p>
+            <p className="hidden md:block text-gray-600 text-xs mb-2">SKU: {product.sku}</p>
             <p className="text-lg font-bold text-blue-600">
               {product.price_range
                 ? `${product.price_range.minimum_price.final_price.value.toFixed(2)} ${product.price_range.minimum_price.final_price.currency}`

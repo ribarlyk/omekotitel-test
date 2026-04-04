@@ -57,16 +57,17 @@ export function ProductsGrid({
             key={product.id}
             className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
           >
-            <div className="aspect-square mb-4 bg-gray-100 rounded overflow-hidden relative">
-              <Image
-                src={magentoImageUrl(product.small_image.url)}
-                alt={product.small_image.label}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                loading={index < 3 ? "eager" : "lazy"}
-                fetchPriority={index < 3 ? "high" : "auto"}
-              />
-            </div>
+            <Image
+              src={magentoImageUrl(product.small_image.url)}
+              alt={product.small_image.label}
+              width={200}
+              height={160}
+              style={{ width: "100%", height: "160px", objectFit: "contain" }}
+              className="mb-3 rounded"
+              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              loading={index < 3 ? "eager" : "lazy"}
+              fetchPriority={index < 3 ? "high" : "auto"}
+            />
 
             <h3 className="font-semibold text-lg mb-2 line-clamp-2">
               {product.name}
