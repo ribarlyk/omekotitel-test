@@ -133,61 +133,75 @@ export const OrderDetail = ({ orderId }: Props) => {
     <>
       {/* Print-only layout */}
       {order && (
-        <div className="hidden print:block text-sm text-black font-sans">
-          <div className="flex justify-between items-center mb-6 border-b border-gray-200 pb-4">
-            <Image src="/assets/omekotitel-bg_1.avif" alt="Омекотител лого" width={160} height={76} />
-            <div className="text-right text-xs text-gray-500">
-              <p>Поръчка # {order.increment_id}</p>
-              <p>{formatDate(order.created_at)}</p>
+        <div className="hidden print:block text-sm text-black font-sans p-8">
+          <style>{`@page { margin: 1.5cm; } @media print { body { -webkit-print-color-adjust: exact; } }`}</style>
+
+          {/* Header */}
+          <div className="flex justify-between items-start mb-8 pb-6 border-b-2 border-gray-800">
+            <Image src="/assets/omekotitel-bg_1.avif" alt="Омекотител лого" width={180} height={86} />
+            <div className="text-right">
+              <p className="text-lg font-bold">Поръчка # {order.increment_id}</p>
+              <p className="text-gray-500 text-xs mt-1">{formatDate(order.created_at)}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-wide">{ORDER_STATUS[order.status] ?? order.status}</p>
             </div>
           </div>
-          <h1 className="text-xl font-bold uppercase mb-6">Информация за поръчката</h1>
-          <div className="grid grid-cols-2 gap-8 mb-8">
-            <div>
-              <h2 className="font-bold mb-2">Адрес за доставка</h2>
+
+          {/* Address + shipping/payment info — 2-col only when space allows */}
+          <div className="grid grid-cols-2 gap-6 mb-8 text-xs">
+            <div className="border border-gray-200 rounded p-3">
+              <h2 className="font-bold text-gray-500 uppercase tracking-wide text-xs mb-2">Адрес за доставка</h2>
               {shippingAddress && <AddressBlock address={shippingAddress} />}
             </div>
-            <div>
-              <h2 className="font-bold mb-2">Метод на доставка</h2>
+            <div className="border border-gray-200 rounded p-3">
+              <h2 className="font-bold text-gray-500 uppercase tracking-wide text-xs mb-2">Метод на доставка</h2>
               <p>{order.shipping_description}</p>
+              <h2 className="font-bold text-gray-500 uppercase tracking-wide text-xs mt-4 mb-2">Метод на плащане</h2>
+              <p>{paymentLabel}</p>
+              {paymentNote && <p className="text-gray-500 mt-1">{paymentNote}</p>}
             </div>
-            <div>
-              <h2 className="font-bold mb-2">Адрес за фактуриране</h2>
+            <div className="border border-gray-200 rounded p-3">
+              <h2 className="font-bold text-gray-500 uppercase tracking-wide text-xs mb-2">Адрес за фактуриране</h2>
               <AddressBlock address={order.billing_address} />
             </div>
-            <div>
-              <h2 className="font-bold mb-2">Метод на плащане</h2>
-              <p>{paymentLabel}</p>
-              {paymentNote && <p className="text-gray-600">{paymentNote}</p>}
-            </div>
           </div>
-          <h2 className="font-bold mb-3">Поръчани артикули</h2>
-          <table className="w-full text-sm border-collapse mb-6">
+
+          {/* Items table */}
+          <h2 className="font-bold text-gray-700 uppercase tracking-wide text-xs mb-3">Поръчани артикули</h2>
+          <table className="w-full text-xs border-collapse mb-6" style={{ tableLayout: "fixed" }}>
+            <colgroup>
+              <col style={{ width: "40%" }} />
+              <col style={{ width: "20%" }} />
+              <col style={{ width: "13%" }} />
+              <col style={{ width: "13%" }} />
+              <col style={{ width: "14%" }} />
+            </colgroup>
             <thead>
-              <tr className="border-b border-gray-300">
-                <th className="text-left py-1 pr-4">Продукт</th>
-                <th className="text-left py-1 pr-4">Кат. номер</th>
-                <th className="text-right py-1 pr-4">Цена</th>
-                <th className="text-right py-1 pr-4">Кол.</th>
-                <th className="text-right py-1">Сума</th>
+              <tr className="bg-gray-100 text-gray-600">
+                <th className="text-left py-2 px-2 font-semibold">Продукт</th>
+                <th className="text-left py-2 px-2 font-semibold">Кат. номер</th>
+                <th className="text-right py-2 px-2 font-semibold">Цена</th>
+                <th className="text-right py-2 px-2 font-semibold">Кол.</th>
+                <th className="text-right py-2 px-2 font-semibold">Сума</th>
               </tr>
             </thead>
             <tbody>
               {visibleItems.map((item) => (
                 <tr key={item.item_id} className="border-b border-gray-100">
-                  <td className="py-1 pr-4">{item.name}</td>
-                  <td className="py-1 pr-4">{item.sku}</td>
-                  <td className="py-1 pr-4 text-right">{fmt(item.price, currency)}</td>
-                  <td className="py-1 pr-4 text-right">{item.qty_ordered}</td>
-                  <td className="py-1 text-right">{fmt(item.row_total, currency)}</td>
+                  <td className="py-2 px-2 wrap-break-word">{item.name}</td>
+                  <td className="py-2 px-2 text-gray-500 wrap-break-word">{item.sku}</td>
+                  <td className="py-2 px-2 text-right">{fmt(item.price, currency)}</td>
+                  <td className="py-2 px-2 text-right">{item.qty_ordered}</td>
+                  <td className="py-2 px-2 text-right font-medium">{fmt(item.row_total, currency)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="flex flex-col items-end gap-1 border-t border-gray-300 pt-3">
-            <div className="flex gap-12"><span className="text-gray-500">Сума</span><span>{fmt(order.subtotal, currency)}</span></div>
-            <div className="flex gap-12"><span className="text-gray-500">Доставка</span><span>{fmt(order.shipping_amount, currency)}</span></div>
-            <div className="flex gap-12 font-bold"><span>Обща сума</span><span>{fmt(order.grand_total, currency)}</span></div>
+
+          {/* Totals */}
+          <div className="flex flex-col items-end gap-1 border-t-2 border-gray-800 pt-4 text-xs">
+            <div className="flex justify-between w-48"><span className="text-gray-500">Сума</span><span>{fmt(order.subtotal, currency)}</span></div>
+            <div className="flex justify-between w-48"><span className="text-gray-500">Доставка</span><span>{fmt(order.shipping_amount, currency)}</span></div>
+            <div className="flex justify-between w-48 font-bold text-sm border-t border-gray-300 pt-2 mt-1"><span>Обща сума</span><span>{fmt(order.grand_total, currency)}</span></div>
           </div>
         </div>
       )}

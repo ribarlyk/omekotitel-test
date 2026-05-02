@@ -51,6 +51,7 @@ export interface NavCatalogCategory {
   name: string;
   url_key: string | null;
   url_path: string | null;
+  image?: string | null;
   children?: NavCatalogCategory[];
 }
 
@@ -644,11 +645,11 @@ export const VR_SCHANE_NA_POR_CHKA = {
 
 export const NAVGATIOM_ITEMS = [
   { name: "Всички продукти", href: "/catalog", main: true },
-  { name: "Нови", href: "/" },
-  { name: "Препоръчани", href: "/catalog" },
-  { name: "Оферти", href: "/catalog" },
-  { name: "Марки", href: "/catalog" },
-  { name: "Контакти", href: "/catalog" },
+  { name: "Нови", href: "/novi-produkti" },
+  { name: "Препоръчани", href: "/preporuchani-produkti" },
+  { name: "Оферти", href: "/oferti-produkti" },
+  { name: "Марки", href: "/marki-brands" },
+  { name: "Контакти", href: "/contact" },
 ];
 
 export interface NavSubCategory {

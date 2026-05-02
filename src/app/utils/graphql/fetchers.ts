@@ -82,15 +82,21 @@ export async function fetchCatalog() {
   return data;
 }
 
+export type MagentoFilterValue =
+  | { eq: string }
+  | { in: string[] }
+  | { from: string; to: string };
+
 export async function fetchProductsByCategory(
   categoryId: string,
   pageSize = 20,
   currentPage = 1,
+  extraFilters: Record<string, MagentoFilterValue> = {},
 ) {
-  return gql<{ products: { items: unknown[]; total_count: number } }>(
+  const filter = { category_id: { eq: categoryId }, ...extraFilters };
+  return gql<{ products: { items: unknown[]; total_count: number; aggregations: unknown[] } }>(
     print(Queries.GET_PRODUCTS_BY_CATEGORY),
-    { categoryId, pageSize, currentPage },
-    // Fine-grained tag: invalidate one category without busting all products.
+    { filter, pageSize, currentPage },
     { revalidate: false, tags: ["products", `products:category:${categoryId}`] },
   );
 }

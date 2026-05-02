@@ -1,6 +1,6 @@
-query GetProductsByCategory($categoryId: String!, $pageSize: Int, $currentPage: Int) {
+query GetProductsByCategory($filter: ProductAttributeFilterInput!, $pageSize: Int, $currentPage: Int) {
   products(
-    filter: { category_id: { eq: $categoryId } }
+    filter: $filter
     pageSize: $pageSize
     currentPage: $currentPage
   ) {
@@ -27,6 +27,16 @@ query GetProductsByCategory($categoryId: String!, $pageSize: Int, $currentPage: 
       current_page
       page_size
       total_pages
+    }
+    aggregations {
+      attribute_code
+      count
+      label
+      options {
+        count
+        label
+        value
+      }
     }
   }
 }

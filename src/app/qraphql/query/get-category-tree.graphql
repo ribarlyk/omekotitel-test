@@ -8,6 +8,7 @@ query GetCategoryTree {
     position
     product_count
     children_count
+    image
     children {
       id
       name
@@ -17,6 +18,7 @@ query GetCategoryTree {
       position
       product_count
       children_count
+      image
       children {
         id
         name
@@ -26,6 +28,7 @@ query GetCategoryTree {
         position
         product_count
         children_count
+        image
         children {
           id
           name
@@ -35,6 +38,7 @@ query GetCategoryTree {
           position
           product_count
           children_count
+          image
         }
       }
     }

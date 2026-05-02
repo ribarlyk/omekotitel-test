@@ -2,8 +2,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-import ProductsList from "@/src/app/components/ProductsList";
 import ProductDetail from "@/src/app/components/ProductDetail";
+import CategoryPage from "@/src/app/components/CategoryPage";
+import { Aggregation } from "@/src/app/components/FilterSidebar";
 import {
   fetchCatalog,
   fetchProductsByCategory,
@@ -86,20 +87,20 @@ async function PageData({ slugs }: { slugs: string[] }) {
       urlPath,
     );
     if (category) {
-      // fetchProductsByCategory throws on any Magento failure — ISR keeps the
-      // previous good HTML automatically; no null guard needed here.
       const data = await fetchProductsByCategory(String(category.id));
-      const products = (data.products?.items ?? []).filter(
-        Boolean,
-      ) as Parameters<typeof ProductsList>[0]["products"];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const products = (data.products?.items ?? []) as any[];
       const totalCount = data.products?.total_count ?? 0;
+      const aggregations = (data.products?.aggregations ?? []) as Aggregation[];
 
       return (
         <div className="container mx-auto px-4 py-4 lg:py-8">
-          <ProductsList
-            products={products}
-            totalCount={totalCount}
+          <CategoryPage
+            categoryId={String(category.id)}
             categoryName={category.name}
+            initialProducts={products}
+            initialTotalCount={totalCount}
+            aggregations={aggregations}
           />
         </div>
       );
