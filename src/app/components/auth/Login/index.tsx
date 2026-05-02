@@ -34,7 +34,7 @@ export default function Login({ onSuccess, onRegister, onForgotPassword }: Props
     if (success) {
       toast.success("Влязохте успешно!");
       onSuccess?.();
-      router.push("/profil");
+      router.push("/");
     } else {
       toast.error("Грешен имейл или парола.");
     }

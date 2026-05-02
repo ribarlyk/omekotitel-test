@@ -22,7 +22,7 @@ export const ProfileDropdown = ({ onClose }: Props) => {
       {MENU_ITEMS.map((section, i) => (
         <div key={section}>
           <Link
-            href={`/profil?section=${section}`}
+            href={`/customer/account?section=${section}`}
             onClick={onClose}
             className="block px-5 py-2.5 text-sm text-gray-700 hover:text-brand-action transition-colors"
           >

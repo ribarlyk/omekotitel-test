@@ -3,5 +3,21 @@ query GetCustomer {
     firstname
     lastname
     email
+    is_subscribed
+    addresses {
+      id
+      firstname
+      lastname
+      street
+      city
+      region {
+        region
+      }
+      postcode
+      country_code
+      telephone
+      default_billing
+      default_shipping
+    }
   }
 }

@@ -71,7 +71,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
-        {/* Image Gallery */}
         <div>
           <Image
             src={magentoImageUrl(product.image.url)}
@@ -100,12 +99,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           )}
         </div>
 
-        {/* Product Info */}
         <div>
           <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
           <p className="text-gray-600 mb-4">SKU: {product.sku}</p>
 
-          {/* Price */}
           <div className="mb-6">
             {hasDiscount ? (
               <div>
@@ -123,7 +120,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             )}
           </div>
 
-          {/* Stock Status */}
           <div className="mb-6">
             <span
               className={`inline-block px-3 py-1 rounded ${
@@ -138,7 +134,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             </span>
           </div>
 
-          {/* Short Description */}
           {product.short_description?.html && (
             <div
               className="mb-6 text-gray-700"
@@ -148,7 +143,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             />
           )}
 
-          {/* Categories */}
           {product.categories && product.categories.length > 0 && (
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Categories:</h3>
@@ -167,7 +161,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         </div>
       </div>
 
-      {/* Full Description */}
       {product.description?.html && (
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Description</h2>

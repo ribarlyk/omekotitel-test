@@ -20,8 +20,17 @@ const STATIC_LABELS: Record<string, string> = {
   "vr-schane-na-por-chka": "Връщане на поръчка",
   "za-nas": "За нас",
   "forgot-password": "Забравена парола",
+  sales: "Профил",
+  order: "Поръчки",
+  history: "История",
+  view: "Преглед",
+  order_id: "Поръчка",
   customer: "Профил",
   account: "Акаунт",
+  edit: "Редактирай",
+  address: "Адрес",
+  new: "Нов",
+  createPassword: "Нова парола",
 };
 
 function findCategoryByUrlKey(
@@ -68,6 +77,11 @@ export function Breadcrumb({ categoryList }: BreadcrumbProps) {
   }, [pathname, setLastCategoryPath, categoryList]);
 
   if (pathname === "/") return null;
+  if (
+    pathname.startsWith("/customer/") ||
+    pathname.startsWith("/sales/") ||
+    pathname.startsWith("/profil")
+  ) return null;
 
   const segments = pathname.split("/").filter(Boolean);
 

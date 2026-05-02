@@ -14,6 +14,11 @@ import SET_BILLING_SAME_AS_SHIPPING from "@/src/app/qraphql/mutation/set-billing
 import SET_BILLING_ADDRESS_ON_CART from "@/src/app/qraphql/mutation/set-billing-address-on-cart.graphql";
 import SET_PAYMENT_METHOD_ON_CART from "@/src/app/qraphql/mutation/set-payment-method-on-cart.graphql";
 import PLACE_ORDER from "@/src/app/qraphql/mutation/place-order.graphql";
+import UPDATE_CUSTOMER from "@/src/app/qraphql/mutation/update-customer.graphql";
+import CHANGE_CUSTOMER_PASSWORD from "@/src/app/qraphql/mutation/change-customer-password.graphql";
+import CREATE_CUSTOMER_ADDRESS from "@/src/app/qraphql/mutation/create-customer-address.graphql";
+import UPDATE_CUSTOMER_ADDRESS from "@/src/app/qraphql/mutation/update-customer-address.graphql";
+import DELETE_CUSTOMER_ADDRESS from "@/src/app/qraphql/mutation/delete-customer-address.graphql";
 
 export const Mutations = {
   CREATE_CART_AFTER_SIGNIN,
@@ -32,4 +37,9 @@ export const Mutations = {
   SET_BILLING_ADDRESS_ON_CART,
   SET_PAYMENT_METHOD_ON_CART,
   PLACE_ORDER,
+  UPDATE_CUSTOMER,
+  CHANGE_CUSTOMER_PASSWORD,
+  CREATE_CUSTOMER_ADDRESS,
+  UPDATE_CUSTOMER_ADDRESS,
+  DELETE_CUSTOMER_ADDRESS,
 };

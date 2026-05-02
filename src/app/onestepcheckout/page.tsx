@@ -1481,11 +1481,7 @@ export default function CheckoutPage() {
                     />
                   ))} */}
                       {paymentMethods
-                        .filter(
-                          (m) =>
-                            m.code !== "revolut_pay" &&
-                            m.code !== "revolut_pay_later",
-                        )
+                        .filter((m) => !m.code.startsWith("revolut"))
                         .map((m) => (
                           <MethodRadio
                             key={m.code}

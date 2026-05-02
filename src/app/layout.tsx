@@ -52,19 +52,19 @@ export default async function RootLayout({
                 <ScrollToTop />
                 <Toaster position="top-center" richColors />
                 {/* Mobile sticky header */}
-                <div className="lg:hidden sticky top-0 z-30 shadow-md">
+                <div className="lg:hidden sticky top-0 z-30 shadow-md print:hidden">
                   <MobileHeader categoryList={categoryList} />
                 </div>
                 {/* Desktop: delivery banner sticky on its own */}
-                <DesktopDeliveryBanner />
+                <div className="print:hidden"><DesktopDeliveryBanner /></div>
                 {/* Desktop sticky header + nav */}
-                <div className="hidden lg:sticky lg:top-0 lg:z-30 lg:shadow-md lg:block">
+                <div className="hidden lg:sticky lg:top-0 lg:z-30 lg:shadow-md lg:block print:hidden">
                   <Header />
                   <Navigation categoryList={categoryList} />
                 </div>
                 <Breadcrumb categoryList={categoryList} />
                 <main className="min-h-[70vh]">{children}</main>
-                <Footer />
+                <div className="print:hidden"><Footer /></div>
                 <ScrollToTopButton />
                 </BreadcrumbProvider>
               </WishlistProvider>

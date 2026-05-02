@@ -120,7 +120,7 @@ export default function PrivacyPolicyPage() {
             <table className="w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Име на "бисквитката"</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Име на &quot;бисквитката&quot;</th>
                   <th className="border border-gray-300 px-4 py-2 text-left font-semibold">Описание</th>
                 </tr>
               </thead>

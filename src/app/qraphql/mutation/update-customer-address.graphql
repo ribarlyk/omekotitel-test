@@ -1,0 +1,17 @@
+mutation UpdateCustomerAddress($id: Int!, $input: CustomerAddressInput!) {
+  updateCustomerAddress(id: $id, input: $input) {
+    id
+    firstname
+    lastname
+    street
+    city
+    region {
+      region
+    }
+    postcode
+    country_code
+    telephone
+    default_billing
+    default_shipping
+  }
+}

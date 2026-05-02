@@ -44,7 +44,7 @@ export default async function HomeCategorySection({
   if (!products.length) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 py-10">
+    <section className="max-w-7xl mx-auto px-4 pt-5 pb-10">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
         <Link

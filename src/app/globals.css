@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@keyframes nudge {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(6px); }
+  40%       { transform: translateX(-3px); }
+  60%       { transform: translateX(5px); }
+  80%       { transform: translateX(-2px); }
+}
+
 @utility scrollbar-none {
   scrollbar-width: none;
   &::-webkit-scrollbar {
@@ -52,6 +60,25 @@ q:after {
 table {
   border-collapse: collapse;
   border-spacing: 0;
+}
+
+button, a {
+  cursor: pointer;
+}
+
+@media print {
+  body { background: white; }
+  @page {
+    margin: 10mm 12mm;
+    @top-left { content: ""; }
+    @top-right { content: ""; }
+    @bottom-left { content: ""; }
+    @bottom-right {
+      content: counter(page) " / " counter(pages);
+      font-size: 9pt;
+      color: #666;
+    }
+  }
 }
 
 /* Prevent mobile browsers from zooming on input focus (requires font-size >= 16px) */
