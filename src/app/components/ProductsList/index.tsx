@@ -1,7 +1,7 @@
 "use client";
-import Image from "next/image";
 import Link from "next/link";
 import { magentoImageUrl } from "@/src/app/utils/image";
+import MagentoImage from "@/src/app/components/MagentoImage";
 
 interface Product {
   id: string;
@@ -58,7 +58,7 @@ export default function ProductsList({
             href={`/${product.url_key}`}
             className="border rounded-lg p-4 hover:shadow-lg transition-shadow block"
           >
-            <Image
+            <MagentoImage
               src={magentoImageUrl(product.small_image.url)}
               alt={product.small_image.label || product.name}
               width={200}

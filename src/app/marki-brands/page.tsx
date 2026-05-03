@@ -1,7 +1,15 @@
-import Image from "next/image";
+import MagentoImage from "@/src/app/components/MagentoImage";
 import Link from "next/link";
 import { fetchCatalog } from "@/src/app/utils/graphql/fetchers";
 import { NavCatalogCategory } from "@/src/app/constants";
+import { magentoImageUrl } from "@/src/app/utils/image";
+
+const MAGENTO_ORIGIN = new URL(process.env.GRAPHQL_URL!).origin;
+
+function brandImageUrl(image: string): string {
+  if (image.startsWith("http")) return magentoImageUrl(image);
+  return `${MAGENTO_ORIGIN}/pub/media/catalog/category/${image}`;
+}
 
 const BRANDS_CATEGORY_ID = 83;
 
@@ -35,8 +43,8 @@ export default async function MarkiBrandsPage() {
           >
             {brand.image ? (
               <div className="relative w-full aspect-square">
-                <Image
-                  src={brand.image}
+                <MagentoImage
+                  src={brandImageUrl(brand.image!)}
                   alt={brand.name}
                   fill
                   className="object-contain p-2 group-hover:scale-105 transition-transform duration-200"

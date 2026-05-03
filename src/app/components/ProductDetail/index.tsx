@@ -2,8 +2,8 @@
 
 import { useLayoutEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { magentoImageUrl } from "@/src/app/utils/image";
+import MagentoImage from "@/src/app/components/MagentoImage";
 import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
 
 interface ProductDetailProps {
@@ -72,7 +72,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
         <div>
-          <Image
+          <MagentoImage
             src={magentoImageUrl(product.image.url)}
             alt={product.image.label || product.name}
             width={600}
@@ -85,7 +85,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           {product.media_gallery.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.media_gallery.slice(0, 4).map((img, idx) => (
-                <Image
+                <MagentoImage
                   key={idx}
                   src={magentoImageUrl(img.url)}
                   alt={img.label || product.name}

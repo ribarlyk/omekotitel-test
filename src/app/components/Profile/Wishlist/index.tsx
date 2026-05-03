@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MagentoImage from "@/src/app/components/MagentoImage";
 import Link from "next/link";
 import { useWishlist } from "@/src/app/contexts/WishlistContext";
 import { magentoImageUrl } from "@/src/app/utils/image";
@@ -22,7 +22,7 @@ export const ProfileWishlist = () => {
           return (
             <div key={item.id} className="border border-gray-100 rounded-xl p-4 flex flex-col gap-3">
               <Link href={`/${item.product.url_key}`} className="relative w-full aspect-square rounded-lg overflow-hidden block">
-                <Image
+                <MagentoImage
                   src={magentoImageUrl(item.product.thumbnail.url)}
                   alt={item.product.thumbnail.label || item.product.name}
                   fill

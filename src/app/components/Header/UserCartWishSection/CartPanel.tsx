@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MagentoImage from "@/src/app/components/MagentoImage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, Trash2, Plus, Minus } from "lucide-react";
@@ -162,7 +162,7 @@ export const CartPanel = ({ onClose }: { onClose: () => void }) => {
           return (
             <li key={item.id} className="flex gap-3 rounded-xl hover:bg-gray-50 transition-colors -mx-2 px-2 py-1">
               <Link href={`/${item.product.url_key}`} className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-gray-100">
-                <Image
+                <MagentoImage
                   src={magentoImageUrl(item.product.thumbnail.url)}
                   alt={item.product.thumbnail.label || item.product.name}
                   fill

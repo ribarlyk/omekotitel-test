@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    imgOptTimeoutInSeconds: 30,
+  },
   env: {
     GRAPHQL_URL: process.env.GRAPHQL_URL,
   },

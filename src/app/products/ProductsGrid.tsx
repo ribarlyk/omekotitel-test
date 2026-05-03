@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import MagentoImage from "@/src/app/components/MagentoImage";
 import { magentoImageUrl } from "@/src/app/utils/image";
 
 interface Product {
@@ -57,7 +57,7 @@ export function ProductsGrid({
             key={product.id}
             className="border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
           >
-            <Image
+            <MagentoImage
               src={magentoImageUrl(product.small_image.url)}
               alt={product.small_image.label}
               width={200}

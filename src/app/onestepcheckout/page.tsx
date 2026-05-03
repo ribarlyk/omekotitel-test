@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { CourierOfficeSelector } from "@/src/app/components/CourierOfficeSelector";
 import Link from "next/link";
-import Image from "next/image";
+import MagentoImage from "@/src/app/components/MagentoImage";
 import { magentoImageUrl } from "@/src/app/utils/image";
 import debounce from "lodash/debounce";
 import { toast } from "sonner";
@@ -341,7 +341,7 @@ function OrderSummary({ shippingCost }: { shippingCost?: number }) {
               return (
                 <li key={item.id} className="flex gap-3 items-start">
                   <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden border border-gray-100 bg-gray-50">
-                    <Image
+                    <MagentoImage
                       src={magentoImageUrl(item.product.thumbnail.url)}
                       alt={item.product.thumbnail.label || item.product.name}
                       fill
