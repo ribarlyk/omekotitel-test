@@ -182,8 +182,6 @@ export default function Catalog({ catalog }: CatalogProps) {
             <>
               <ProductsList
                 products={products}
-                totalCount={totalCount}
-                categoryName={selectedCategory.name}
               />
               {hasMoreProducts && (
                 <div className="mt-6 text-center">
