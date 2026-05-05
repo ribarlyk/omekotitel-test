@@ -59,7 +59,7 @@ export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategor
   };
 
   return (
-    <div className="lg:hidden bg-white">
+    <div className="lg:hidden bg-white border-b-2 border-brand-action">
       {/* Top bar: burger + logo + icons */}
       <div className="flex items-center h-16 px-3 gap-2">
         <button

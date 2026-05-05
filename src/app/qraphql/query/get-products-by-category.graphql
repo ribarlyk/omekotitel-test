@@ -1,8 +1,9 @@
-query GetProductsByCategory($filter: ProductAttributeFilterInput!, $pageSize: Int, $currentPage: Int) {
+query GetProductsByCategory($filter: ProductAttributeFilterInput!, $pageSize: Int, $currentPage: Int, $sort: ProductAttributeSortInput) {
   products(
     filter: $filter
     pageSize: $pageSize
     currentPage: $currentPage
+    sort: $sort
   ) {
     items {
       id

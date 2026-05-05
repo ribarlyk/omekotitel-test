@@ -30,7 +30,7 @@ export const Navigation = ({ categoryList }: { categoryList: NavCatalogCategory[
 
   return (
     <div className="relative w-full">
-      <nav className="hidden lg:block w-full bg-brand-nav">
+      <nav className="hidden lg:block w-full bg-brand-nav border-b-2 border-brand-action">
         <ul className="flex flex-row items-center justify-center gap-8 px-6 py-3 text-lg">
           {NAVGATIOM_ITEMS.map((item) =>
             item.main ? (

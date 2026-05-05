@@ -59,6 +59,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "GRAPHQL_URL is not configured" }, { status: 500 });
     }
 
+    const VALID_SORT_FIELDS = new Set(["position", "name", "price", "relevance"]);
+    const sortField = searchParams.get("sortField") ?? "position";
+    const sortDir = searchParams.get("sortDir") === "DESC" ? "DESC" : "ASC";
+    const sort = { [VALID_SORT_FIELDS.has(sortField) ? sortField : "position"]: sortDir };
+
     const filter = buildFilter(categoryId, rawFilters);
 
     const response = await fetch(GRAPHQL_ENDPOINT, {
@@ -66,7 +71,7 @@ export async function GET(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: print(Queries.GET_PRODUCTS_BY_CATEGORY),
-        variables: { filter, pageSize, currentPage },
+        variables: { filter, pageSize, currentPage, sort },
       }),
       cache: "no-store",
     });

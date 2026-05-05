@@ -57,7 +57,8 @@ export async function POST(request: NextRequest) {
     }
 
     const html = await pageRes.text();
-    const formKey = html.match(/name="form_key"\s+value="([a-zA-Z0-9]+)"/)?.[1];
+    const formKeyInput = html.match(/<input[^>]*name="form_key"[^>]*>/)?.[0];
+    const formKey = formKeyInput?.match(/value="([a-zA-Z0-9]+)"/)?.[1];
     if (!formKey) {
       console.error("contact: form_key not found in Magento page");
       return NextResponse.json({ error: "Изпращането не успя. Опитайте отново." }, { status: 502 });
