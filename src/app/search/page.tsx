@@ -26,7 +26,7 @@ export default async function SearchPage({
       <h1 className="text-2xl font-semibold text-brand-nav mb-6">
         Резултати за &ldquo;{query}&rdquo;
       </h1>
-      <ProductsList products={products} totalCount={totalCount} />
+      <ProductsList products={products} />
       {totalCount === 0 && (
         <p className="text-gray-500 mt-4">Няма намерени продукти.</p>
       )}

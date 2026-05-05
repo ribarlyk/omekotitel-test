@@ -54,7 +54,7 @@ export default async function HomeCategorySection({
           Виж всички →
         </Link>
       </div>
-      <ProductsList products={products} totalCount={products.length} />
+      <ProductsList products={products} />
     </section>
   );
 }
