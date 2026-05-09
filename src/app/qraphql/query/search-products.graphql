@@ -10,6 +10,14 @@ query SearchProducts($search: String!, $pageSize: Int) {
             value
             currency
           }
+          regular_price {
+            value
+            currency
+          }
+          discount {
+            percent_off
+            amount_off
+          }
         }
       }
       small_image {
@@ -17,6 +25,12 @@ query SearchProducts($search: String!, $pageSize: Int) {
         label
       }
       url_key
+      type_id
+      new_from_date
+      new_to_date
+      special_price
+      special_from_date
+      special_to_date
     }
     total_count
   }

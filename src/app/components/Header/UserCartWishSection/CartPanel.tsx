@@ -158,7 +158,7 @@ export const CartPanel = ({ onClose }: { onClose: () => void }) => {
     >
       <ul className="flex flex-col gap-4">
         {optimisticItems.filter((item) => item.product).map((item) => {
-          const price = item.product.price_range.minimum_price.final_price;
+          const price = item.prices?.price ?? item.product.price_range.minimum_price.final_price;
           return (
             <li key={item.id} className="flex gap-3 rounded-xl hover:bg-gray-50 transition-colors -mx-2 px-2 py-1">
               <Link href={`/${item.product.url_key}`} className="relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border border-gray-100">

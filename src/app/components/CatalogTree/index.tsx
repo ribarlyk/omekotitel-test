@@ -27,17 +27,18 @@ interface Product {
   sku: string;
   price_range: {
     minimum_price: {
-      final_price: {
-        value: number;
-        currency: string;
-      };
+      final_price: { value: number; currency: string };
+      regular_price?: { value: number; currency: string };
     };
   };
-  small_image: {
-    url: string;
-    label: string;
-  };
+  small_image: { url: string; label: string };
   url_key: string;
+  new_from_date?: string | null;
+  new_to_date?: string | null;
+  special_price?: number | null;
+  special_from_date?: string | null;
+  special_to_date?: string | null;
+  type_id?: string | null;
 }
 
 function CategoryItem({

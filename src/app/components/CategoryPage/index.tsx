@@ -11,10 +11,19 @@ type Product = {
   name: string;
   sku: string;
   price_range: {
-    minimum_price: { final_price: { value: number; currency: string } };
+    minimum_price: {
+      final_price: { value: number; currency: string };
+      regular_price?: { value: number; currency: string };
+    };
   } | null;
   small_image: { url: string; label: string };
   url_key: string;
+  new_from_date?: string | null;
+  new_to_date?: string | null;
+  special_price?: number | null;
+  special_from_date?: string | null;
+  special_to_date?: string | null;
+  type_id?: string | null;
 };
 
 interface CategoryPageProps {
@@ -220,8 +229,8 @@ export default function CategoryPage({
       {/* Mobile filter drawer */}
       {mobileFiltersOpen && (
         <>
-          <div className="fixed inset-0 bg-black/40 z-50" onClick={() => setMobileFiltersOpen(false)} />
-          <div className="fixed inset-y-0 left-0 z-50 w-72 bg-white overflow-y-auto shadow-xl flex flex-col">
+          <div className="fixed inset-0 bg-black/40 z-60" onClick={() => setMobileFiltersOpen(false)} />
+          <div className="fixed inset-y-0 left-0 z-60 w-72 bg-white overflow-y-auto shadow-xl flex flex-col">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 shrink-0">
               <span className="font-bold text-gray-800">Филтри</span>
               <button onClick={() => setMobileFiltersOpen(false)}>

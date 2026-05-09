@@ -39,6 +39,54 @@ query GetProductDetail($urlKey: String!) {
       url_key
       type_id
       stock_status
+      new_from_date
+      new_to_date
+      special_price
+      special_from_date
+      special_to_date
+      ... on ConfigurableProduct {
+        configurable_options {
+          attribute_code
+          label
+          values {
+            label
+            value_index
+          }
+        }
+        variants {
+          attributes {
+            code
+            value_index
+          }
+          product {
+            id
+            sku
+            stock_status
+            special_from_date
+            special_to_date
+            small_image {
+              url
+              label
+            }
+            price_range {
+              minimum_price {
+                final_price {
+                  value
+                  currency
+                }
+                regular_price {
+                  value
+                  currency
+                }
+                discount {
+                  percent_off
+                  amount_off
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

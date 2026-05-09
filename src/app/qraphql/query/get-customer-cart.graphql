@@ -16,6 +16,12 @@ query GetCustomerCart($cartId: String!) {
     items {
       id
       quantity
+      prices {
+        price {
+          value
+          currency
+        }
+      }
       product {
         id
         name

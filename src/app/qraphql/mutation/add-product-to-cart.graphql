@@ -11,6 +11,12 @@ mutation AddProductToCart($cartId: String!, $sku: String!, $quantity: Float!) {
       items {
         id
         quantity
+        prices {
+          price {
+            value
+            currency
+          }
+        }
         product {
           id
           name

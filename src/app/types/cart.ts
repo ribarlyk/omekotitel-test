@@ -35,6 +35,12 @@ export interface CartProduct {
 export interface CartItem {
   id: string;
   quantity: number;
+  prices: {
+    price: {
+      value: number;
+      currency: string;
+    };
+  };
   product: CartProduct;
 }
 
