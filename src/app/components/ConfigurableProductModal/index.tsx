@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
-import { createPortal } from "react-dom";
+import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
-import { X, Loader2, ExternalLink, ChevronDown } from "lucide-react";
+import { X, Loader2, ExternalLink, Minus, Plus } from "lucide-react";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import { magentoImageUrl } from "@/src/app/utils/image";
 import { useCart } from "@/src/app/contexts/CartContext";
@@ -58,103 +57,6 @@ interface Props {
 
 type AddStatus = "idle" | "loading" | "success" | "error";
 
-interface CustomSelectProps {
-  attributeCode: string;
-  label: string;
-  values: ConfigurableOptionValue[];
-  selected: number | undefined;
-  isValueAvailable: (code: string, idx: number) => boolean;
-  onSelect: (valueIndex: number) => void;
-}
-
-function CustomSelect({ attributeCode, label, values, selected, isValueAvailable, onSelect }: CustomSelectProps) {
-  const [open, setOpen] = useState(false);
-  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({});
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as Node;
-      const insideTrigger = triggerRef.current?.contains(target);
-      const insideMenu = menuRef.current?.contains(target);
-      if (!insideTrigger && !insideMenu) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
-
-  const handleOpen = () => {
-    if (!open && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const estimatedHeight = Math.min(values.length * 44, 280);
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const goUp = spaceBelow < estimatedHeight && rect.top > spaceBelow;
-      setMenuStyle({
-        position: "fixed",
-        left: rect.left,
-        width: rect.width,
-        zIndex: 9999,
-        ...(goUp
-          ? { bottom: window.innerHeight - rect.top + 4 }
-          : { top: rect.bottom + 4 }),
-      });
-    }
-    setOpen((o) => !o);
-  };
-
-  const selectedLabel = values.find((v) => v.value_index === selected)?.label;
-
-  const menu = open && (
-    <div
-      ref={menuRef}
-      style={menuStyle}
-      className="bg-white border border-gray-200 rounded-lg shadow-xl overflow-y-auto max-h-70"
-    >
-      {values.map((val) => {
-        const available = isValueAvailable(attributeCode, val.value_index);
-        const isSelected = selected === val.value_index;
-        return (
-          <button
-            key={val.value_index}
-            type="button"
-            disabled={!available}
-            onClick={() => { onSelect(val.value_index); setOpen(false); }}
-            className={`w-full text-left px-3 py-2.5 text-sm flex items-center justify-between transition-colors
-              ${isSelected ? "bg-brand-action/10 text-brand-action font-semibold" : available ? "text-gray-700 hover:bg-gray-50" : "text-gray-300 cursor-not-allowed"}`}
-          >
-            <span>{val.label}</span>
-            {!available && <span className="text-xs ml-2">изчерпано</span>}
-            {isSelected && (
-              <svg className="w-4 h-4 shrink-0 ml-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-            )}
-          </button>
-        );
-      })}
-    </div>
-  );
-
-  return (
-    <div data-custom-select className="relative w-full">
-      <button
-        ref={triggerRef}
-        type="button"
-        onClick={handleOpen}
-        className="w-full flex items-center justify-between border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-brand-action/40 focus:border-brand-action transition-colors"
-      >
-        <span className={selectedLabel ? "text-gray-700" : "text-gray-400"}>
-          {selectedLabel ?? `Изберете ${label.toLowerCase()}...`}
-        </span>
-        <ChevronDown size={16} className={`text-gray-400 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
-      </button>
-
-      {typeof document !== "undefined" && createPortal(menu, document.body)}
-    </div>
-  );
-}
 
 export default function ConfigurableProductModal({ urlKey, initialProduct, onClose }: Props) {
   const { addToCart } = useCart();
@@ -163,6 +65,7 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
   const [imageIndex, setImageIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
   const [addStatus, setAddStatus] = useState<AddStatus>("idle");
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     fetch(`/api/product?urlKey=${encodeURIComponent(urlKey)}`)
@@ -274,7 +177,7 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
     if (!variant || isOutOfStock || addStatus === "loading") return;
     setAddStatus("loading");
     try {
-      await addToCart(variant.product.sku, 1);
+      await addToCart(variant.product.sku, quantity);
       setAddStatus("success");
       toast.success("Продуктът е добавен в количката", { description: initialProduct.name });
       setTimeout(() => { setAddStatus("idle"); onClose(); }, 1200);
@@ -300,7 +203,7 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
         </button>
 
         {/* ── Left: image ── */}
-        <div className="sm:w-[52%] shrink-0 bg-gray-50">
+        <div className="sm:w-[52%] shrink-0 bg-white">
           <div className="relative w-full h-64 sm:h-auto sm:aspect-square overflow-hidden">
             {images[0] && (
               <MagentoImage
@@ -356,78 +259,66 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
               </div>
             </div>
           ) : (
-            extra?.configurable_options?.map((option) => {
-              const hasImages = option.values.every(
-                (val) => !!getVariantForValue(option.attribute_code, val.value_index)?.product.small_image?.url
-              );
-              return (
-                <div key={option.attribute_code} className="mb-5">
-                  <p className="text-sm font-semibold text-gray-700 mb-2">
-                    {option.label}
-                    {hasImages && selectedOptions[option.attribute_code] !== undefined && (
-                      <span className="font-normal text-gray-500 ml-1">
-                        — {option.values.find((v) => v.value_index === selectedOptions[option.attribute_code])?.label}
-                      </span>
-                    )}
-                  </p>
-                  {hasImages ? (
-                    <div className="flex flex-wrap gap-2">
-                      {option.values.map((val) => {
-                        const available = isValueAvailable(option.attribute_code, val.value_index);
-                        const selected = selectedOptions[option.attribute_code] === val.value_index;
-                        const variantImg = getVariantForValue(option.attribute_code, val.value_index)?.product.small_image;
-                        return (
-                          <button
-                            key={val.value_index}
-                            disabled={!available}
-                            title={val.label}
-                            onClick={() =>
-                              setSelectedOptions((prev) => ({ ...prev, [option.attribute_code]: val.value_index }))
-                            }
-                            className={`
-                              relative w-16 h-16 rounded-lg border-2 overflow-hidden bg-white transition-all duration-150
-                              ${selected
-                                ? "border-brand-action shadow-md scale-105"
-                                : available
-                                ? "border-gray-200 hover:border-brand-action/60 hover:shadow"
-                                : "border-gray-100 opacity-40 cursor-not-allowed"
-                              }
-                            `}
-                          >
-                            {variantImg && (
-                              <MagentoImage
-                                src={magentoImageUrl(variantImg.url)}
-                                alt={variantImg.label || val.label}
-                                width={64}
-                                height={64}
-                                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                                className="p-1"
-                              />
-                            )}
-                            {!available && (
-                              <span className="absolute inset-0 flex items-center justify-center">
-                                <span className="w-full h-px bg-gray-400 rotate-45 absolute" />
-                              </span>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <CustomSelect
-                      attributeCode={option.attribute_code}
-                      label={option.label}
-                      values={option.values}
-                      selected={selectedOptions[option.attribute_code]}
-                      isValueAvailable={isValueAvailable}
-                      onSelect={(valueIndex) =>
-                        setSelectedOptions((prev) => ({ ...prev, [option.attribute_code]: valueIndex }))
-                      }
-                    />
+            extra?.configurable_options?.map((option) => (
+              <div key={option.attribute_code} className="mb-5">
+                <p className="text-sm font-semibold text-gray-700 mb-2">
+                  {option.label}
+                  {selectedOptions[option.attribute_code] !== undefined && (
+                    <span className="font-normal text-gray-500 ml-1">
+                      — {option.values.find((v) => v.value_index === selectedOptions[option.attribute_code])?.label}
+                    </span>
                   )}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {option.values.filter((val) => isValueAvailable(option.attribute_code, val.value_index)).map((val) => {
+                    const isSelected = selectedOptions[option.attribute_code] === val.value_index;
+                    const variantImg = getVariantForValue(option.attribute_code, val.value_index)?.product.small_image;
+                    return variantImg ? (
+                      <button
+                        key={val.value_index}
+                        title={val.label}
+                        onClick={() =>
+                          setSelectedOptions((prev) => ({ ...prev, [option.attribute_code]: val.value_index }))
+                        }
+                        className={`
+                          relative w-16 h-16 rounded-lg border-2 overflow-hidden transition-all duration-150
+                          ${isSelected
+                            ? "border-brand-action shadow-md scale-105"
+                            : "border-gray-200 hover:border-brand-action/60 hover:shadow"
+                          }
+                        `}
+                      >
+                        <MagentoImage
+                          src={magentoImageUrl(variantImg.url)}
+                          alt={variantImg.label || val.label}
+                          width={64}
+                          height={64}
+                          style={{ width: "100%", height: "100%", objectFit: "contain" }}
+                          className="p-1"
+                        />
+                      </button>
+                    ) : (
+                      <button
+                        key={val.value_index}
+                        title={val.label}
+                        onClick={() =>
+                          setSelectedOptions((prev) => ({ ...prev, [option.attribute_code]: val.value_index }))
+                        }
+                        className={`
+                          px-3 py-2 rounded-lg border-2 text-sm transition-all duration-150
+                          ${isSelected
+                            ? "border-brand-action bg-brand-action/5 text-brand-action font-semibold shadow-md"
+                            : "border-gray-200 text-gray-700 hover:border-brand-action/60 hover:shadow"
+                          }
+                        `}
+                      >
+                        {val.label}
+                      </button>
+                    );
+                  })}
                 </div>
-              );
-            })
+              </div>
+            ))
           )}
 
           {allSelected && isOutOfStock && (
@@ -444,34 +335,58 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
             Виж пълните детайли на продукта
           </Link>
 
-          {/* Add to cart */}
-          <button
-            onClick={handleAddToCart}
-            disabled={!allSelected || isOutOfStock || addStatus === "loading"}
-            className={`
-              mt-auto w-full py-3 rounded-xl font-semibold text-sm transition-all duration-200
-              flex items-center justify-center gap-2
-              ${!allSelected || isOutOfStock
-                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+          {/* Quantity + Add to cart */}
+          <div className="mt-auto flex gap-3 items-end">
+            <div className="flex flex-col gap-1 shrink-0">
+              <span className="text-xs font-semibold text-gray-500">Количество</span>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={quantity <= 1}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-brand-action hover:text-brand-action disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="w-8 text-center text-sm font-semibold text-gray-800">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity((q) => q + 1)}
+                  className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-brand-action hover:text-brand-action transition-colors"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              disabled={!allSelected || isOutOfStock || addStatus === "loading"}
+              className={`
+                flex-1 py-3 rounded-xl font-semibold text-sm transition-all duration-200
+                flex items-center justify-center gap-2
+                ${!allSelected || isOutOfStock
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  : addStatus === "success"
+                  ? "bg-emerald-500 text-white"
+                  : addStatus === "error"
+                  ? "bg-rose-500 text-white"
+                  : "bg-brand-action text-white hover:bg-brand-action/90 active:scale-[0.98]"
+                }
+              `}
+            >
+              {addStatus === "loading" && <Loader2 size={16} className="animate-spin" />}
+              {addStatus === "loading"
+                ? "Добавяне..."
                 : addStatus === "success"
-                ? "bg-emerald-500 text-white"
-                : addStatus === "error"
-                ? "bg-rose-500 text-white"
-                : "bg-brand-action text-white hover:bg-brand-action/90 active:scale-[0.98]"
-              }
-            `}
-          >
-            {addStatus === "loading" && <Loader2 size={16} className="animate-spin" />}
-            {addStatus === "loading"
-              ? "Добавяне..."
-              : addStatus === "success"
-              ? "Добавено!"
-              : !allSelected
-              ? "Избери вариант"
-              : isOutOfStock
-              ? "Изчерпано"
-              : "Добави в количката"}
-          </button>
+                ? "Добавено!"
+                : !allSelected
+                ? "Избери вариант"
+                : isOutOfStock
+                ? "Изчерпано"
+                : "Добави в количката"}
+            </button>
+          </div>
+
         </div>
       </div>
     </div>

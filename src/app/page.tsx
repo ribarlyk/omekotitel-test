@@ -3,7 +3,6 @@ import Link from "next/link";
 import Image from "next/image";
 import CategoryBar from "@/src/app/components/CategoryBar";
 import HomeCategorySection from "@/src/app/components/HomeCategorySection";
-import TestCartButton from "@/src/app/components/TestCartButton";
 
 export default function Home() {
   return (
@@ -52,8 +51,6 @@ export default function Home() {
         <HomeCategorySection urlKey="oferti-produkti" title="Оферти" />
       </Suspense>
 
-      {/* Dev test button */}
-      <TestCartButton />
     </div>
   );
 }

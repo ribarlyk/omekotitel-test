@@ -11,7 +11,7 @@ import { NavCatalogCategory, NAVGATIOM_ITEMS } from "@/src/app/constants";
 function categoryHref(cat: NavCatalogCategory): string {
   if (cat.url_path) return `/${cat.url_path}`;
   if (cat.url_key) return `/${cat.url_key}`;
-  return `/catalog?category=${cat.id}`;
+  return "/";
 }
 
 const NAV_CATEGORY_IDS = new Set([9, 221, 4, 3, 10, 7, 48]);

@@ -1,7 +1,6 @@
 "use client";
 
 import { useLayoutEffect } from "react";
-import Link from "next/link";
 import { magentoImageUrl } from "@/src/app/utils/image";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
@@ -63,12 +62,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   console.log("product", product);
   return (
     <div className="container mx-auto px-4 py-8">
-      <Link
-        href="/catalog"
-        className="text-blue-600 hover:text-blue-800 mb-4 inline-block"
-      >
-        ← Back to Catalog
-      </Link>
+
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-4">
         <div>

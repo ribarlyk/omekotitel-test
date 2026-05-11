@@ -9,7 +9,7 @@ import { NavCatalogCategory } from "../../../constants";
 function categoryHref(cat: NavCatalogCategory): string {
   if (cat.url_path) return `/${cat.url_path}`;
   if (cat.url_key) return `/${cat.url_key}`;
-  return `/catalog?category=${cat.id}`;
+  return "/";
 }
 
 export const NavCatalogDropdown = ({
