@@ -41,8 +41,13 @@ export const FOOTER_SOCIAL = [
   },
   {
     label: "Instagram",
-    href: "https://www.instagram.com/omekotitel",
+    href: "https://www.instagram.com/omekotitel.bg?igsh=MWM0a2RtNDJkNnU5OA==",
     icon: "instagram",
+  },
+  {
+    label: "TikTok",
+    href: "https://www.tiktok.com/@omekotitel.bg?_r=1&_t=ZN-96LkUEkn4nG",
+    icon: "tiktok",
   },
 ];
 

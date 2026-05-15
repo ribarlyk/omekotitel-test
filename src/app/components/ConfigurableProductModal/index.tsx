@@ -192,7 +192,7 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
     <div className="fixed inset-x-0 top-0 h-dvh z-60 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 bg-white w-full sm:max-w-3xl sm:rounded-2xl shadow-2xl h-[85dvh] sm:h-auto sm:max-h-[90dvh] flex flex-col sm:flex-row overflow-hidden rounded-t-2xl">
+      <div className="relative z-10 bg-white w-full sm:max-w-3xl sm:rounded-2xl shadow-2xl h-[92dvh] sm:h-auto sm:max-h-[90dvh] flex flex-col sm:flex-row overflow-hidden rounded-t-2xl">
 
         {/* Close */}
         <button
@@ -204,7 +204,7 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
 
         {/* ── Left: image ── */}
         <div className="sm:w-[52%] shrink-0 bg-white">
-          <div className="relative w-full h-64 sm:h-auto sm:aspect-square overflow-hidden">
+          <div className="relative w-full h-72 sm:h-auto sm:aspect-square overflow-hidden">
             {images[0] && (
               <MagentoImage
                 src={magentoImageUrl(images[0].url)}
@@ -212,7 +212,7 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
                 fill
                 style={{ objectFit: "contain" }}
                 className="p-4 sm:p-6"
-                priority
+                fetchPriority="high"
               />
             )}
           </div>
@@ -225,27 +225,48 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
             {initialProduct.name}
           </h2>
 
-          {/* Price — fixed height so modal doesn't jump when promo variant is selected */}
-          <div className="mb-4 min-h-15 flex flex-col justify-center">
-            {variantOnSale && regularPrice ? (
-              <div className="flex flex-col gap-0.5">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl font-bold text-rose-600">
-                    {finalPrice!.value.toFixed(2)} {finalPrice!.currency}
-                  </span>
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white">
-                    -{variantDiscountPct}%
+          {/* Price + quantity on same row on mobile */}
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex-1 min-h-15 flex flex-col justify-center">
+              {variantOnSale && regularPrice ? (
+                <div className="flex flex-col gap-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl font-bold text-rose-600">
+                      {finalPrice!.value.toFixed(2)} {finalPrice!.currency}
+                    </span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-rose-500 text-white">
+                      -{variantDiscountPct}%
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-400 line-through">
+                    {regularPrice.value.toFixed(2)} {regularPrice.currency}
                   </span>
                 </div>
-                <span className="text-sm text-gray-400 line-through">
-                  {regularPrice.value.toFixed(2)} {regularPrice.currency}
+              ) : (
+                <span className="text-2xl font-bold text-brand-action">
+                  {finalPrice ? `${finalPrice.value.toFixed(2)} ${finalPrice.currency}` : "—"}
                 </span>
-              </div>
-            ) : (
-              <span className="text-2xl font-bold text-brand-action">
-                {finalPrice ? `${finalPrice.value.toFixed(2)} ${finalPrice.currency}` : "—"}
-              </span>
-            )}
+              )}
+            </div>
+            {/* Quantity stepper — mobile only */}
+            <div className="sm:hidden shrink-0 flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={quantity <= 1}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-brand-action hover:text-brand-action disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              >
+                <Minus size={14} />
+              </button>
+              <span className="w-8 text-center text-sm font-semibold text-gray-800">{quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => q + 1)}
+                className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:border-brand-action hover:text-brand-action transition-colors"
+              >
+                <Plus size={14} />
+              </button>
+            </div>
           </div>
 
           {/* Options */}
@@ -337,7 +358,8 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
 
           {/* Quantity + Add to cart */}
           <div className="mt-auto flex gap-3 items-end">
-            <div className="flex flex-col gap-1 shrink-0">
+            {/* Quantity — desktop only (mobile version is next to price above) */}
+            <div className="hidden sm:flex flex-col gap-1 shrink-0">
               <span className="text-xs font-semibold text-gray-500">Количество</span>
               <div className="flex items-center gap-1">
                 <button

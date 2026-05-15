@@ -97,7 +97,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     const el = cartBtnRef.current;
     if (!el) return;
     const observer = new IntersectionObserver(
-      ([entry]) => setCartBtnVisible(entry.isIntersecting),
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setCartBtnVisible(true);
+        } else {
+          // Only show bar when button has scrolled ABOVE viewport, not when it's below (not yet reached)
+          setCartBtnVisible(entry.boundingClientRect.top > 0);
+        }
+      },
       { threshold: 0 },
     );
     observer.observe(el);
@@ -257,7 +264,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               fill
               style={{ objectFit: "contain" }}
               className="p-6 sm:p-10"
-              priority
+              fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
 
@@ -315,33 +322,66 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             />
           )}
 
-          {/* Price */}
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-xl font-bold text-gray-900">
-              {finalPrice.value.toFixed(2)}&nbsp;{finalPrice.currency}
-            </span>
-            {hasDiscount && regularPrice && (
-              <>
-                <span className="text-xs text-gray-400 line-through">
-                  {regularPrice.value.toFixed(2)}&nbsp;{regularPrice.currency}
+          {/* Price + Quantity row */}
+          <div className="flex items-start justify-between gap-4 mb-4">
+            {/* Left: stock + price */}
+            <div>
+              <span
+                className={`flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider mb-2 ${
+                  isInStock ? "text-emerald-600" : "text-red-500"
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isInStock ? "bg-emerald-500" : "bg-red-400"}`} />
+                {isInStock ? "В наличност" : "Изчерпано"}
+              </span>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold text-gray-900">
+                  {finalPrice.value.toFixed(2)}&nbsp;{finalPrice.currency}
                 </span>
-                <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-brand-action text-white">
-                  -{discountPct}%
-                </span>
-              </>
-            )}
-          </div>
+                {hasDiscount && regularPrice && (
+                  <>
+                    <span className="text-xs text-gray-400 line-through">
+                      {regularPrice.value.toFixed(2)}&nbsp;{regularPrice.currency}
+                    </span>
+                    <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-brand-action text-white">
+                      -{discountPct}%
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
 
-          {/* Stock badge */}
-          <div className="flex items-center gap-2 mb-4">
-            <span
-              className={`inline-flex items-center gap-1.5 text-xs font-medium ${
-                isInStock ? "text-emerald-600" : "text-red-500"
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${isInStock ? "bg-emerald-500" : "bg-red-400"}`} />
-              {isInStock ? "В наличност" : "Изчерпано"}
-            </span>
+            {/* Right: quantity */}
+            <div className="shrink-0">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                Количество
+              </p>
+              <div className="flex items-center gap-3">
+                <div className="inline-flex items-center border-2 border-brand-action rounded-full bg-white">
+                  <button
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    aria-label="Намали количество"
+                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-brand-action/10 ${
+                      quantity <= 1 ? "text-brand-action opacity-30 cursor-not-allowed" : "text-brand-action cursor-pointer"
+                    }`}
+                  >
+                    <Minus size={13} />
+                  </button>
+                  <span className="w-8 text-center text-sm font-bold text-gray-900 select-none">{quantity}</span>
+                  <button
+                    onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                    disabled={quantity >= 10}
+                    aria-label="Увеличи количество"
+                    className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-brand-action/10 ${
+                      quantity >= 10 ? "text-brand-action opacity-30 cursor-not-allowed" : "text-brand-action cursor-pointer"
+                    }`}
+                  >
+                    <Plus size={13} />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* ── Configurable options ── */}
@@ -402,39 +442,6 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           {allSelected && !isInStock && (
             <p className="text-sm text-red-500 font-medium mb-3">Избраният вариант е изчерпан</p>
           )}
-
-          {/* ── Quantity ── */}
-          <div className="mb-3 pb-3 border-b border-gray-100">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
-              Количество
-            </p>
-            <div className="flex items-center gap-3">
-              <div className="inline-flex items-center border-2 border-brand-action rounded-full bg-white">
-                <button
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
-                  aria-label="Намали количество"
-                  className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-brand-action/10 ${
-                    quantity <= 1 ? "text-brand-action opacity-30 cursor-not-allowed" : "text-brand-action cursor-pointer"
-                  }`}
-                >
-                  <Minus size={13} />
-                </button>
-                <span className="w-8 text-center text-sm font-bold text-gray-900 select-none">{quantity}</span>
-                <button
-                  onClick={() => setQuantity((q) => Math.min(10, q + 1))}
-                  disabled={quantity >= 10}
-                  aria-label="Увеличи количество"
-                  className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors hover:bg-brand-action/10 ${
-                    quantity >= 10 ? "text-brand-action opacity-30 cursor-not-allowed" : "text-brand-action cursor-pointer"
-                  }`}
-                >
-                  <Plus size={13} />
-                </button>
-              </div>
-              <span className="text-[11px] text-gray-400">Макс. 10 бр.</span>
-            </div>
-          </div>
 
           {/* ── Add to cart + wishlist ── */}
           {(() => {
@@ -617,7 +624,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <button
               onClick={handleAddToCart}
               disabled={!isInStock || addStatus === "loading" || (isConfigurable && !allSelected)}
-              className={`h-12 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer w-full lg:w-auto lg:shrink-0 ${
+              className={`h-12 px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer w-full lg:w-52 lg:shrink-0 ${
                 !isInStock || (isConfigurable && !allSelected)
                   ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                   : addStatus === "success"
