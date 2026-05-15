@@ -189,10 +189,10 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div className="fixed inset-x-0 top-0 h-dvh z-60 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative z-10 bg-white w-full sm:max-w-3xl sm:rounded-2xl shadow-2xl max-h-[95dvh] flex flex-col sm:flex-row overflow-hidden rounded-t-2xl">
+      <div className="relative z-10 bg-white w-full sm:max-w-3xl sm:rounded-2xl shadow-2xl h-[85dvh] sm:h-auto sm:max-h-[90dvh] flex flex-col sm:flex-row overflow-hidden rounded-t-2xl">
 
         {/* Close */}
         <button

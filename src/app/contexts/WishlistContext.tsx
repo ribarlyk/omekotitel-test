@@ -4,12 +4,19 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { Wishlist } from "../types/wishlist";
 import { useAuth } from "./AuthContext";
 
+const MAGENTO_URL = (process.env.NEXT_PUBLIC_GRAPHQL_URL ?? "").replace("/graphql", "");
+
+function getMagentoFormKey(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  return document.cookie.split("; ").find((c) => c.startsWith("form_key="))?.split("=")[1];
+}
+
 interface WishlistContextType {
   wishlist: Wishlist | null;
   loading: boolean;
   itemCount: number;
   isInWishlist: (sku: string) => boolean;
-  addToWishlist: (sku: string) => Promise<void>;
+  addToWishlist: (sku: string, productId: string | number) => Promise<void>;
   removeFromWishlist: (wishlistItemId: string) => Promise<void>;
   refreshWishlist: () => Promise<void>;
 }
@@ -23,14 +30,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const fetchWishlist = useCallback(async () => {
     if (!isLoggedIn) return;
-    
     try {
       setLoading(true);
       const resp = await fetch("/api/wishlist", { credentials: "include" });
-      if (resp.status === 401) {
-        setWishlist(null);
-        return;
-      }
+      if (resp.status === 401) { setWishlist(null); return; }
       if (!resp.ok) throw new Error("Failed to fetch wishlist");
       const data = await resp.json();
       setWishlist(data.wishlist);
@@ -42,36 +45,33 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   }, [isLoggedIn]);
 
   useEffect(() => {
-    if (!authLoading && isLoggedIn) {
-      fetchWishlist();
-    } else if (!authLoading && !isLoggedIn) {
-      setWishlist(null);
-    }
+    if (!authLoading && isLoggedIn) fetchWishlist();
+    else if (!authLoading && !isLoggedIn) setWishlist(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, isLoggedIn]);
 
-  const isInWishlist = (sku: string): boolean => {
-    if (!wishlist) return false;
-    return wishlist.items.some((item) => item.product?.sku === sku);
-  };
+  const isInWishlist = (sku: string): boolean =>
+    wishlist?.items.some((item) => item.product?.sku === sku) ?? false;
 
-  const addToWishlist = async (sku: string) => {
+  const addToWishlist = async (sku: string, productId: string | number) => {
     if (!isLoggedIn) return;
-    
+    setLoading(true);
     try {
-      setLoading(true);
-      const resp = await fetch("/api/wishlist/add", {
+      const formKey = getMagentoFormKey();
+      if (!formKey) throw new Error("no_session");
+
+      const uenc = btoa(`${MAGENTO_URL}/wishlist`);
+      const resp = await fetch(`${MAGENTO_URL}/wishlist/index/add/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ sku }),
+        redirect: "manual",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ product: String(productId), uenc, form_key: formKey }).toString(),
       });
 
-      if (resp.status === 401) return;
-
-      if (!resp.ok) {
-        const err = await resp.json();
-        throw new Error(err.error || "Failed to add to wishlist");
+      // Magento 302 redirect = success. Browser with redirect:"manual" returns type="opaqueredirect" / status=0.
+      if (resp.status !== 0 && resp.status !== 302 && resp.type !== "opaqueredirect" && !resp.ok) {
+        throw new Error("Failed to add to wishlist");
       }
 
       await fetchWishlist();
@@ -85,19 +85,22 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
   const removeFromWishlist = async (wishlistItemId: string) => {
     if (!isLoggedIn) return;
-    
+    setLoading(true);
     try {
-      setLoading(true);
-      const resp = await fetch("/api/wishlist/remove", {
+      const formKey = getMagentoFormKey();
+      if (!formKey) throw new Error("no_session");
+
+      const uenc = btoa(`${MAGENTO_URL}/wishlist`);
+      const resp = await fetch(`${MAGENTO_URL}/wishlist/index/remove/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ wishlistItemId }),
+        redirect: "manual",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ item: String(wishlistItemId), uenc, form_key: formKey }).toString(),
       });
 
-      if (!resp.ok) {
-        const err = await resp.json();
-        throw new Error(err.error || "Failed to remove from wishlist");
+      if (resp.status !== 0 && resp.status !== 302 && resp.type !== "opaqueredirect" && !resp.ok) {
+        throw new Error("Failed to remove from wishlist");
       }
 
       await fetchWishlist();
@@ -112,17 +115,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const itemCount = wishlist?.items_count ?? 0;
 
   return (
-    <WishlistContext.Provider
-      value={{
-        wishlist,
-        loading,
-        itemCount,
-        isInWishlist,
-        addToWishlist,
-        removeFromWishlist,
-        refreshWishlist: fetchWishlist,
-      }}
-    >
+    <WishlistContext.Provider value={{ wishlist, loading, itemCount, isInWishlist, addToWishlist, removeFromWishlist, refreshWishlist: fetchWishlist }}>
       {children}
     </WishlistContext.Provider>
   );
@@ -130,8 +123,6 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
 
 export function useWishlist() {
   const context = useContext(WishlistContext);
-  if (context === undefined) {
-    throw new Error("useWishlist must be used within a WishlistProvider");
-  }
+  if (context === undefined) throw new Error("useWishlist must be used within a WishlistProvider");
   return context;
 }

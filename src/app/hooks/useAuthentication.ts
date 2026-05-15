@@ -70,6 +70,32 @@ export const useAuthenticate = (): UseAuthenticateReturns => {
           const userData = await meResponse.json();
           setUser(userData);
         }
+
+        // Establish a Magento PHP session in the browser so wishlist works.
+        // In production the app is same-origin with Magento — browser requests pass Cloudflare fine.
+        // In local dev this silently fails (cross-origin), which is acceptable.
+        try {
+          const MAGENTO_URL = (process.env.NEXT_PUBLIC_GRAPHQL_URL ?? "").replace("/graphql", "");
+          // GET the login page so Magento sets form_key + PHPSESSID cookies in the browser.
+          await fetch(`${MAGENTO_URL}/customer/account/login/`, { credentials: "include" });
+          const formKey = document.cookie.split("; ").find((c) => c.startsWith("form_key="))?.split("=")[1];
+          if (formKey) {
+            await fetch(`${MAGENTO_URL}/customer/account/loginPost/`, {
+              method: "POST",
+              credentials: "include",
+              redirect: "manual",
+              headers: { "Content-Type": "application/x-www-form-urlencoded" },
+              body: new URLSearchParams({
+                "login[username]": email,
+                "login[password]": password,
+                form_key: formKey,
+              }).toString(),
+            });
+          }
+        } catch {
+          // Silently ignore — auth succeeded, wishlist may not work until same-origin deploy
+        }
+
         return true;
       }
       return false;

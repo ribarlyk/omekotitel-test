@@ -129,8 +129,8 @@ export function Breadcrumb({ categoryList }: BreadcrumbProps) {
             Начало
           </Link>
         </li>
-        {crumbs.map(({ href, label, isLast }) => (
-          <li key={href} className="flex items-center gap-1">
+        {crumbs.map(({ href, label, isLast }, i) => (
+          <li key={`${i}-${href}`} className="flex items-center gap-1">
             <span className="select-none">›</span>
             {isLast ? (
               <span className="text-gray-800 font-medium">{label}</span>

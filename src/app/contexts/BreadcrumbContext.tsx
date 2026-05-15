@@ -1,6 +1,8 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useCallback, useEffect } from "react";
+
+const SESSION_KEY = "breadcrumb_last_category_path";
 
 interface BreadcrumbContextValue {
   lastCrumbLabel: string | null;
@@ -18,7 +20,21 @@ const BreadcrumbContext = createContext<BreadcrumbContextValue>({
 
 export function BreadcrumbProvider({ children }: { children: React.ReactNode }) {
   const [lastCrumbLabel, setLastCrumbLabel] = useState<string | null>(null);
-  const [lastCategoryPath, setLastCategoryPath] = useState<string | null>(null);
+  const [lastCategoryPath, setLastCategoryPathState] = useState<string | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem(SESSION_KEY);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- must run client-side after hydration; initializing to null keeps server/client in sync
+    if (stored) setLastCategoryPathState(stored);
+  }, []);
+
+  const setLastCategoryPath = useCallback((path: string | null) => {
+    setLastCategoryPathState(path);
+    if (typeof window === "undefined") return;
+    if (path) sessionStorage.setItem(SESSION_KEY, path);
+    else sessionStorage.removeItem(SESSION_KEY);
+  }, []);
+
   return (
     <BreadcrumbContext.Provider value={{ lastCrumbLabel, setLastCrumbLabel, lastCategoryPath, setLastCategoryPath }}>
       {children}

@@ -681,7 +681,7 @@ export default function CheckoutPage() {
         setCardField(instance);
         setCardFieldReady(true);
          
-      } catch (_error) {
+      } catch {
         if (!destroyed)
           setPlaceError("Грешка при зареждане на формата за карта");
       }
