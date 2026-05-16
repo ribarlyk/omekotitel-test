@@ -18,11 +18,12 @@ async function getMagentoAdminToken(): Promise<string> {
       username: process.env.MAGENTO_ADMIN_USER,
       password: process.env.MAGENTO_ADMIN_PASSWORD,
     }),
-    cache: "no-store",
+    // Cache token in Next.js Data Cache for 3 h — avoids marking pages as dynamic.
+    next: { revalidate: 10800 },
   });
   if (!res.ok) throw new Error(`Magento admin token fetch failed: ${res.status}`);
   const token: string = await res.json();
-  adminTokenCache = { token, expiresAt: Date.now() + 3 * 60 * 60 * 1000 }; // 3 h
+  adminTokenCache = { token, expiresAt: Date.now() + 3 * 60 * 60 * 1000 };
   return token;
 }
 

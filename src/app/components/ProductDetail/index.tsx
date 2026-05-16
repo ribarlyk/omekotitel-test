@@ -54,6 +54,11 @@ interface Variant {
   product: VariantProduct;
 }
 
+interface ProductLinksState {
+  upsell: ProductCardProduct[];
+  crosssell: ProductCardProduct[];
+}
+
 interface ProductDetailProps {
   product: {
     id: string;
@@ -80,15 +85,25 @@ interface ProductDetailProps {
     variants?: Variant[];
   };
   resolvedAttributes?: ResolvedAttribute[];
-  upsellProducts?: ProductCardProduct[];
-  crosssellProducts?: ProductCardProduct[];
 }
 
 type AddStatus = "idle" | "loading" | "success" | "error";
 
-export default function ProductDetail({ product, resolvedAttributes = [], upsellProducts = [], crosssellProducts = [] }: ProductDetailProps) {
+export default function ProductDetail({ product, resolvedAttributes = [] }: ProductDetailProps) {
   const { setLastCrumbLabel } = useBreadcrumb();
   const { addToCart } = useCart();
+
+  const [productLinks, setProductLinks] = useState<ProductLinksState>({ upsell: [], crosssell: [] });
+  const [linksLoading, setLinksLoading] = useState(true);
+
+  useEffect(() => {
+    setLinksLoading(true);
+    fetch(`/api/product-links?urlKey=${encodeURIComponent(product.url_key)}`)
+      .then((r) => r.json())
+      .then((data) => setProductLinks({ upsell: data.upsell ?? [], crosssell: data.crosssell ?? [] }))
+      .catch(() => {})
+      .finally(() => setLinksLoading(false));
+  }, [product.url_key]);
 
   const [imageIndex, setImageIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
@@ -579,13 +594,13 @@ export default function ProductDetail({ product, resolvedAttributes = [], upsell
         </div>
       )}
       {/* ── Cross-sell products ── */}
-      {crosssellProducts.length > 0 && (
-        <ProductSlider title="Често купувани заедно" products={crosssellProducts} />
+      {(linksLoading || productLinks.crosssell.length > 0) && (
+        <ProductSlider title="Често купувани заедно" products={productLinks.crosssell} loading={linksLoading} />
       )}
 
       {/* ── Upsell products ── */}
-      {upsellProducts.length > 0 && (
-        <ProductSlider title="Може да ви хареса също" products={upsellProducts} />
+      {(linksLoading || productLinks.upsell.length > 0) && (
+        <ProductSlider title="Може да ви хареса също" products={productLinks.upsell} loading={linksLoading} />
       )}
 
       {/* ── Sticky bottom bar ── */}

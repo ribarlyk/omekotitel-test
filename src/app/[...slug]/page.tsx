@@ -10,8 +10,6 @@ import {
   fetchProductsByCategory,
   fetchProductDetail,
   fetchAttributeMetadata,
-  fetchProductLinkSkus,
-  fetchProductsBySku,
 } from "@/src/app/utils/graphql/fetchers";
 import {
   buildOptionMap,
@@ -86,17 +84,10 @@ async function PageData({ slugs }: { slugs: string[] }) {
   // Single-segment product match (products have no category prefix in url_key)
   if (product && rawProduct && slugs.length === 1) {
     const resolvedAttributes = resolveProductAttributes(rawProduct, optionMap);
-    const { upsell: upsellSkus, crosssell: crosssellSkus } = await fetchProductLinkSkus(urlKey);
-    const [upsellProducts, crosssellProducts] = await Promise.all([
-      fetchProductsBySku(upsellSkus),
-      fetchProductsBySku(crosssellSkus),
-    ]);
     return (
       <ProductDetail
         product={product}
         resolvedAttributes={resolvedAttributes}
-        upsellProducts={upsellProducts}
-        crosssellProducts={crosssellProducts}
       />
     );
   }
@@ -132,17 +123,10 @@ async function PageData({ slugs }: { slugs: string[] }) {
   // Multi-segment fallback — could be product under a category path, try last segment
   if (product && rawProduct && slugs.length > 1) {
     const resolvedAttributes = resolveProductAttributes(rawProduct, optionMap);
-    const { upsell: upsellSkus, crosssell: crosssellSkus } = await fetchProductLinkSkus(urlKey);
-    const [upsellProducts, crosssellProducts] = await Promise.all([
-      fetchProductsBySku(upsellSkus),
-      fetchProductsBySku(crosssellSkus),
-    ]);
     return (
       <ProductDetail
         product={product}
         resolvedAttributes={resolvedAttributes}
-        upsellProducts={upsellProducts}
-        crosssellProducts={crosssellProducts}
       />
     );
   }

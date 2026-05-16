@@ -10,9 +10,31 @@ const VISIBLE = 4;
 interface ProductSliderProps {
   title: string;
   products: ProductCardProduct[];
+  loading?: boolean;
 }
 
-export default function ProductSlider({ title, products }: ProductSliderProps) {
+function SliderSkeleton({ title }: { title: string }) {
+  return (
+    <div className="mt-16">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-base font-bold text-gray-900 tracking-tight">{title}</h2>
+      </div>
+      <div className="h-0.5 w-full mb-5" style={{ background: "linear-gradient(to right, #98ab3f 60px, #e5e7eb 60px)" }} />
+      <div className="hidden sm:flex gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="w-[calc(25%-12px)] shrink-0 rounded-2xl border border-gray-100 bg-gray-50 animate-pulse" style={{ height: 320 }} />
+        ))}
+      </div>
+      <div className="sm:hidden flex gap-3">
+        {Array.from({ length: 2 }).map((_, i) => (
+          <div key={i} className="w-[calc(50%-6px)] shrink-0 rounded-2xl border border-gray-100 bg-gray-50 animate-pulse" style={{ height: 280 }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function ProductSlider({ title, products, loading }: ProductSliderProps) {
   const [index, setIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -33,6 +55,7 @@ export default function ProductSlider({ title, products }: ProductSliderProps) {
     trackRef.current.style.transform = `translateX(-${index * (cardWidth + gap)}px)`;
   }, [index]);
 
+  if (loading) return <SliderSkeleton title={title} />;
   if (!products.length) return null;
 
   return (
