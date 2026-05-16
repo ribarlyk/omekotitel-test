@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { X, Loader2, ExternalLink, Minus, Plus } from "lucide-react";
 import MagentoImage from "@/src/app/components/MagentoImage";
@@ -188,7 +189,11 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
     }
   };
 
-  return (
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+
+  return createPortal(
     <div className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
@@ -411,6 +416,7 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
 
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
