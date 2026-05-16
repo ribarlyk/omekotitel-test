@@ -1,5 +1,5 @@
-query SearchProducts($search: String!, $pageSize: Int) {
-  products(search: $search, pageSize: $pageSize) {
+query SearchProducts($search: String!, $pageSize: Int, $currentPage: Int, $sort: ProductAttributeSortInput, $filter: ProductAttributeFilterInput) {
+  products(search: $search, pageSize: $pageSize, currentPage: $currentPage, sort: $sort, filter: $filter) {
     items {
       id
       name
@@ -33,5 +33,15 @@ query SearchProducts($search: String!, $pageSize: Int) {
       special_to_date
     }
     total_count
+    aggregations {
+      attribute_code
+      label
+      count
+      options {
+        label
+        value
+        count
+      }
+    }
   }
 }

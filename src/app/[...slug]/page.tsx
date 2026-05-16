@@ -9,7 +9,14 @@ import {
   fetchCatalog,
   fetchProductsByCategory,
   fetchProductDetail,
+  fetchAttributeMetadata,
+  fetchProductLinkSkus,
+  fetchProductsBySku,
 } from "@/src/app/utils/graphql/fetchers";
+import {
+  buildOptionMap,
+  resolveProductAttributes,
+} from "@/src/app/utils/productAttributes";
 
 interface Category {
   id: number;
@@ -64,19 +71,34 @@ function findCategoryByUrlPath(
 async function PageData({ slugs }: { slugs: string[] }) {
   const urlKey = slugs[slugs.length - 1];
 
-  // Fetch product and catalog in parallel
-  const [productData, catalog] = await Promise.all([
+  // Fetch product, catalog, and attribute metadata in parallel
+  const [productData, catalog, attrMetaItems] = await Promise.all([
     fetchProductDetail(urlKey),
     fetchCatalog(),
+    fetchAttributeMetadata(),
   ]);
 
-  const product = productData?.products?.items?.[0] as
-    | Parameters<typeof ProductDetail>[0]["product"]
-    | undefined;
+  const rawProduct = productData?.products?.items?.[0] as Record<string, unknown> | undefined;
+  const product = rawProduct as Parameters<typeof ProductDetail>[0]["product"] | undefined;
+
+  const optionMap = buildOptionMap(attrMetaItems);
 
   // Single-segment product match (products have no category prefix in url_key)
-  if (product && slugs.length === 1) {
-    return <ProductDetail product={product} />;
+  if (product && rawProduct && slugs.length === 1) {
+    const resolvedAttributes = resolveProductAttributes(rawProduct, optionMap);
+    const { upsell: upsellSkus, crosssell: crosssellSkus } = await fetchProductLinkSkus(urlKey);
+    const [upsellProducts, crosssellProducts] = await Promise.all([
+      fetchProductsBySku(upsellSkus),
+      fetchProductsBySku(crosssellSkus),
+    ]);
+    return (
+      <ProductDetail
+        product={product}
+        resolvedAttributes={resolvedAttributes}
+        upsellProducts={upsellProducts}
+        crosssellProducts={crosssellProducts}
+      />
+    );
   }
 
   // Category match — match against Magento's url_path (e.g. "parent/child")
@@ -108,8 +130,21 @@ async function PageData({ slugs }: { slugs: string[] }) {
   }
 
   // Multi-segment fallback — could be product under a category path, try last segment
-  if (product && slugs.length > 1) {
-    return <ProductDetail product={product} />;
+  if (product && rawProduct && slugs.length > 1) {
+    const resolvedAttributes = resolveProductAttributes(rawProduct, optionMap);
+    const { upsell: upsellSkus, crosssell: crosssellSkus } = await fetchProductLinkSkus(urlKey);
+    const [upsellProducts, crosssellProducts] = await Promise.all([
+      fetchProductsBySku(upsellSkus),
+      fetchProductsBySku(crosssellSkus),
+    ]);
+    return (
+      <ProductDetail
+        product={product}
+        resolvedAttributes={resolvedAttributes}
+        upsellProducts={upsellProducts}
+        crosssellProducts={crosssellProducts}
+      />
+    );
   }
 
   return notFound();

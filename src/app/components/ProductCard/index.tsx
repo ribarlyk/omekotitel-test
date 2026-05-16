@@ -76,10 +76,10 @@ function AddToCartButton({ sku, status, onClick, isConfigurable }: { sku: string
   const isLoading = status === "loading";
 
   const configs = {
-    idle: { icon: null, label: isConfigurable ? "Избери вариант" : "Добави", className: "bg-brand-action text-white hover:bg-brand-action/90 active:scale-[0.98]" },
-    loading: { icon: <SpinnerIcon />, label: "Добавяне...", className: "bg-brand-action/80 text-white cursor-not-allowed" },
-    success: { icon: <CheckIcon />, label: "Добавено!", className: "bg-emerald-500 text-white" },
-    error: { icon: <ErrorIcon />, label: "Грешка!", className: "bg-rose-500 text-white" },
+    idle: { icon: null, label: isConfigurable ? "Избери вариант" : "Добави", className: "bg-white border-2 border-brand-action text-brand-action hover:bg-brand-action hover:text-white hover:border-brand-action active:scale-[0.98]" },
+    loading: { icon: <SpinnerIcon />, label: "Добавяне...", className: "bg-white border-2 border-brand-action text-brand-action opacity-70 cursor-not-allowed" },
+    success: { icon: <CheckIcon />, label: "Добавено!", className: "bg-emerald-500 border-2 border-emerald-500 text-white" },
+    error: { icon: <ErrorIcon />, label: "Грешка!", className: "bg-rose-500 border-2 border-rose-500 text-white" },
   };
 
   const { icon, label, className } = configs[status];
@@ -227,7 +227,7 @@ export default function ProductCard({ product, index = 0, view = "grid" }: Produ
     <>
     <Link
       href={`/${product.url_key}`}
-      className="flex flex-col border border-gray-200 rounded-xl bg-white hover:shadow-xl hover:border-brand-action/40 transition-all duration-200 group overflow-hidden"
+      className="flex flex-col h-full border border-gray-200 rounded-xl bg-white hover:shadow-xl hover:border-brand-action/40 transition-all duration-200 group overflow-hidden"
     >
       <div className="relative overflow-hidden">
         {product.small_image && (

@@ -6,8 +6,14 @@ import { LayoutGrid, LayoutList, ArrowUp, ArrowDown, ChevronDown } from "lucide-
 export type SortDir = "ASC" | "DESC";
 export type ViewMode = "grid" | "list";
 
-const SORT_OPTIONS = [
+export const SORT_OPTIONS = [
   { value: "position", label: "Позиция" },
+  { value: "name", label: "Наименование" },
+  { value: "price", label: "Цена" },
+];
+
+export const SEARCH_SORT_OPTIONS = [
+  { value: "relevance", label: "Релевантност" },
   { value: "name", label: "Наименование" },
   { value: "price", label: "Цена" },
 ];
@@ -22,6 +28,7 @@ interface SortToolbarProps {
   view: ViewMode;
   onSortChange: (field: string, dir: SortDir) => void;
   onViewChange: (view: ViewMode) => void;
+  sortOptions?: { value: string; label: string }[];
 }
 
 export default function SortToolbar({
@@ -34,6 +41,7 @@ export default function SortToolbar({
   view,
   onSortChange,
   onViewChange,
+  sortOptions = SORT_OPTIONS,
 }: SortToolbarProps) {
   const from = (currentPage - 1) * pageSize + 1;
   const to = Math.min(currentPage * pageSize, from + currentCount - 1);
@@ -48,7 +56,7 @@ export default function SortToolbar({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const selectedLabel = SORT_OPTIONS.find((o) => o.value === sortField)?.label ?? sortField;
+  const selectedLabel = sortOptions.find((o) => o.value === sortField)?.label ?? sortField;
   const toggleDir = () => onSortChange(sortField, sortDir === "ASC" ? "DESC" : "ASC");
 
   return (
@@ -97,7 +105,7 @@ export default function SortToolbar({
 
         {open && (
           <div className="absolute right-0 top-full mt-1 z-20 bg-white border border-gray-200 rounded shadow-lg min-w-full overflow-hidden">
-            {SORT_OPTIONS.map((opt) => (
+            {sortOptions.map((opt) => (
               <button
                 key={opt.value}
                 onClick={() => { onSortChange(opt.value, sortDir); setOpen(false); }}

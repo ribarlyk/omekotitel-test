@@ -37,10 +37,8 @@ export async function GET() {
     }
 
     const data = await resp.json();
-    console.debug("/api/me raw GraphQL response:", JSON.stringify(data));
 
     if (data.errors || !data?.data?.customer) {
-      console.error("/api/me GraphQL errors:", data.errors ?? data);
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 

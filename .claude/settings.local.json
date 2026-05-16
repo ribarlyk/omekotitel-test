@@ -5,7 +5,11 @@
       "Bash(Get-ChildItem -Path 'c:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\src\\\\app' -Directory)",
       "Bash(Select-Object -ExpandProperty Name)",
       "Bash(Select-Object Name)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "PowerShell($body = '{\"query\":\"{ __type\\(name: \\\\\"ProductInterface\\\\\"\\) { fields { name } } }\"}'; $response = Invoke-WebRequest -Uri \"https://omekotitel.bg/graphql\" -Method POST -ContentType \"application/json\" -Body $body; $response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 5)",
+      "Bash(curl -s https://omekotitel.bg/graphql -H 'Content-Type: application/json' --data-raw '{\"query\":\"{ __type\\(name: \\\\\"ProductInterface\\\\\"\\) { fields { name } } }\"}')",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(f['name']\\) for f in data['data']['__type']['fields']]\")",
+      "Bash(node -e ' *)"
     ]
   }
 }

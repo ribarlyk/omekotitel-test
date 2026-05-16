@@ -44,6 +44,42 @@ query GetProductDetail($urlKey: String!) {
       special_price
       special_from_date
       special_to_date
+      Broi
+      aromat
+      aromat_dush_gel_2
+      aromat_sapuni
+      aromati
+      broj_cikli_sushene
+      broj_cikli_upotreba
+      broj_izmivanija
+      cvjat
+      d_lgotrajnost
+      dejstvie
+      dejstvie_dush_gel
+      dejstvie_dushgel_multiple
+      koli_garderobi_prilozhenie
+      kosa
+      marki
+      material_na_izrabotka
+      materii_s_vmestimost_2
+      mozhe_da_se_izpolzva_v
+      obem_kapacitet
+      podhodjascho_za
+      podhodjascho_za_hrani
+      prilozhenie
+      proizhod
+      razfasovka
+      razmer
+      svojstva
+      temperaturna_ustojchivost
+      tip_kosa
+      tip_kuhnenska_prinadlejnost
+      tip_podove_pov_rhnosti
+      tip_podove_pov_rhnosti_2
+      tip_vero
+      tip_zatvarjane
+      tretirane_na_petna_ot
+      vid_materii
       ... on ConfigurableProduct {
         configurable_options {
           attribute_code

@@ -18,6 +18,9 @@ import { magentoImageUrl } from "@/src/app/utils/image";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
 import { useCart } from "@/src/app/contexts/CartContext";
+import ProductSlider from "@/src/app/components/ProductSlider";
+import type { ProductCardProduct } from "@/src/app/components/ProductCard";
+import type { ResolvedAttribute } from "@/src/app/utils/productAttributes";
 
 interface ConfigurableOptionValue {
   label: string;
@@ -76,11 +79,14 @@ interface ProductDetailProps {
     configurable_options?: ConfigurableOption[];
     variants?: Variant[];
   };
+  resolvedAttributes?: ResolvedAttribute[];
+  upsellProducts?: ProductCardProduct[];
+  crosssellProducts?: ProductCardProduct[];
 }
 
 type AddStatus = "idle" | "loading" | "success" | "error";
 
-export default function ProductDetail({ product }: ProductDetailProps) {
+export default function ProductDetail({ product, resolvedAttributes = [], upsellProducts = [], crosssellProducts = [] }: ProductDetailProps) {
   const { setLastCrumbLabel } = useBreadcrumb();
   const { addToCart } = useCart();
 
@@ -317,7 +323,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
           {product.short_description?.html && (
             <div
-              className="text-gray-500 text-xs leading-relaxed mb-3 [&>p]:mb-0.5"
+              className="text-gray-500 text-xs leading-relaxed mb-6 [&>p]:mb-0.5"
               dangerouslySetInnerHTML={{ __html: product.short_description.html }}
             />
           )}
@@ -497,7 +503,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       </div>
 
       {/* ── Tabs ── */}
-      {(product.description?.html || product.short_description?.html) && (
+      {(product.description?.html || resolvedAttributes.length > 0) && (
         <div className="mt-16">
           {/* Tab bar */}
           <div className="flex gap-6 border-b border-gray-200">
@@ -513,7 +519,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 Детайли
               </button>
             )}
-            {product.short_description?.html && (
+            {resolvedAttributes.length > 0 && (
               <button
                 onClick={() => setActiveTab("short")}
                 className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
@@ -559,21 +565,29 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </button>
               </div>
             )}
-            {activeTab === "short" && product.short_description?.html && (
-              <div
-                className="
-                  [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm
-                  [&_tr]:border-b [&_tr]:border-gray-100 [&_tr:last-child]:border-0
-                  [&_td]:py-3 [&_td]:px-2 [&_td]:align-top [&_td]:text-sm
-                  [&_td:first-child]:font-semibold [&_td:first-child]:text-gray-700 [&_td:first-child]:w-2/5
-                  [&_td:last-child]:text-gray-500
-                "
-                dangerouslySetInnerHTML={{ __html: product.short_description.html }}
-              />
+            {activeTab === "short" && resolvedAttributes.length > 0 && (
+              <div className="divide-y divide-gray-100">
+                {resolvedAttributes.map((attr) => (
+                  <div key={attr.code} className="flex gap-4 py-3">
+                    <span className="w-2/5 shrink-0 text-sm font-semibold text-gray-700">{attr.label}</span>
+                    <span className="text-sm text-gray-500">{attr.value}</span>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         </div>
       )}
+      {/* ── Cross-sell products ── */}
+      {crosssellProducts.length > 0 && (
+        <ProductSlider title="Често купувани заедно" products={crosssellProducts} />
+      )}
+
+      {/* ── Upsell products ── */}
+      {upsellProducts.length > 0 && (
+        <ProductSlider title="Може да ви хареса също" products={upsellProducts} />
+      )}
+
       {/* ── Sticky bottom bar ── */}
       <div
         className={`fixed bottom-0 left-0 right-0 z-60 lg:z-50 transition-transform duration-300 ${

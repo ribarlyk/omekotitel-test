@@ -1,0 +1,50 @@
+query GetAttributeMetadata {
+  customAttributeMetadata(
+    attributes: [
+      { attribute_code: "Broi", entity_type: "catalog_product" }
+      { attribute_code: "aromat", entity_type: "catalog_product" }
+      { attribute_code: "aromat_dush_gel_2", entity_type: "catalog_product" }
+      { attribute_code: "aromat_sapuni", entity_type: "catalog_product" }
+      { attribute_code: "aromati", entity_type: "catalog_product" }
+      { attribute_code: "broj_cikli_sushene", entity_type: "catalog_product" }
+      { attribute_code: "broj_cikli_upotreba", entity_type: "catalog_product" }
+      { attribute_code: "broj_izmivanija", entity_type: "catalog_product" }
+      { attribute_code: "cvjat", entity_type: "catalog_product" }
+      { attribute_code: "d_lgotrajnost", entity_type: "catalog_product" }
+      { attribute_code: "dejstvie", entity_type: "catalog_product" }
+      { attribute_code: "dejstvie_dush_gel", entity_type: "catalog_product" }
+      { attribute_code: "dejstvie_dushgel_multiple", entity_type: "catalog_product" }
+      { attribute_code: "koli_garderobi_prilozhenie", entity_type: "catalog_product" }
+      { attribute_code: "kosa", entity_type: "catalog_product" }
+      { attribute_code: "marki", entity_type: "catalog_product" }
+      { attribute_code: "material_na_izrabotka", entity_type: "catalog_product" }
+      { attribute_code: "materii_s_vmestimost_2", entity_type: "catalog_product" }
+      { attribute_code: "mozhe_da_se_izpolzva_v", entity_type: "catalog_product" }
+      { attribute_code: "obem_kapacitet", entity_type: "catalog_product" }
+      { attribute_code: "podhodjascho_za", entity_type: "catalog_product" }
+      { attribute_code: "podhodjascho_za_hrani", entity_type: "catalog_product" }
+      { attribute_code: "prilozhenie", entity_type: "catalog_product" }
+      { attribute_code: "proizhod", entity_type: "catalog_product" }
+      { attribute_code: "razfasovka", entity_type: "catalog_product" }
+      { attribute_code: "razmer", entity_type: "catalog_product" }
+      { attribute_code: "svojstva", entity_type: "catalog_product" }
+      { attribute_code: "temperaturna_ustojchivost", entity_type: "catalog_product" }
+      { attribute_code: "tip_kosa", entity_type: "catalog_product" }
+      { attribute_code: "tip_kuhnenska_prinadlejnost", entity_type: "catalog_product" }
+      { attribute_code: "tip_podove_pov_rhnosti", entity_type: "catalog_product" }
+      { attribute_code: "tip_podove_pov_rhnosti_2", entity_type: "catalog_product" }
+      { attribute_code: "tip_vero", entity_type: "catalog_product" }
+      { attribute_code: "tip_zatvarjane", entity_type: "catalog_product" }
+      { attribute_code: "tretirane_na_petna_ot", entity_type: "catalog_product" }
+      { attribute_code: "vid_materii", entity_type: "catalog_product" }
+    ]
+  ) {
+    items {
+      attribute_code
+      attribute_options {
+        label
+        value
+      }
+    }
+  }
+}

@@ -2,6 +2,29 @@ import { print } from "graphql";
 import { Queries } from ".";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
+const REST_BASE = GRAPHQL_ENDPOINT.replace(/\/graphql$/, "/rest/V1");
+
+// Module-level admin token cache — shared across requests in the same process.
+let adminTokenCache: { token: string; expiresAt: number } | null = null;
+
+async function getMagentoAdminToken(): Promise<string> {
+  if (adminTokenCache && Date.now() < adminTokenCache.expiresAt) {
+    return adminTokenCache.token;
+  }
+  const res = await fetch(`${REST_BASE}/integration/admin/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: process.env.MAGENTO_ADMIN_USER,
+      password: process.env.MAGENTO_ADMIN_PASSWORD,
+    }),
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Magento admin token fetch failed: ${res.status}`);
+  const token: string = await res.json();
+  adminTokenCache = { token, expiresAt: Date.now() + 3 * 60 * 60 * 1000 }; // 3 h
+  return token;
+}
 
 // Abort slow Magento requests before they stall ISR workers.
 // Use a longer timeout during static build (many concurrent requests flood Magento).
@@ -62,7 +85,7 @@ async function gql<T>(
     // (e.g. price_range internal errors on specific products). Log for
     // observability but do not throw — the page can render with null fields,
     // and throwing here would break builds / ISR for permanent Magento data issues.
-    console.error("GraphQL partial errors:", json.errors);
+    console.warn("GraphQL partial errors:", JSON.stringify(json.errors));
   }
 
   return json.data as T;
@@ -110,9 +133,65 @@ export async function fetchProductDetail(urlKey: string) {
   );
 }
 
+export async function fetchAttributeMetadata() {
+  const data = await gql<{
+    customAttributeMetadata: {
+      items: { attribute_code: string; attribute_options: { label: string; value: string }[] | null }[];
+    };
+  }>(
+    print(Queries.GET_ATTRIBUTE_METADATA),
+    undefined,
+    // Attribute options change rarely — cache for 24 h.
+    { revalidate: 86400, tags: ["attribute-metadata"] },
+  );
+  return data.customAttributeMetadata.items;
+}
+
+// Fetch upsell + crosssell SKUs via REST (GraphQL resolvers are broken for these on this instance).
+// Uses the products search API with url_key — avoids SKU encoding issues with special characters.
+export async function fetchProductLinkSkus(
+  urlKey: string,
+): Promise<{ upsell: string[]; crosssell: string[] }> {
+  try {
+    const token = await getMagentoAdminToken();
+    const params = new URLSearchParams({
+      "searchCriteria[filterGroups][0][filters][0][field]": "url_key",
+      "searchCriteria[filterGroups][0][filters][0][value]": urlKey,
+      "fields": "items[product_links]",
+    });
+    const res = await fetch(`${REST_BASE}/products?${params}`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return { upsell: [], crosssell: [] };
+
+    type LinkItem = { link_type: string; linked_product_sku: string; position: number };
+    const data: { items: { product_links?: LinkItem[] }[] } = await res.json();
+    const links = data.items?.[0]?.product_links ?? [];
+
+    const byPosition = (a: LinkItem, b: LinkItem) => a.position - b.position;
+    return {
+      upsell: links.filter((l) => l.link_type === "upsell").sort(byPosition).map((l) => l.linked_product_sku),
+      crosssell: links.filter((l) => l.link_type === "crosssell").sort(byPosition).map((l) => l.linked_product_sku),
+    };
+  } catch (e) {
+    console.warn("fetchProductLinkSkus failed:", e);
+    return { upsell: [], crosssell: [] };
+  }
+}
+
+export async function fetchProductsBySku(skus: string[]) {
+  if (!skus.length) return [];
+  const data = await gql<{ products: { items: unknown[] } }>(
+    print(Queries.GET_PRODUCTS_BY_SKU),
+    { skus },
+  );
+  return (data.products?.items ?? []) as import("@/src/app/components/ProductCard").ProductCardProduct[];
+}
+
 // Search is intentionally uncached — results must reflect live inventory.
 export async function fetchSearchProducts(search: string, pageSize = 20) {
-  return gql<{ products: { items: unknown[]; total_count: number } }>(
+  return gql<{ products: { items: unknown[]; total_count: number; aggregations: unknown[] } }>(
     print(Queries.SEARCH_PRODUCTS),
     { search, pageSize },
   );
