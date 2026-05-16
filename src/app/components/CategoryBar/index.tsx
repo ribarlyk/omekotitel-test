@@ -62,7 +62,7 @@ const CATEGORIES = [
 export default function CategoryBar() {
   return (
     <section className="pt-3 pb-4 md:pb-8 px-4 border-b border-gray-100">
-      <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-400 mb-2 md:mb-3">
+      <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-900 mb-2 md:mb-3">
         Пазарувай по категория
       </p>
       <div className="relative md:static">

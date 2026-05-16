@@ -3,13 +3,14 @@ import { fetchProductLinkSkus, fetchProductsBySku } from "@/src/app/utils/graphq
 
 export async function GET(req: NextRequest) {
   const urlKey = req.nextUrl.searchParams.get("urlKey");
-  if (!urlKey) return NextResponse.json({ upsell: [], crosssell: [] });
+  if (!urlKey) return NextResponse.json({ upsell: [], crosssell: [], related: [] });
 
-  const { upsell: upsellSkus, crosssell: crosssellSkus } = await fetchProductLinkSkus(urlKey);
-  const [upsellProducts, crosssellProducts] = await Promise.all([
+  const { upsell: upsellSkus, crosssell: crosssellSkus, related: relatedSkus } = await fetchProductLinkSkus(urlKey);
+  const [upsellProducts, crosssellProducts, relatedProducts] = await Promise.all([
     fetchProductsBySku(upsellSkus),
     fetchProductsBySku(crosssellSkus),
+    fetchProductsBySku(relatedSkus),
   ]);
 
-  return NextResponse.json({ upsell: upsellProducts, crosssell: crosssellProducts });
+  return NextResponse.json({ upsell: upsellProducts, crosssell: crosssellProducts, related: relatedProducts });
 }

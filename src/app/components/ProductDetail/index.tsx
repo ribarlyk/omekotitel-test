@@ -1,6 +1,7 @@
 "use client";
 
-import { useLayoutEffect, useState, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
+import { useLayoutEffect, useState, useCallback, useEffect, useRef, useMemo } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,8 +10,6 @@ import {
   Loader2,
   Check,
   Truck,
-  RotateCcw,
-  Shield,
   Package,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -57,6 +56,7 @@ interface Variant {
 interface ProductLinksState {
   upsell: ProductCardProduct[];
   crosssell: ProductCardProduct[];
+  related: ProductCardProduct[];
 }
 
 interface ProductDetailProps {
@@ -89,28 +89,65 @@ interface ProductDetailProps {
 
 type AddStatus = "idle" | "loading" | "success" | "error";
 
+function parseDescriptionSections(html: string): { title: string; html: string }[] {
+  const normalized = html
+    .replace(/<h2(\b[^>]*)>/gi, "<h3$1>")
+    .replace(/<\/h2>/gi, "</h3>");
+  const parts = normalized.split(/(?=<h3[\s>])/i);
+  const sections: { title: string; html: string }[] = [];
+  for (const part of parts) {
+    const match = part.match(/^<h3[^>]*>([\s\S]*?)<\/h3>/i);
+    if (match) {
+      const title = match[1].replace(/<[^>]+>/g, "").trim();
+      sections.push({ title, html: part.slice(match[0].length).trim() });
+    } else if (part.trim()) {
+      sections.push({ title: "__intro__", html: part.trim() });
+    }
+  }
+  return sections;
+}
+
 export default function ProductDetail({ product, resolvedAttributes = [] }: ProductDetailProps) {
   const { setLastCrumbLabel } = useBreadcrumb();
   const { addToCart } = useCart();
 
-  const [productLinks, setProductLinks] = useState<ProductLinksState>({ upsell: [], crosssell: [] });
+  const [productLinks, setProductLinks] = useState<ProductLinksState>({ upsell: [], crosssell: [], related: [] });
   const [linksLoading, setLinksLoading] = useState(true);
 
   useEffect(() => {
     setLinksLoading(true);
     fetch(`/api/product-links?urlKey=${encodeURIComponent(product.url_key)}`)
       .then((r) => r.json())
-      .then((data) => setProductLinks({ upsell: data.upsell ?? [], crosssell: data.crosssell ?? [] }))
+      .then((data) => setProductLinks({ upsell: data.upsell ?? [], crosssell: data.crosssell ?? [], related: data.related ?? [] }))
       .catch(() => {})
       .finally(() => setLinksLoading(false));
   }, [product.url_key]);
+
+  const visibleSliders = useMemo(() => {
+    const all = [
+      { title: "Често купувани заедно", products: productLinks.crosssell },
+      { title: "Може да ви хареса също", products: productLinks.upsell },
+      { title: "Подобни продукти", products: productLinks.related },
+    ];
+    if (linksLoading) return all.slice(0, 2);
+    const nonEmpty = all.filter((s) => s.products.length > 0);
+    if (nonEmpty.length <= 2) return nonEmpty;
+    const i = Math.floor(Math.random() * nonEmpty.length);
+    const j = (i + 1 + Math.floor(Math.random() * (nonEmpty.length - 1))) % nonEmpty.length;
+    return [nonEmpty[i], nonEmpty[j]];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [linksLoading]);
 
   const [imageIndex, setImageIndex] = useState(0);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
   const [quantity, setQuantity] = useState(1);
   const [addStatus, setAddStatus] = useState<AddStatus>("idle");
   const [activeTab, setActiveTab] = useState<"description" | "short">("description");
-  const [descExpanded, setDescExpanded] = useState(false);
+  const descSections = useMemo(
+    () => (product.description?.html ? parseDescriptionSections(product.description.html) : []),
+    [product.description?.html]
+  );
+  const [descSection, setDescSection] = useState(0);
   const [cartBtnVisible, setCartBtnVisible] = useState(true);
   const cartBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -238,10 +275,8 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
   const nextImage = () => setImageIndex((i) => (i + 1) % images.length);
 
   const perks = [
-    { icon: <Truck size={15} />, title: "Бърза доставка", desc: "2 работни дни · Еконт / Speedy" },
-    { icon: <RotateCcw size={15} />, title: "14 дни връщане", desc: "Безплатно от адрес" },
-    { icon: <Shield size={15} />, title: "Гаранция", desc: "Официален вносител" },
-    { icon: <Package size={15} />, title: "Сигурно плащане", desc: "Карта или наложен платеж" },
+    { icon: <Truck size={15} />, title: "Бърза доставка", desc: "48 часа · Еконт / Speedy", href: "/dostavka" },
+    { icon: <Package size={15} />, title: "Сигурно плащане", desc: "Карта или наложен платеж", href: "/nachini-za-plaschane" },
   ];
 
   return (
@@ -505,13 +540,13 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
           {/* ── Perks ── */}
           <div className="mt-3 grid grid-cols-2 gap-2">
             {perks.map((p) => (
-              <div key={p.title} className="flex items-start gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100">
+              <Link key={p.title} href={p.href} className="flex items-start gap-2 p-2 rounded-lg bg-gray-50 border border-gray-100 hover:border-brand-action/40 hover:bg-brand-action/5 transition-colors">
                 <span className="text-brand-action shrink-0 mt-0.5">{p.icon}</span>
                 <div>
                   <p className="text-[11px] font-semibold text-gray-700 leading-snug">{p.title}</p>
                   <p className="text-[10px] text-gray-400 leading-snug">{p.desc}</p>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -521,11 +556,11 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
       {(product.description?.html || resolvedAttributes.length > 0) && (
         <div className="mt-16">
           {/* Tab bar */}
-          <div className="flex gap-6 border-b border-gray-200">
+          <div className="flex gap-6 border-b border-gray-200 justify-center">
             {product.description?.html && (
               <button
                 onClick={() => setActiveTab("description")}
-                className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
+                className={`pb-3 text-base font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
                   activeTab === "description"
                     ? "border-brand-action text-gray-900"
                     : "border-transparent text-gray-400 hover:text-gray-600"
@@ -537,7 +572,7 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
             {resolvedAttributes.length > 0 && (
               <button
                 onClick={() => setActiveTab("short")}
-                className={`pb-3 text-sm font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
+                className={`pb-3 text-base font-semibold border-b-2 -mb-px transition-colors cursor-pointer ${
                   activeTab === "short"
                     ? "border-brand-action text-gray-900"
                     : "border-transparent text-gray-400 hover:text-gray-600"
@@ -550,34 +585,44 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
 
           {/* Tab content */}
           <div className="pt-8">
-            {activeTab === "description" && product.description?.html && (
+            {activeTab === "description" && descSections.length > 0 && (
               <div>
-                <div className={`relative overflow-hidden transition-all duration-500 ${descExpanded ? "" : "max-h-72"}`}>
+                {/* Section sub-tabs (skip __intro__ entries) */}
+                {descSections.filter((s) => s.title !== "__intro__").length > 1 && (
+                  <div className="flex overflow-x-auto scrollbar-none border-b border-gray-200 mb-6 gap-0 -ml-3">
+                    {descSections.map((s, i) =>
+                      s.title === "__intro__" ? null : (
+                        <button
+                          key={i}
+                          onClick={() => setDescSection(i)}
+                          className={`shrink-0 px-3 pb-3 text-sm font-semibold border-b-2 -mb-px transition-colors cursor-pointer whitespace-nowrap ${
+                            descSection === i
+                              ? "border-brand-action text-gray-900"
+                              : "border-transparent text-gray-400 hover:text-gray-600"
+                          }`}
+                        >
+                          {s.title}
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
+                {/* Show intro (content before first h3) always */}
+                {descSections[0]?.title === "__intro__" && (
                   <div
-                    className="
-                      [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-gray-900 [&_h1]:mt-10 [&_h1]:mb-4 [&_h1]:pb-2 [&_h1]:border-b [&_h1]:border-gray-200
-                      [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-gray-900 [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:pb-2 [&_h2]:border-b [&_h2]:border-gray-200
-                      [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-gray-900 [&_h3]:mt-8 [&_h3]:mb-3
-                      [&_h4]:text-lg [&_h4]:font-semibold [&_h4]:text-gray-800 [&_h4]:mt-6 [&_h4]:mb-2
-                      [&_p]:text-gray-600 [&_p]:leading-relaxed [&_p]:mb-3
-                      [&_ul]:pl-5 [&_ul]:mb-4 [&_ul]:list-disc
-                      [&_ol]:pl-5 [&_ol]:mb-4 [&_ol]:list-decimal
-                      [&_li]:text-gray-600 [&_li]:mb-1
-                      [&_strong]:font-semibold [&_strong]:text-gray-800
-                      [&_a]:text-brand-action [&_a]:underline
-                    "
-                    dangerouslySetInnerHTML={{ __html: product.description.html }}
+                    className="prose-desc mb-6"
+                    dangerouslySetInnerHTML={{ __html: descSections[0].html }}
                   />
-                  {!descExpanded && (
-                    <div className="absolute bottom-0 left-0 right-0 h-24 bg-linear-to-t from-white to-transparent pointer-events-none" />
-                  )}
-                </div>
-                <button
-                  onClick={() => setDescExpanded((v) => !v)}
-                  className="mt-3 text-sm font-semibold text-brand-action underline underline-offset-4 hover:text-brand-nav transition-colors cursor-pointer"
-                >
-                  {descExpanded ? "Покажи по-малко ↑" : "Покажи повече ↓"}
-                </button>
+                )}
+                {/* Active section content */}
+                {descSections[descSection] && descSections[descSection].title !== "__intro__" && (
+                  <div
+                    className="prose-desc"
+                    dangerouslySetInnerHTML={{ __html: descSections[descSection].html }}
+                  />
+                )}
+                {/* Fallback: single section with no h3 */}
+                {descSections.length === 1 && descSections[0].title === "__intro__" && null}
               </div>
             )}
             {activeTab === "short" && resolvedAttributes.length > 0 && (
@@ -593,15 +638,10 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
           </div>
         </div>
       )}
-      {/* ── Cross-sell products ── */}
-      {(linksLoading || productLinks.crosssell.length > 0) && (
-        <ProductSlider title="Често купувани заедно" products={productLinks.crosssell} loading={linksLoading} />
-      )}
-
-      {/* ── Upsell products ── */}
-      {(linksLoading || productLinks.upsell.length > 0) && (
-        <ProductSlider title="Може да ви хареса също" products={productLinks.upsell} loading={linksLoading} />
-      )}
+      {/* ── Related sliders — 2 of 3 chosen randomly ── */}
+      {visibleSliders.map((s) => (
+        <ProductSlider key={s.title} title={s.title} products={s.products} loading={linksLoading} />
+      ))}
 
       {/* ── Sticky bottom bar ── */}
       <div

@@ -201,7 +201,7 @@ export default function ProductCard({ product, index = 0, view = "grid" }: Produ
           {badges}
         </div>
         <div className="flex flex-col justify-between py-4 pr-4 flex-1 min-w-0">
-          <h3 className="font-medium text-sm mb-2 line-clamp-2 text-gray-800 group-hover:text-brand-nav transition-colors leading-snug">
+          <h3 className="font-medium text-sm mb-2 text-gray-800 group-hover:text-brand-nav transition-colors leading-snug">
             {product.name}
           </h3>
           <div className="flex items-end justify-between gap-3 flex-wrap">
@@ -246,7 +246,7 @@ export default function ProductCard({ product, index = 0, view = "grid" }: Produ
       </div>
 
       <div className="flex flex-col p-4 flex-1">
-        <h3 className="font-medium text-sm mb-3 line-clamp-3 flex-1 text-gray-800 group-hover:text-brand-nav transition-colors leading-snug">
+        <h3 className="font-medium text-sm mb-3 flex-1 text-gray-800 group-hover:text-brand-nav transition-colors leading-snug">
           {product.name}
         </h3>
         <div className="mt-auto flex flex-col gap-3">

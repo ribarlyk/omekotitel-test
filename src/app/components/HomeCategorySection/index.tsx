@@ -1,6 +1,5 @@
-import Link from "next/link";
 import { fetchCatalog, fetchProductsByCategory } from "@/src/app/utils/graphql/fetchers";
-import ProductsList from "@/src/app/components/ProductsList";
+import ProductSlider from "@/src/app/components/ProductSlider";
 
 interface Category {
   id: number;
@@ -25,36 +24,28 @@ interface HomeCategorySectionProps {
   urlKey: string;
   title: string;
   pageSize?: number;
+  href?: string;
 }
 
 export default async function HomeCategorySection({
   urlKey,
   title,
-  pageSize = 4,
+  pageSize = 10,
+  href,
 }: HomeCategorySectionProps) {
   const catalog = await fetchCatalog();
   const category = findCategoryByUrlKey(catalog.categoryList as Category[], urlKey);
   if (!category) return null;
 
   const data = await fetchProductsByCategory(String(category.id), pageSize);
-  const products = (data.products?.items ?? []).filter(Boolean) as Parameters<
-    typeof ProductsList
-  >[0]["products"];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const products = (data.products?.items ?? []).filter(Boolean) as any[];
 
   if (!products.length) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 pt-5 pb-10">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-        <Link
-          href={`/${urlKey}`}
-          className="text-sm font-medium text-brand-nav hover:text-brand-action transition-colors"
-        >
-          Виж всички →
-        </Link>
-      </div>
-      <ProductsList products={products} />
+    <section className="max-w-7xl mx-auto px-4 pt-5 pb-6">
+      <ProductSlider title={title} products={products} viewAllHref={href ?? `/${urlKey}`} titleSize="text-lg lg:text-2xl" outerClassName="mt-4" />
     </section>
   );
 }

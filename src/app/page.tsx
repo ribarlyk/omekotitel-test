@@ -51,6 +51,22 @@ export default function Home() {
         <HomeCategorySection urlKey="oferti-produkti" title="Оферти" />
       </Suspense>
 
+      <Suspense fallback={null}>
+        <HomeCategorySection
+          urlKey="omekotiteli"
+          title="Омекотители"
+          href="/prane-vsichko-neobhodimo/omekotiteli"
+        />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <HomeCategorySection
+          urlKey="preparati-za-sadomiyalni"
+          title="Продукти за съдомиялни"
+          href="/grizha-za-doma/kuhnja/preparati-za-sadomiyalni"
+        />
+      </Suspense>
+
     </div>
   );
 }

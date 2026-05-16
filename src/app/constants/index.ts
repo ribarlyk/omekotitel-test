@@ -649,7 +649,8 @@ export const VR_SCHANE_NA_POR_CHKA = {
 };
 
 export const NAVGATIOM_ITEMS = [
-  { name: "Всички продукти", href: "/", main: true },
+  { name: "Категории", href: "/", main: true },
+  { name: "Всички продукти", href: "/products" },
   { name: "Нови", href: "/novi-produkti" },
   { name: "Препоръчани", href: "/preporuchani-produkti" },
   { name: "Оферти", href: "/oferti-produkti" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
 import ProductsList from "@/src/app/components/ProductsList";
 import FilterSidebar, { Aggregation, ActiveFilters } from "@/src/app/components/FilterSidebar";
@@ -166,13 +166,31 @@ export default function CategoryPage({
   const hasMore = products.length < totalCount;
   const hasFilters = aggregations.filter((a) => !["category_id", "category_uid"].includes(a.attribute_code) && a.options.length > 0).length > 0;
 
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loadingMore && !loading && window.innerWidth < 1024) {
+          loadMore();
+        }
+      },
+      { rootMargin: "200px" }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  // loadMore is stable via useCallback but eslint can't see that — deps are correct
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasMore, loadingMore, loading]);
+
   return (
     <div>
       {/* Paired header row — both columns start at exact same y */}
       <div className="hidden lg:flex gap-6 mb-0">
         {hasFilters && (
           <div className="w-52 shrink-0 bg-brand-nav text-white px-3 flex items-center py-1.5">
-            <h2 className="font-bold text-xs uppercase tracking-wide">Пазаруване По</h2>
+            <h2 className="font-bold text-xs uppercase tracking-wide text-black">Пазаруване По</h2>
           </div>
         )}
         <div className="flex-1 min-w-0 flex items-center border-b-2 border-brand-nav py-1.5">
@@ -282,16 +300,23 @@ export default function CategoryPage({
               view={view}
             />
             {hasMore && (
-              <div className="mt-8 mb-16 lg:mb-0 text-center">
-                <button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  className="px-8 py-3 bg-brand-action text-white rounded font-bold uppercase text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 mx-auto"
-                >
-                  {loadingMore && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                  {loadingMore ? "Зарежда се..." : `Покажи още (${products.length} от ${totalCount})`}
-                </button>
-              </div>
+              <>
+                {/* Desktop: manual load-more button */}
+                <div className="hidden lg:flex mt-8 text-center justify-center">
+                  <button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    className="px-8 py-3 bg-brand-action text-white rounded font-bold uppercase text-sm hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2 mx-auto"
+                  >
+                    {loadingMore && <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                    {loadingMore ? "Зарежда се..." : `Покажи още (${products.length} от ${totalCount})`}
+                  </button>
+                </div>
+                {/* Mobile: infinite scroll sentinel */}
+                <div ref={sentinelRef} className="lg:hidden mt-8 mb-20 flex justify-center">
+                  {loadingMore && <Loader2 className="w-8 h-8 animate-spin text-brand-action" />}
+                </div>
+              </>
             )}
           </>
         )}

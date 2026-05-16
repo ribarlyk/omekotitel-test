@@ -41,11 +41,8 @@ interface ProductsResponse {
 }
 
 async function fetchProducts(
-  pageSize: number = 5,
+  pageSize: number = 20,
   currentPage: number = 1,
-  search: string = "",
-  filter: string = "",
-  sort: string = ""
 ): Promise<ProductsResponse | null> {
   try {
     const queryPath = join(
@@ -62,28 +59,14 @@ async function fetchProducts(
 
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query,
-        variables: {
-          pageSize,
-          currentPage,
-          search,
-          filter,
-          sort,
-        },
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, variables: { pageSize, currentPage, search: "а" } }),
+      cache: "no-store",
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
     const data = await response.json();
-
-    console.log("GraphQL Response Data:", data);
     if (data.errors) {
       console.error("GraphQL errors:", data.errors);
       return null;
@@ -91,13 +74,13 @@ async function fetchProducts(
 
     return data.data;
   } catch (error) {
-    console.error("Error fetching bestseller products:", error);
+    console.error("Error fetching products:", error);
     return null;
   }
 }
 
 export async function ProductsSection() {
-  const data = await fetchProducts(20, 2, "", "", "");
+  const data = await fetchProducts(20, 1);
 
   if (!data) {
     return (

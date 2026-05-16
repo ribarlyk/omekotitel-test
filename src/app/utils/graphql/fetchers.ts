@@ -152,7 +152,7 @@ export async function fetchAttributeMetadata() {
 // Uses the products search API with url_key — avoids SKU encoding issues with special characters.
 export async function fetchProductLinkSkus(
   urlKey: string,
-): Promise<{ upsell: string[]; crosssell: string[] }> {
+): Promise<{ upsell: string[]; crosssell: string[]; related: string[] }> {
   try {
     const token = await getMagentoAdminToken();
     const params = new URLSearchParams({
@@ -164,7 +164,7 @@ export async function fetchProductLinkSkus(
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
-    if (!res.ok) return { upsell: [], crosssell: [] };
+    if (!res.ok) return { upsell: [], crosssell: [], related: [] };
 
     type LinkItem = { link_type: string; linked_product_sku: string; position: number };
     const data: { items: { product_links?: LinkItem[] }[] } = await res.json();
@@ -174,10 +174,11 @@ export async function fetchProductLinkSkus(
     return {
       upsell: links.filter((l) => l.link_type === "upsell").sort(byPosition).map((l) => l.linked_product_sku),
       crosssell: links.filter((l) => l.link_type === "crosssell").sort(byPosition).map((l) => l.linked_product_sku),
+      related: links.filter((l) => l.link_type === "related").sort(byPosition).map((l) => l.linked_product_sku),
     };
   } catch (e) {
     console.warn("fetchProductLinkSkus failed:", e);
-    return { upsell: [], crosssell: [] };
+    return { upsell: [], crosssell: [], related: [] };
   }
 }
 

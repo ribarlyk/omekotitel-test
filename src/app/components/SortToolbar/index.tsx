@@ -44,7 +44,7 @@ export default function SortToolbar({
   sortOptions = SORT_OPTIONS,
 }: SortToolbarProps) {
   const from = (currentPage - 1) * pageSize + 1;
-  const to = Math.min(currentPage * pageSize, from + currentCount - 1);
+  const to = Math.min(currentPage * pageSize, totalCount);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
