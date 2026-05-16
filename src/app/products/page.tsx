@@ -4,6 +4,7 @@ import CategoryPage from "@/src/app/components/CategoryPage";
 import { Aggregation } from "@/src/app/components/FilterSidebar";
 import { fetchCatalog, fetchProductsByCategory } from "@/src/app/utils/graphql/fetchers";
 
+// Catalog
 async function CatalogContent() {
   const catalog = await fetchCatalog();
   const root = (catalog.categoryList as { id: number; name: string }[])[0];
