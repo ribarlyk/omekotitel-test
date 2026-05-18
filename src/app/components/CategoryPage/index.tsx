@@ -189,12 +189,12 @@ export default function CategoryPage({
       {/* Paired header row — both columns start at exact same y */}
       <div className="hidden lg:flex gap-6 mb-0">
         {hasFilters && (
-          <div className="w-52 shrink-0 bg-brand-nav text-white px-3 flex items-center py-1.5">
-            <h2 className="font-bold text-xs uppercase tracking-wide text-black">Пазаруване По</h2>
+          <div className="w-52 shrink-0 bg-brand-action text-white px-3 flex items-center py-1.5">
+            <h2 className="font-bold text-xs uppercase tracking-wide">Пазаруване По</h2>
           </div>
         )}
-        <div className="flex-1 min-w-0 flex items-center border-b-2 border-brand-nav py-1.5">
-          <h1 className="text-2xl font-bold text-gray-800">{categoryName}</h1>
+        <div className="flex-1 min-w-0 flex items-center border-b-2 border-brand-action py-1.5">
+          <h1 className="text-2xl font-bold text-brand-nav">{categoryName}</h1>
         </div>
       </div>
 

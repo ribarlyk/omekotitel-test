@@ -71,7 +71,7 @@ export default function FilterSidebar({ aggregations, activeFilters, onToggle, o
   return (
     <aside className={fullWidth ? "w-full" : "w-52 shrink-0"}>
       {showHeader && (
-        <div className="bg-brand-nav text-white px-3 py-1.5">
+        <div className="bg-brand-action text-white px-3 py-1.5">
           <h2 className="font-bold text-xs uppercase tracking-wide">Пазаруване По</h2>
         </div>
       )}

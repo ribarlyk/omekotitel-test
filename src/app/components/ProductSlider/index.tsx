@@ -98,36 +98,36 @@ export default function ProductSlider({
       {/* Header row */}
       <div className="flex items-center justify-between gap-3 mb-2">
         <h2 className={`${titleSize} font-bold text-gray-900 tracking-tight min-w-0 truncate`}>{title}</h2>
-        <div className="flex items-center gap-3 shrink-0">
-          {viewAllHref && (
-            <Link href={viewAllHref} className="text-sm font-medium text-brand-nav hover:text-brand-action transition-colors whitespace-nowrap">
-              Виж всички →
-            </Link>
-          )}
-          {products.length > VISIBLE && (
-            <div className="hidden lg:flex gap-2">
-              <button onClick={() => slideTo(index - 1)} disabled={!canPrev} aria-label="Предишни"
-                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${canPrev ? "border-brand-action text-brand-action hover:bg-brand-action/10" : "border-gray-200 text-gray-300 cursor-not-allowed"}`}>
-                <ChevronLeft size={16} />
-              </button>
-              <button onClick={() => slideTo(index + 1)} disabled={!canNext} aria-label="Следващи"
-                className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${canNext ? "border-brand-action text-brand-action hover:bg-brand-action/10" : "border-gray-200 text-gray-300 cursor-not-allowed"}`}>
-                <ChevronRight size={16} />
-              </button>
-            </div>
-          )}
-        </div>
+        {viewAllHref && (
+          <Link href={viewAllHref} className="text-sm font-medium text-brand-nav hover:text-brand-action transition-colors whitespace-nowrap shrink-0">
+            Виж всички →
+          </Link>
+        )}
       </div>
       <div className="h-0.5 w-full mb-5" style={{ background: "linear-gradient(to right, #98ab3f 60px, #e5e7eb 60px)" }} />
 
       {/* Desktop: windowed slider */}
-      <div className="hidden lg:block overflow-hidden">
-        <div ref={trackRef} className="flex gap-4 transition-transform duration-300 ease-in-out" style={{ willChange: "transform" }}>
-          {products.map((product, i) => (
-            <div key={product.id} className="w-[calc(25%-12px)] shrink-0 self-stretch">
-              <ProductCard product={product} index={i} view="grid" />
-            </div>
-          ))}
+      <div className="hidden lg:block relative">
+        {products.length > VISIBLE && (
+          <>
+            <button onClick={() => slideTo(index - 1)} disabled={!canPrev} aria-label="Предишни"
+              className={`absolute -left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border bg-white shadow flex items-center justify-center transition-colors ${canPrev ? "border-brand-action text-brand-action hover:bg-brand-action/10" : "border-gray-200 text-gray-300 cursor-not-allowed"}`}>
+              <ChevronLeft size={18} />
+            </button>
+            <button onClick={() => slideTo(index + 1)} disabled={!canNext} aria-label="Следващи"
+              className={`absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full border bg-white shadow flex items-center justify-center transition-colors ${canNext ? "border-brand-action text-brand-action hover:bg-brand-action/10" : "border-gray-200 text-gray-300 cursor-not-allowed"}`}>
+              <ChevronRight size={18} />
+            </button>
+          </>
+        )}
+        <div className="overflow-hidden">
+          <div ref={trackRef} className="flex gap-4 transition-transform duration-300 ease-in-out" style={{ willChange: "transform" }}>
+            {products.map((product, i) => (
+              <div key={product.id} className="w-[calc(25%-12px)] shrink-0 self-stretch">
+                <ProductCard product={product} index={i} view="grid" />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

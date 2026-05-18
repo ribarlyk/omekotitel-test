@@ -166,7 +166,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
       {/* Header row */}
       <div className="hidden lg:flex gap-6 mb-0">
         {hasFilters && (
-          <div className="w-52 shrink-0 bg-brand-nav text-white px-3 flex items-center py-1.5">
+          <div className="w-52 shrink-0 bg-brand-action text-white px-3 flex items-center py-1.5">
             <h2 className="font-bold text-xs uppercase tracking-wide">Пазаруване По</h2>
           </div>
         )}

@@ -11,6 +11,8 @@ import {
   Check,
   Truck,
   Package,
+  X,
+  ZoomIn,
 } from "lucide-react";
 import { toast } from "sonner";
 import { magentoImageUrl } from "@/src/app/utils/image";
@@ -139,6 +141,18 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
   }, [linksLoading]);
 
   const [imageIndex, setImageIndex] = useState(0);
+  const [zoomOpen, setZoomOpen] = useState(false);
+
+  useEffect(() => {
+    if (!zoomOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setZoomOpen(false);
+      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "ArrowRight") nextImage();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [zoomOpen, imageIndex]);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, number>>({});
   const [quantity, setQuantity] = useState(1);
   const [addStatus, setAddStatus] = useState<AddStatus>("idle");
@@ -314,6 +328,15 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
 
           {/* Main stage */}
           <div className="flex-1 relative bg-white rounded-2xl border border-gray-200 overflow-hidden h-72 sm:h-96 lg:h-115">
+            <button
+              onClick={() => setZoomOpen(true)}
+              className="absolute inset-0 w-full h-full cursor-zoom-in z-10 group flex items-center justify-center"
+              aria-label="Увеличи снимката"
+            >
+              <div className="opacity-0 group-hover:opacity-60 transition-opacity duration-200 bg-white/80 rounded-full p-4">
+                <ZoomIn size={32} className="text-gray-600" />
+              </div>
+            </button>
             <MagentoImage
               src={magentoImageUrl(images[imageIndex]?.url ?? product.image.url)}
               alt={images[imageIndex]?.label || product.name}
@@ -329,36 +352,32 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
                 <button
                   onClick={prevImage}
                   aria-label="Предишна снимка"
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 border border-gray-200 flex items-center justify-center shadow-sm hover:bg-white hover:shadow transition-all"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white/90 border border-brand-action text-brand-action flex items-center justify-center shadow-sm hover:bg-brand-action/10 hover:shadow transition-all"
                 >
                   <ChevronLeft size={15} />
                 </button>
                 <button
                   onClick={nextImage}
                   aria-label="Следваща снимка"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 border border-gray-200 flex items-center justify-center shadow-sm hover:bg-white hover:shadow transition-all"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white/90 border border-brand-action text-brand-action flex items-center justify-center shadow-sm hover:bg-brand-action/10 hover:shadow transition-all"
                 >
                   <ChevronRight size={15} />
                 </button>
 
-                {/* Dot indicators (mobile) */}
-                <div className="sm:hidden absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                {/* Dot indicators */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
                   {images.map((_, i) => (
                     <button
                       key={i}
                       onClick={() => setImageIndex(i)}
-                      className={`rounded-full transition-all duration-200 ${
-                        i === imageIndex
-                          ? "w-5 h-2 bg-brand-action"
-                          : "w-2 h-2 bg-gray-300"
-                      }`}
+                      className="rounded-full transition-all duration-300"
+                      style={{
+                        width: i === imageIndex ? 24 : 8,
+                        height: 8,
+                        background: i === imageIndex ? "#98ab3f" : "#d1d5db",
+                      }}
                     />
                   ))}
-                </div>
-
-                {/* Counter */}
-                <div className="absolute bottom-3 right-3 text-xs text-gray-500 bg-white/80 border border-gray-200 px-2.5 py-1 rounded-full hidden sm:block">
-                  {imageIndex + 1} / {images.length}
                 </div>
               </>
             )}
@@ -720,6 +739,57 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
           </div>
         </div>
       </div>
+
+      {/* Lightbox */}
+      {zoomOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setZoomOpen(false)}
+        >
+          <button
+            onClick={() => setZoomOpen(false)}
+            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+            aria-label="Затвори"
+          >
+            <X size={20} />
+          </button>
+
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                aria-label="Предишна снимка"
+              >
+                <ChevronLeft size={22} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                aria-label="Следваща снимка"
+              >
+                <ChevronRight size={22} />
+              </button>
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm">
+                {imageIndex + 1} / {images.length}
+              </div>
+            </>
+          )}
+
+          <div
+            className="relative w-full h-full max-w-4xl max-h-[90vh] mx-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <MagentoImage
+              src={magentoImageUrl(images[imageIndex]?.url ?? product.image.url)}
+              alt={images[imageIndex]?.label || product.name}
+              fill
+              style={{ objectFit: "contain" }}
+              sizes="100vw"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
