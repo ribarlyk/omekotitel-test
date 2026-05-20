@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import Link from "next/link";
 import { fetchCatalog } from "@/src/app/utils/graphql/fetchers";
 import { NavCatalogCategory } from "@/src/app/constants";
 import { magentoImageUrl } from "@/src/app/utils/image";
+
+export const metadata: Metadata = {
+  title: { absolute: "Марки | omekotitel.bg" },
+  description: "Разгледайте всички марки продукти в omekotitel.bg — широк избор от водещи производители на препарати и аксесоари за дома.",
+  alternates: { canonical: "/marki-brands" },
+  openGraph: {
+    type: "website",
+    url: "/marki-brands",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Марки | omekotitel.bg" },
+    description: "Разгледайте всички марки продукти в omekotitel.bg — широк избор от водещи производители на препарати и аксесоари за дома.",
+  },
+};
 
 const MAGENTO_ORIGIN = new URL(process.env.GRAPHQL_URL!).origin;
 

@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { fetchSearchProducts } from "@/src/app/utils/graphql/fetchers";
 import SearchPage from "@/src/app/components/SearchPage";
 import { Aggregation } from "@/src/app/components/FilterSidebar";
+
+export const metadata: Metadata = {
+  title: { absolute: "Търсене | omekotitel.bg" },
+  robots: { index: false, follow: false },
+};
 
 export default async function SearchPageRoute({
   searchParams,

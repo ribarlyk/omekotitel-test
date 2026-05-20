@@ -4,6 +4,9 @@ query GetProductDetail($urlKey: String!) {
       id
       name
       sku
+      meta_title
+      meta_description
+      meta_keyword
       description {
         html
       }

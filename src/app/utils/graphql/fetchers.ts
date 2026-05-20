@@ -191,6 +191,30 @@ export async function fetchProductsBySku(skus: string[]) {
   return (data.products?.items ?? []) as import("@/src/app/components/ProductCard").ProductCardProduct[];
 }
 
+export async function fetchAllProductUrlKeys(): Promise<string[]> {
+  const catalog = await fetchCatalog();
+  const rootId = (catalog.categoryList[0] as { id: number }).id;
+  const PAGE_SIZE = 200;
+  const urlKeys = new Set<string>();
+  let page = 1;
+  let totalPages = 1;
+  do {
+    const data = await gql<{
+      products: { items: { url_key: string }[]; page_info: { total_pages: number } };
+    }>(
+      print(Queries.GET_PRODUCTS_SITEMAP),
+      { filter: { category_id: { eq: String(rootId) } }, pageSize: PAGE_SIZE, currentPage: page },
+      { revalidate: 3600, tags: ["sitemap-products"] },
+    );
+    for (const item of data.products.items) {
+      if (item.url_key) urlKeys.add(item.url_key);
+    }
+    totalPages = data.products.page_info.total_pages;
+    page++;
+  } while (page <= totalPages);
+  return [...urlKeys];
+}
+
 // Search is intentionally uncached — results must reflect live inventory.
 export async function fetchSearchProducts(search: string, pageSize = 20) {
   return gql<{ products: { items: unknown[]; total_count: number; aggregations: unknown[] } }>(

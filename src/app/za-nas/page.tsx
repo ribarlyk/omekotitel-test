@@ -3,9 +3,18 @@ import { Phone, Mail } from "lucide-react";
 import { ZA_NAS_INFO } from "@/src/app/constants";
 
 export const metadata: Metadata = {
-  title: "За нас | omekotitel.bg",
+  title: { absolute: "За нас | omekotitel.bg" },
   description:
     "Приветстваме ви на сайта, на който може да откриете голямо разнообразие от професионални препарати за дома, бизнеса, консумативи и аксесоари.",
+  alternates: { canonical: "/za-nas" },
+  openGraph: {
+    type: "website",
+    url: "/za-nas",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "За нас | omekotitel.bg" },
+    description: "Приветстваме ви на сайта, на който може да откриете голямо разнообразие от професионални препарати за дома, бизнеса, консумативи и аксесоари.",
+  },
 };
 
 export default function ZaNasPage() {

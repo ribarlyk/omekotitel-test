@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import ForgotPassword from "@/src/app/components/auth/ForgotPassword";
+
+export const metadata: Metadata = {
+  title: { absolute: "Забравена парола | omekotitel.bg" },
+  robots: { index: false, follow: false },
+};
 
 export default function ForgotPasswordPage() {
   return (

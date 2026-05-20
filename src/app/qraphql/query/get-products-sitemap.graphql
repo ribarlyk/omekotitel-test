@@ -1,0 +1,10 @@
+query GetProductsSitemap($filter: ProductAttributeFilterInput!, $pageSize: Int!, $currentPage: Int!) {
+  products(filter: $filter, pageSize: $pageSize, currentPage: $currentPage) {
+    items {
+      url_key
+    }
+    page_info {
+      total_pages
+    }
+  }
+}

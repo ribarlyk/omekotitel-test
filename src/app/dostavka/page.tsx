@@ -3,9 +3,18 @@ import { Truck } from "lucide-react";
 import { DELIVERY_INFO } from "@/src/app/constants";
 
 export const metadata: Metadata = {
-  title: "Условия за Доставка | omekotitel.bg",
+  title: { absolute: "Условия за Доставка | omekotitel.bg" },
   description:
     "Информация за начините и цените на доставка чрез Еконт и Speedy, включително безплатна доставка при поръчка над 50 €.",
+  alternates: { canonical: "/dostavka" },
+  openGraph: {
+    type: "website",
+    url: "/dostavka",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Условия за Доставка | omekotitel.bg" },
+    description: "Информация за начините и цените на доставка чрез Еконт и Speedy, включително безплатна доставка при поръчка над 50 €.",
+  },
 };
 
 export default function DostavkaPage() {

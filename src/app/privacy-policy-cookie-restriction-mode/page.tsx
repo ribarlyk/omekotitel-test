@@ -3,9 +3,18 @@ import { Phone, Mail } from "lucide-react";
 import { PRIVACY_POLICY } from "@/src/app/constants";
 
 export const metadata: Metadata = {
-  title: "Политика за поверителност | omekotitel.bg",
+  title: { absolute: "Политика за поверителност | omekotitel.bg" },
   description:
     `Политика за защита на личните данни, поверителност и "бисквитки" на omekotitel.bg`,
+  alternates: { canonical: "/privacy-policy-cookie-restriction-mode" },
+  openGraph: {
+    type: "website",
+    url: "/privacy-policy-cookie-restriction-mode",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Политика за поверителност | omekotitel.bg" },
+    description: `Политика за защита на личните данни, поверителност и "бисквитки" на omekotitel.bg`,
+  },
 };
 
 export default function PrivacyPolicyPage() {

@@ -343,7 +343,7 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
               fill
               style={{ objectFit: "contain" }}
               className="p-6 sm:p-10"
-              fetchPriority="high"
+              priority
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
 
@@ -748,27 +748,27 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
         >
           <button
             onClick={() => setZoomOpen(false)}
-            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+            className="absolute top-4 right-4 z-20 w-13 h-13 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-colors"
             aria-label="Затвори"
           >
-            <X size={20} />
+            <X size={24} />
           </button>
 
           {images.length > 1 && (
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); prevImage(); }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-13 h-13 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-colors shadow-lg"
                 aria-label="Предишна снимка"
               >
-                <ChevronLeft size={22} />
+                <ChevronLeft size={26} />
               </button>
               <button
                 onClick={(e) => { e.stopPropagation(); nextImage(); }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-13 h-13 rounded-full bg-white/20 hover:bg-white/30 border border-white/30 flex items-center justify-center text-white transition-colors shadow-lg"
                 aria-label="Следваща снимка"
               >
-                <ChevronRight size={22} />
+                <ChevronRight size={26} />
               </button>
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm">
                 {imageIndex + 1} / {images.length}
@@ -777,7 +777,7 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
           )}
 
           <div
-            className="relative w-full h-full max-w-4xl max-h-[90vh] mx-8"
+            className="relative w-full h-full max-w-4xl max-h-[90vh] mx-16"
             onClick={(e) => e.stopPropagation()}
           >
             <MagentoImage

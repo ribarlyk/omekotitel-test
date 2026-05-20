@@ -3,9 +3,18 @@ import { Phone, Mail } from "lucide-react";
 import { VR_SCHANE_NA_POR_CHKA } from "@/src/app/constants";
 
 export const metadata: Metadata = {
-  title: "Право на отказ | omekotitel.bg",
+  title: { absolute: "Право на отказ | omekotitel.bg" },
   description:
     "Право на отказ и връщане на поръчка - 14 дни на omekotitel.bg",
+  alternates: { canonical: "/vr-schane-na-por-chka" },
+  openGraph: {
+    type: "website",
+    url: "/vr-schane-na-por-chka",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Право на отказ | omekotitel.bg" },
+    description: "Право на отказ и връщане на поръчка - 14 дни на omekotitel.bg",
+  },
 };
 
 export default function VrSchaneNaPorchkaPage() {

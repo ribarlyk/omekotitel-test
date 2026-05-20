@@ -9,6 +9,8 @@ query GetCategoryTree {
     product_count
     children_count
     image
+    meta_title
+    meta_description
     children {
       id
       name
@@ -19,6 +21,8 @@ query GetCategoryTree {
       product_count
       children_count
       image
+      meta_title
+      meta_description
       children {
         id
         name
@@ -29,6 +33,8 @@ query GetCategoryTree {
         product_count
         children_count
         image
+        meta_title
+        meta_description
         children {
           id
           name
@@ -39,6 +45,8 @@ query GetCategoryTree {
           product_count
           children_count
           image
+          meta_title
+          meta_description
         }
       }
     }

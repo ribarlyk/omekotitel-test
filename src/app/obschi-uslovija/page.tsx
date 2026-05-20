@@ -3,9 +3,18 @@ import { Phone, Mail } from "lucide-react";
 import { OBSCHI_USLOVIJA } from "@/src/app/constants";
 
 export const metadata: Metadata = {
-  title: "Общи условия | omekotitel.bg",
+  title: { absolute: "Общи условия | omekotitel.bg" },
   description:
     "Общи условия на онлайн магазин OMEKOTITEL.BG, содържащи информация за правата и задълженията на потребителите и доставчика.",
+  alternates: { canonical: "/obschi-uslovija" },
+  openGraph: {
+    type: "website",
+    url: "/obschi-uslovija",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Общи условия | omekotitel.bg" },
+    description: "Общи условия на онлайн магазин OMEKOTITEL.BG, содържащи информация за правата и задълженията на потребителите и доставчика.",
+  },
 };
 
 export default function ObshchiUsloviyaPage() {

@@ -17,6 +17,8 @@ import { ScrollToTop } from "./components/ScrollToTop";
 import { Footer } from "./components/Footer";
 import { Breadcrumb } from "./components/Breadcrumb";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
+import { JsonLd } from "./components/JsonLd";
+import { buildOrganizationSchema, buildWebSiteSchema } from "./utils/seo";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -25,8 +27,32 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Онлайн магазин за омекотители и аксесоари | omekotitel.bg",
-  description: "Онлайн магазин за омекотители и аксесоари",
+  title: {
+    default: "Онлайн магазин за омекотители и аксесоари | omekotitel.bg",
+    template: "%s | omekotitel.bg",
+  },
+  description:
+    "Открийте широк асортимент от омекотители, перилни препарати и домашни аксесоари. Бърза доставка до офис на Еконт или Спиди в цяла България.",
+  metadataBase: new URL("https://omekotitel.bg"),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    images: [{ url: "/assets/hero-omekotitel.png", width: 1200, height: 630, alt: "Omekotitel.bg" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 
@@ -40,6 +66,9 @@ export default async function RootLayout({
 
   return (
     <html lang="bg">
+      <head>
+        <JsonLd data={[buildOrganizationSchema(), buildWebSiteSchema()]} />
+      </head>
       <body
         className={`${roboto.variable} antialiased`}
         suppressHydrationWarning={true}

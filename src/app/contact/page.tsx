@@ -4,8 +4,17 @@ import ContactForm from "@/src/app/components/ContactForm";
 import { ZA_NAS_INFO } from "@/src/app/constants";
 
 export const metadata: Metadata = {
-  title: "Контакти | omekotitel.bg",
+  title: { absolute: "Контакти | omekotitel.bg" },
   description: "Свържете се с нас по телефон или имейл, или попълнете формата и ние ще отговорим при първа възможност.",
+  alternates: { canonical: "/contact" },
+  openGraph: {
+    type: "website",
+    url: "/contact",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Контакти | omekotitel.bg" },
+    description: "Свържете се с нас по телефон или имейл, или попълнете формата и ние ще отговорим при първа възможност.",
+  },
 };
 
 export default function ContactPage() {

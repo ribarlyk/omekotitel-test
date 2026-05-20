@@ -17,8 +17,6 @@ export const FOOTER_COLUMNS = [
       { label: "Моят акаунт", href: "/customer/account/login" },
       { label: "История на поръчките", href: "/sales/order/history" },
       { label: "Връщане на поръчка", href: "/vr-schane-na-por-chka" },
-      { label: "Любими продукти", href: "/wishlist" },
-      { label: "Сравни продукти", href: "/catalog/product_compare/" },
     ],
   },
   {

@@ -8,6 +8,7 @@ import GET_CUSTOMER_WISHLIST from "@/src/app/qraphql/query/get-customer-wishlist
 import SEARCH_PRODUCTS from "@/src/app/qraphql/query/search-products.graphql";
 import GET_ATTRIBUTE_METADATA from "@/src/app/qraphql/query/get-attribute-metadata.graphql";
 import GET_PRODUCTS_BY_SKU from "@/src/app/qraphql/query/get-products-by-sku.graphql";
+import GET_PRODUCTS_SITEMAP from "@/src/app/qraphql/query/get-products-sitemap.graphql";
 
 export const Queries = {
   GET_CATALOG,
@@ -20,4 +21,5 @@ export const Queries = {
   SEARCH_PRODUCTS,
   GET_ATTRIBUTE_METADATA,
   GET_PRODUCTS_BY_SKU,
+  GET_PRODUCTS_SITEMAP,
 };

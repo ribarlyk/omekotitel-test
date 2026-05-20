@@ -1,8 +1,23 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 import CategoryPage from "@/src/app/components/CategoryPage";
 import { Aggregation } from "@/src/app/components/FilterSidebar";
 import { fetchCatalog, fetchProductsByCategory } from "@/src/app/utils/graphql/fetchers";
+
+export const metadata: Metadata = {
+  title: { absolute: "Всички продукти | omekotitel.bg" },
+  description: "Открийте пълния асортимент от омекотители, перилни препарати и домашни аксесоари на omekotitel.bg. Бърза доставка в цяла България.",
+  alternates: { canonical: "/products" },
+  openGraph: {
+    type: "website",
+    url: "/products",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Всички продукти | omekotitel.bg" },
+    description: "Открийте пълния асортимент от омекотители, перилни препарати и домашни аксесоари на omekotitel.bg. Бърза доставка в цяла България.",
+  },
+};
 
 // Catalog
 async function CatalogContent() {

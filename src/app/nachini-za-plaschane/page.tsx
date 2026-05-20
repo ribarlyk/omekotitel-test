@@ -3,9 +3,18 @@ import { Phone, Mail } from "lucide-react";
 import { NACHINI_ZA_PLASCHANE } from "@/src/app/constants";
 
 export const metadata: Metadata = {
-  title: "Начини за плащане | omekotitel.bg",
+  title: { absolute: "Начини за плащане | omekotitel.bg" },
   description:
     "Начини за плащане - Revolut Pay, карта и плащане при доставка на omekotitel.bg",
+  alternates: { canonical: "/nachini-za-plaschane" },
+  openGraph: {
+    type: "website",
+    url: "/nachini-za-plaschane",
+    locale: "bg_BG",
+    siteName: "Omekotitel.bg",
+    title: { absolute: "Начини за плащане | omekotitel.bg" },
+    description: "Начини за плащане - Revolut Pay, карта и плащане при доставка на omekotitel.bg",
+  },
 };
 
 export default function NachinaZaPlaschane() {
