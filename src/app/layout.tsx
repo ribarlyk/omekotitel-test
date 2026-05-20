@@ -19,6 +19,7 @@ import { Breadcrumb } from "./components/Breadcrumb";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import { JsonLd } from "./components/JsonLd";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./utils/seo";
+import { Analytics } from "@vercel/analytics/next"
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -100,6 +101,7 @@ export default async function RootLayout({
             </CartProvider>
           </AuthProvider>
         </ApolloWrapper>
+        <Analytics />
       </body>
     </html>
   );
