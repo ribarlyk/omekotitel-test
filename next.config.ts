@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
         pathname: "/pub/media/**",
       },
     ],
+    // change to false on production to enable built-in optimizations (resizing, WebP conversion, etc.)
+    unoptimized:true,
     // Only generate WebP — avif doubles transformations with negligible visual gain
     formats: ["image/webp"],
     // 31 days: product images rarely change, so skip re-transforming on every request
