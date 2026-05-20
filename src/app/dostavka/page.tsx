@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     url: "/dostavka",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Условия за Доставка | omekotitel.bg" },
+    title: "Условия за Доставка | omekotitel.bg",
     description: "Информация за начините и цените на доставка чрез Еконт и Speedy, включително безплатна доставка при поръчка над 50 €.",
   },
 };

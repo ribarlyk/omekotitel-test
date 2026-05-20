@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     url: "/marki-brands",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Марки | omekotitel.bg" },
+    title: "Марки | omekotitel.bg",
     description: "Разгледайте всички марки продукти в omekotitel.bg — широк избор от водещи производители на препарати и аксесоари за дома.",
   },
 };

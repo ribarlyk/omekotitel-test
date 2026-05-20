@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     url: "/nachini-za-plaschane",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Начини за плащане | omekotitel.bg" },
+    title: "Начини за плащане | omekotitel.bg",
     description: "Начини за плащане - Revolut Pay, карта и плащане при доставка на omekotitel.bg",
   },
 };

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     url: "/vr-schane-na-por-chka",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Право на отказ | omekotitel.bg" },
+    title: "Право на отказ | omekotitel.bg",
     description: "Право на отказ и връщане на поръчка - 14 дни на omekotitel.bg",
   },
 };

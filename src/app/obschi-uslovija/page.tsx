@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     url: "/obschi-uslovija",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Общи условия | omekotitel.bg" },
+    title: "Общи условия | omekotitel.bg",
     description: "Общи условия на онлайн магазин OMEKOTITEL.BG, содържащи информация за правата и задълженията на потребителите и доставчика.",
   },
 };

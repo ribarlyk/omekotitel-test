@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     url: "/contact",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Контакти | omekotitel.bg" },
+    title: "Контакти | omekotitel.bg",
     description: "Свържете се с нас по телефон или имейл, или попълнете формата и ние ще отговорим при първа възможност.",
   },
 };

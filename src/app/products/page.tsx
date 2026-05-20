@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     url: "/products",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Всички продукти | omekotitel.bg" },
+    title: "Всички продукти | omekotitel.bg",
     description: "Открийте пълния асортимент от омекотители, перилни препарати и домашни аксесоари на omekotitel.bg. Бърза доставка в цяла България.",
   },
 };

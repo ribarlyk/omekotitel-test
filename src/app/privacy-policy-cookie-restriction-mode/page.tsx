@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     url: "/privacy-policy-cookie-restriction-mode",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "Политика за поверителност | omekotitel.bg" },
+    title: "Политика за поверителност | omekotitel.bg",
     description: `Политика за защита на личните данни, поверителност и "бисквитки" на omekotitel.bg`,
   },
 };

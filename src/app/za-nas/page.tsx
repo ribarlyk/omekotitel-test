@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     url: "/za-nas",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    title: { absolute: "За нас | omekotitel.bg" },
+    title: "За нас | omekotitel.bg",
     description: "Приветстваме ви на сайта, на който може да откриете голямо разнообразие от професионални препарати за дома, бизнеса, консумативи и аксесоари.",
   },
 };
