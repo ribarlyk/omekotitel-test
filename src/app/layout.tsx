@@ -20,6 +20,8 @@ import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import { JsonLd } from "./components/JsonLd";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./utils/seo";
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
+import { GoogleAnalytics } from "@next/third-parties/google"
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -101,7 +103,9 @@ export default async function RootLayout({
             </CartProvider>
           </AuthProvider>
         </ApolloWrapper>
+        {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
