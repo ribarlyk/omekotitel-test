@@ -9,7 +9,14 @@
       "PowerShell($body = '{\"query\":\"{ __type\\(name: \\\\\"ProductInterface\\\\\"\\) { fields { name } } }\"}'; $response = Invoke-WebRequest -Uri \"https://omekotitel.bg/graphql\" -Method POST -ContentType \"application/json\" -Body $body; $response.Content | ConvertFrom-Json | ConvertTo-Json -Depth 5)",
       "Bash(curl -s https://omekotitel.bg/graphql -H 'Content-Type: application/json' --data-raw '{\"query\":\"{ __type\\(name: \\\\\"ProductInterface\\\\\"\\) { fields { name } } }\"}')",
       "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(f['name']\\) for f in data['data']['__type']['fields']]\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\public\\\\\" | Select-Object Name; Get-ChildItem \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\src\\\\app\\\\\" | Where-Object { $_.Extension -match \"png|ico\" } | Select-Object Name)",
+      "PowerShell(Get-ChildItem \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\public\\\\\"; Get-ChildItem \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\src\\\\app\\\\\" | Where-Object { $_.Extension -in \".png\",\".ico\" })",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\src\\\\app\\\\apple-touch-icon.png\" \"apple-icon.png\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\public\\\\android-chrome-192x192.png\" \"icon-192.png\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\public\\\\android-chrome-512x512.png\" \"icon-512.png\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\public\\\\favicon-32x32.png\" \"icon.png\")",
+      "PowerShell(Rename-Item \"C:\\\\Users\\\\pavel\\\\Desktop\\\\omekotitel\\\\omekotitel\\\\public\\\\favicon-16x16.png\" \"icon-16.png\")"
     ]
   }
 }

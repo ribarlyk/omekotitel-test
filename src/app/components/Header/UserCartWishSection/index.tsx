@@ -24,7 +24,7 @@ const PANEL_TITLES: Record<Panel, string> = {
 };
 
 export const UserCartWishSection = ({
-  showWishlist = true,
+  showWishlist = false,
   showPhone = true,
   showLabels = true,
   iconSize = 24,

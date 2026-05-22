@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { isProductNew, isProductOnSale, discountPercent } from "@/src/app/utils/productBadges";
 import ConfigurableProductModal from "@/src/app/components/ConfigurableProductModal";
 import type { ViewMode } from "@/src/app/components/SortToolbar";
+import { prefetchProductLinks } from "@/src/app/components/ProductDetail";
 
 export interface ProductCardProduct {
   id: string;
@@ -183,6 +184,7 @@ export default function ProductCard({ product, index = 0, view = "grid" }: Produ
       <>
       <Link
         href={`/${product.url_key}`}
+        onMouseDown={() => prefetchProductLinks(product.url_key)}
         className="flex gap-4 border border-gray-200 rounded-xl bg-white hover:shadow-lg hover:border-brand-action/40 transition-all duration-200 group overflow-hidden"
       >
         <div className="relative shrink-0 overflow-hidden w-30">
@@ -227,6 +229,7 @@ export default function ProductCard({ product, index = 0, view = "grid" }: Produ
     <>
     <Link
       href={`/${product.url_key}`}
+      onMouseDown={() => prefetchProductLinks(product.url_key)}
       className="flex flex-col h-full border border-gray-200 rounded-xl bg-white hover:shadow-xl hover:border-brand-action/40 transition-all duration-200 group overflow-hidden"
     >
       <div className="relative overflow-hidden">

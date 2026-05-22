@@ -55,10 +55,10 @@ export async function GET(request: NextRequest) {
     const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
     if (!GRAPHQL_ENDPOINT) return NextResponse.json({ error: "GRAPHQL_URL not configured" }, { status: 500 });
 
-    const VALID_SORT_FIELDS = new Set(["name", "price", "relevance"]);
+    const VALID_SORT_FIELDS = new Set(["name", "price"]);
     const sortField = searchParams.get("sortField") ?? "relevance";
     const sortDir = searchParams.get("sortDir") === "DESC" ? "DESC" : "ASC";
-    const sort = { [VALID_SORT_FIELDS.has(sortField) ? sortField : "relevance"]: sortDir };
+    const sort = VALID_SORT_FIELDS.has(sortField) ? { [sortField]: sortDir } : undefined;
 
     const filter = buildFilter(rawFilters);
 

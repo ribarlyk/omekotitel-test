@@ -55,26 +55,45 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Set shipping address — response includes available_shipping_methods
-    const addrResp = await fetch(GRAPHQL_ENDPOINT, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        query: print(Mutations.SET_SHIPPING_ADDRESSES_ON_CART),
-        variables: {
-          cartId,
-          firstname: shippingAddress.firstname,
-          lastname: shippingAddress.lastname,
-          street: [shippingAddress.street],
-          city: shippingAddress.city,
-          region: shippingAddress.region,
-          postcode: shippingAddress.postcode,
-          country_code: shippingAddress.country_code,
-          telephone: shippingAddress.telephone,
-        },
+    // Set shipping address and fetch payment methods in parallel — they don't depend on each other
+    const [addrResp, pmResp] = await Promise.all([
+      fetch(GRAPHQL_ENDPOINT, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          query: print(Mutations.SET_SHIPPING_ADDRESSES_ON_CART),
+          variables: {
+            cartId,
+            firstname: shippingAddress.firstname,
+            lastname: shippingAddress.lastname,
+            street: [shippingAddress.street],
+            city: shippingAddress.city,
+            region: shippingAddress.region,
+            postcode: shippingAddress.postcode,
+            country_code: shippingAddress.country_code,
+            telephone: shippingAddress.telephone,
+          },
+        }),
       }),
-    });
-    const addrData = await addrResp.json();
+      fetch(GRAPHQL_ENDPOINT, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          query: `query GetPaymentMethods($cartId: String!) {
+            cart(cart_id: $cartId) {
+              available_payment_methods {
+                code
+                title
+              }
+            }
+          }`,
+          variables: { cartId },
+        }),
+      }),
+    ]);
+
+    const [addrData, pmData] = await Promise.all([addrResp.json(), pmResp.json()]);
+
     if (addrData.errors) {
       return NextResponse.json(
         { message: addrData.errors[0]?.message ?? "Failed to set shipping address" },
@@ -86,23 +105,6 @@ export async function POST(request: NextRequest) {
       addrData.data?.setShippingAddressesOnCart?.cart?.shipping_addresses?.[0]
         ?.available_shipping_methods ?? [];
 
-    // Fetch available payment methods
-    const pmResp = await fetch(GRAPHQL_ENDPOINT, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({
-        query: `query GetPaymentMethods($cartId: String!) {
-          cart(cart_id: $cartId) {
-            available_payment_methods {
-              code
-              title
-            }
-          }
-        }`,
-        variables: { cartId },
-      }),
-    });
-    const pmData = await pmResp.json();
     // Filter out banktransfer — it is reserved as the internal bridge for Revolut Pay orders
     const paymentMethods = (pmData.data?.cart?.available_payment_methods ?? []).filter(
       (m: { code: string }) => m.code !== "banktransfer"

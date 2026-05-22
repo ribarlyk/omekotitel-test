@@ -6,7 +6,6 @@ import { SECTION_LABELS, ProfileSection } from "@/src/app/components/Profile/sec
 
 const MENU_ITEMS: ProfileSection[] = [
   ProfileSection.Orders,
-  ProfileSection.Wishlist,
   ProfileSection.Details,
 ];
 

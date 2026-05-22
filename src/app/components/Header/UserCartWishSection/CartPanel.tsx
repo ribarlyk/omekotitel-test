@@ -34,8 +34,10 @@ const QuantityInput = ({ id, quantity, isUpdating, onUpdate }: QuantityInputProp
     setValue(raw);
     const num = parseInt(raw);
     if (!isNaN(num) && num >= 1) {
-      if (num > 99) {
-        toast.warning("За количества над 99 бр. моля обадете се на 0888787852 за наличност.");
+      if (num > 10) {
+        toast.warning("Максималното количество е 10 бр. За повече моля обадете се на 0884358676.");
+        setValue("10");
+        debouncedUpdate(id, 10);
         return;
       }
       debouncedUpdate(id, num);
@@ -190,13 +192,18 @@ export const CartPanel = ({ onClose }: { onClose: () => void }) => {
                       />
                     </span>
                     <div
-                      onClick={() => updatingId !== item.id && handleUpdateQuantity(item.id, item.quantity + 1)}
-                      className={`w-8 h-8 flex items-center justify-center bg-brand-action-light text-white hover:bg-brand-action transition-colors cursor-pointer ${updatingId === item.id ? "opacity-30 pointer-events-none" : ""}`}
+                      onClick={() => updatingId !== item.id && item.quantity < 10 && handleUpdateQuantity(item.id, item.quantity + 1)}
+                      className={`w-8 h-8 flex items-center justify-center bg-brand-action-light text-white hover:bg-brand-action transition-colors cursor-pointer ${updatingId === item.id || item.quantity >= 10 ? "opacity-30 pointer-events-none" : ""}`}
                     >
                       <Plus size={14} />
                     </div>
                   </div>
-                  <span className="text-sm text-gray-700">{price.value.toFixed(2)} {price.currency}</span>
+                  <span className="text-sm text-gray-700">
+                    {price.value.toFixed(2)} {price.currency}
+                    {item.quantity > 1 && (
+                      <span className="text-gray-400 ml-1">({(price.value * item.quantity).toFixed(2)} {price.currency})</span>
+                    )}
+                  </span>
                 </div>
               </div>
               <button

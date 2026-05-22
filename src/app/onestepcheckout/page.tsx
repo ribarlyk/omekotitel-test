@@ -6,6 +6,7 @@ import {
   useRef,
   useOptimistic,
   useTransition,
+  startTransition,
 } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +22,7 @@ import {
   Check,
   ShieldCheck,
 } from "lucide-react";
-import { CourierOfficeSelector } from "@/src/app/components/CourierOfficeSelector";
+import { CourierOfficeSelector, prefetchOffices } from "@/src/app/components/CourierOfficeSelector";
 import Link from "next/link";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import { magentoImageUrl } from "@/src/app/utils/image";
@@ -32,7 +33,7 @@ import TurnstileWidget from "@/src/app/components/Turnstile";
 // ─── Form schema ──────────────────────────────────────────────────────────────
 const addressSchema = z.object({
   email: z.string().min(1, "Въведете имейл").email("Невалиден имейл адрес"),
-  firstname: z.string().min(1, "Въведете ime"),
+  firstname: z.string().min(1, "Въведете име"),
   lastname: z.string().min(1, "Въведете фамилия"),
   telephone: z.string().min(6, "Въведете телефон"),
   street: z.string().min(1, "Въведете адрес"),
@@ -105,13 +106,14 @@ function Field({
   );
 }
 
-function SectionHeader({ number, title }: { number: string; title: string }) {
+function SectionHeader({ number, title, loading }: { number: string; title: string; loading?: boolean }) {
   return (
     <div className="flex items-center gap-3 mb-5">
       <div className="w-7 h-7 rounded-full bg-brand-nav flex items-center justify-center text-xs font-bold text-white shrink-0">
         {number}
       </div>
       <h2 className="font-semibold text-gray-900 text-base">{title}</h2>
+      {loading && <Loader2 size={15} className="animate-spin text-gray-400" />}
     </div>
   );
 }
@@ -522,7 +524,9 @@ export default function CheckoutPage() {
     },
   });
 
-  // Restore sessionStorage after hydration to avoid server/client HTML mismatch
+  // Restore sessionStorage after hydration to avoid server/client HTML mismatch.
+  // Also compute validity immediately from stored values — the watch subscription
+  // isn't active yet when reset() fires, so validity would otherwise stay false.
   useEffect(() => {
     const stored = getStoredForm();
     if (Object.keys(stored).length > 0) {
@@ -540,33 +544,55 @@ export default function CheckoutPage() {
         },
         { keepErrors: false },
       );
+      const cv =
+        !!stored.email?.trim() &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(stored.email.trim()) &&
+        !!stored.telephone?.trim() &&
+        stored.telephone.trim().length >= 6 &&
+        !!stored.firstname?.trim() &&
+        !!stored.lastname?.trim();
+      const sv =
+        cv &&
+        !!stored.street?.trim() &&
+        !!stored.city?.trim() &&
+        !!stored.postcode?.trim() &&
+        !!stored.region?.trim();
+      setContactValid(cv);
+      setShippingValid(sv);
     }
     setFormRestoring(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Derive validity from watched values so it updates on every keystroke
-  const watchedValues = watchForm();
-  const contactValid =
-    !!watchedValues.email?.trim() &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(watchedValues.email.trim()) &&
-    !!watchedValues.telephone?.trim() &&
-    watchedValues.telephone.trim().length >= 6 &&
-    !!watchedValues.firstname?.trim() &&
-    !!watchedValues.lastname?.trim();
-  const shippingValid =
-    contactValid &&
-    !!watchedValues.street?.trim() &&
-    !!watchedValues.city?.trim() &&
-    !!watchedValues.postcode?.trim() &&
-    !!watchedValues.region?.trim();
+  // Validity as state — only changes when thresholds are crossed, not on every keystroke.
+  // Using the subscription form of watch (callback-based) avoids re-rendering CheckoutPage
+  // on every keystroke; startTransition defers validity re-renders so the browser paints
+  // the input event response first, which is what INP measures.
+  const [contactValid, setContactValid] = useState(false);
+  const [shippingValid, setShippingValid] = useState(false);
 
-  // Persist form to sessionStorage on every change
   useEffect(() => {
     const sub = watchForm((values) => {
       try {
         sessionStorage.setItem(FORM_KEY, JSON.stringify(values));
       } catch {}
+      const cv =
+        !!values.email?.trim() &&
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim()) &&
+        !!values.telephone?.trim() &&
+        values.telephone.trim().length >= 6 &&
+        !!values.firstname?.trim() &&
+        !!values.lastname?.trim();
+      const sv =
+        cv &&
+        !!values.street?.trim() &&
+        !!values.city?.trim() &&
+        !!values.postcode?.trim() &&
+        !!values.region?.trim();
+      startTransition(() => {
+        setContactValid(cv);
+        setShippingValid(sv);
+      });
     });
     return () => sub.unsubscribe();
   }, [watchForm]);
@@ -786,6 +812,11 @@ export default function CheckoutPage() {
     }
   }
 
+  useEffect(() => {
+    prefetchOffices("econt");
+    prefetchOffices("speedy");
+  }, []);
+
   function fetchShippingMethods() {
     setMethodsLoading(true);
     fetch("/api/checkout/address", {
@@ -800,11 +831,13 @@ export default function CheckoutPage() {
       .finally(() => setMethodsLoading(false));
   }
 
-  // Fetch shipping methods once cart is loaded, then re-fetch on total change
+  // Fetch shipping methods only after the user completes contact info — the shipping section
+  // is hidden (teaser) until contactValid anyway, so fetching earlier wastes a round-trip.
+  // Re-fetch when cartTotal changes (e.g. quantity update) in case free-shipping threshold moves.
   const cartTotal = cart?.prices?.grand_total?.value;
   const didFetchRef = useRef(false);
   useEffect(() => {
-    if (cartTotal === undefined) return;
+    if (!contactValid || cartTotal === undefined) return;
     // On first run, try the prefetch cache before hitting the API
     if (!didFetchRef.current) {
       didFetchRef.current = true;
@@ -819,7 +852,7 @@ export default function CheckoutPage() {
     }
     fetchShippingMethods();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cartTotal]);
+  }, [contactValid, cartTotal]);
 
   // ── Shipping cost for summary ───────────────────────────────────────────────
   const selectedShippingMethod = shippingMethods.find(
@@ -834,12 +867,16 @@ export default function CheckoutPage() {
     )
       .toLowerCase()
       .includes("адрес");
-  const isOfficeDelivery = selectedShipping !== "" && !isAddressDelivery;
-  const selectedCourier = (
+  const methodLabel = (
     (selectedShippingMethod?.carrier_title ?? "") +
     " " +
     (selectedShippingMethod?.method_title ?? "")
-  ).toLowerCase().includes("speedy") ? "speedy" : "econt";
+  ).toLowerCase();
+  const isOfficeDelivery =
+    selectedShipping !== "" &&
+    !isAddressDelivery &&
+    (methodLabel.includes("speedy") || methodLabel.includes("econt") || methodLabel.includes("еконт"));
+  const selectedCourier = methodLabel.includes("speedy") ? "speedy" : "econt";
   const effectiveShippingValid = isOfficeDelivery
     ? contactValid
     : shippingValid;
@@ -1062,7 +1099,7 @@ export default function CheckoutPage() {
                 <SectionTeaser number="2" title="Метод на доставка" />
               ) : (
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6">
-                  <SectionHeader number="2" title="Метод на доставка" />
+                  <SectionHeader number="2" title="Метод на доставка" loading={methodsLoading} />
                   {methodsLoading ? (
                     <MethodsSkeleton />
                   ) : shippingMethods.length > 0 ? (
@@ -1087,7 +1124,7 @@ export default function CheckoutPage() {
                       })}
                     </div>
                   ) : null}
-                  {selectedShipping !== "" && !isAddressDelivery && (
+                  {isOfficeDelivery && (
                     <div className="mt-4">
                       <CourierOfficeSelector
                         value={selectedOffice}

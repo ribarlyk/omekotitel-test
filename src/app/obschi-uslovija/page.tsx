@@ -36,10 +36,10 @@ export default function ObshchiUsloviyaPage() {
             ))}
 
             {section.details && (
-              <dl className="mb-6 space-y-2">
+              <dl className="mb-6 space-y-4">
                 {section.details.map((detail, i) => (
-                  <div key={i} className="flex gap-4">
-                    <dt className="font-semibold text-gray-800 w-48 flex-shrink-0">{detail.label}</dt>
+                  <div key={i} className="flex gap-8">
+                    <dt className="font-semibold text-gray-800 w-64 flex-shrink-0">{detail.label}</dt>
                     <dd className="text-gray-600">{detail.value}</dd>
                   </div>
                 ))}

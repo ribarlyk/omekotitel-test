@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useAuthenticate } from "@/src/app/hooks/useAuthentication";
 import TurnstileWidget from "@/src/app/components/Turnstile";
+import { Eye, EyeOff } from "lucide-react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,6 +23,7 @@ export default function Login({ onSuccess, onRegister, onForgotPassword }: Props
   const [password, setPassword] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [cfToken, setCfToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const emailError = touched.email && !EMAIL_RE.test(email.trim()) ? "Невалиден имейл адрес" : null;
   const passwordError = touched.password && password.length === 0 ? "Полето е задължително" : null;
@@ -64,16 +66,24 @@ export default function Login({ onSuccess, onRegister, onForgotPassword }: Props
 
       <div className="relative">
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           name="password"
           placeholder="Парола"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           onBlur={() => touch("password")}
           required
-          className={inputClass(passwordError)}
+          className={`${inputClass(passwordError)} pr-10`}
         />
-        <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
+        <button
+          type="button"
+          onClick={() => setShowPassword((p) => !p)}
+          className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+          tabIndex={-1}
+          aria-label={showPassword ? "Скрий паролата" : "Покажи паролата"}
+        >
+          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
         {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
       </div>
 

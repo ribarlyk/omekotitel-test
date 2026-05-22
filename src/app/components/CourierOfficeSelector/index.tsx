@@ -27,6 +27,32 @@ const COURIER_API: Record<Courier, string> = {
   speedy: "/api/speedy/offices",
 };
 
+const officeCache: Partial<Record<Courier, Office[]>> = {};
+const officeInflight: Partial<Record<Courier, Promise<Office[]>>> = {};
+
+function fetchOffices(courier: Courier): Promise<Office[]> {
+  if (officeCache[courier]) return Promise.resolve(officeCache[courier]!);
+  if (officeInflight[courier]) return officeInflight[courier]!;
+  const p = fetch(COURIER_API[courier])
+    .then((r) => r.json())
+    .then((d) => {
+      const list: Office[] = d.offices ?? [];
+      officeCache[courier] = list;
+      delete officeInflight[courier];
+      return list;
+    })
+    .catch(() => {
+      delete officeInflight[courier];
+      return [] as Office[];
+    });
+  officeInflight[courier] = p;
+  return p;
+}
+
+export function prefetchOffices(courier: Courier) {
+  fetchOffices(courier);
+}
+
 const COURIER_LABEL: Record<Courier, { text: string; className: string }> = {
   econt: {
     text: "ЕКОНТ",
@@ -51,7 +77,7 @@ export function CourierOfficeSelector({
   courier,
   placeholder = "Моля, изберете офис на куриер",
 }: Props) {
-  const [offices, setOffices] = useState<Office[]>([]);
+  const [offices, setOffices] = useState<Office[]>(() => officeCache[courier] ?? []);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -60,22 +86,22 @@ export function CourierOfficeSelector({
   const fetchedCourierRef = useRef<Courier | null>(null);
 
   useEffect(() => {
+    if (!open) return;
+
+    setTimeout(() => searchRef.current?.focus(), 50);
+
     if (fetchedCourierRef.current === courier) return;
     fetchedCourierRef.current = courier;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOffices([]);
-     
-    setLoading(true);
-    fetch(COURIER_API[courier])
-      .then((r) => r.json())
-      .then((d) => setOffices(d.offices ?? []))
-      .catch(() => setOffices([]))
-      .finally(() => setLoading(false));
-  }, [courier]);
 
-  useEffect(() => {
-    if (open) setTimeout(() => searchRef.current?.focus(), 50);
-  }, [open]);
+    if (officeCache[courier]) return;
+
+    queueMicrotask(() => {
+      setLoading(true);
+      fetchOffices(courier)
+        .then((list) => setOffices(list))
+        .finally(() => setLoading(false));
+    });
+  }, [open, courier]);
 
   useEffect(() => {
     const onClickOutside = (e: MouseEvent) => {

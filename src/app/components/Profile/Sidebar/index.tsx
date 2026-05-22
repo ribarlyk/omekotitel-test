@@ -14,6 +14,7 @@ const HIDDEN_SECTIONS = new Set([
   ProfileSection.Newsletter,
   ProfileSection.Payments,
   ProfileSection.Reviews,
+  ProfileSection.Wishlist,
 ]);
 
 const SECTIONS = Object.values(ProfileSection).filter((s) => !HIDDEN_SECTIONS.has(s));

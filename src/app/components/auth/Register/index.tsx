@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthenticate } from "@/src/app/hooks/useAuthentication";
 import TurnstileWidget from "@/src/app/components/Turnstile";
+import { Eye, EyeOff } from "lucide-react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -46,6 +47,8 @@ export default function Register({ onLogin, onSuccess }: Props) {
   const [repass, setRepass] = useState("");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [cfToken, setCfToken] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showRepass, setShowRepass] = useState(false);
 
   // Per-rule checks
   const rules = {
@@ -160,16 +163,24 @@ export default function Register({ onLogin, onSuccess }: Props) {
       <div>
         <div className="relative">
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Парола"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onBlur={() => touch("password")}
             required
-            className={inputClass("password")}
+            className={`${inputClass("password")} pr-10`}
           />
-          <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
+          <button
+            type="button"
+            onClick={() => setShowPassword((p) => !p)}
+            className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+            tabIndex={-1}
+            aria-label={showPassword ? "Скрий паролата" : "Покажи паролата"}
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
         </div>
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
           <Rule ok={rules.password.minLen} touched={!!touched.password} text="Минимум 8 символа" />
@@ -183,16 +194,24 @@ export default function Register({ onLogin, onSuccess }: Props) {
       <div>
         <div className="relative">
           <input
-            type="password"
+            type={showRepass ? "text" : "password"}
             name="repass"
             placeholder="Потвърдете паролата"
             value={repass}
             onChange={(e) => setRepass(e.target.value)}
             onBlur={() => touch("repass")}
             required
-            className={inputClass("repass")}
+            className={`${inputClass("repass")} pr-10`}
           />
-          <span className="absolute top-3 right-3 text-red-500 text-xs">*</span>
+          <button
+            type="button"
+            onClick={() => setShowRepass((p) => !p)}
+            className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+            tabIndex={-1}
+            aria-label={showRepass ? "Скрий паролата" : "Покажи паролата"}
+          >
+            {showRepass ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
         </div>
         <ul className="mt-1.5 space-y-0.5 pl-0.5">
           <Rule ok={rules.repass.match} touched={!!touched.repass} text="Паролите съвпадат" />

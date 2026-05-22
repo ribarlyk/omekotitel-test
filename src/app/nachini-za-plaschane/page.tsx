@@ -35,9 +35,12 @@ export default function NachinaZaPlaschane() {
           ))}
 
           {section.paymentMethods && (
-            <ul className="list-disc list-inside space-y-2 text-gray-600 mb-6 ml-4">
+            <ul className="flex flex-col gap-2 mb-6">
               {section.paymentMethods.map((method, i) => (
-                <li key={i}>{method}</li>
+                <li key={i} className="flex items-start gap-2 text-gray-600 text-base">
+                  <span className="mt-1.5 w-2 h-2 rounded-full bg-brand-nav shrink-0" aria-hidden="true" />
+                  {method}
+                </li>
               ))}
             </ul>
           )}

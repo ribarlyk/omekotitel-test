@@ -33,13 +33,16 @@ export default async function HomeCategorySection({
   pageSize = 10,
   href,
 }: HomeCategorySectionProps) {
-  const catalog = await fetchCatalog();
-  const category = findCategoryByUrlKey(catalog.categoryList as Category[], urlKey);
-  if (!category) return null;
-
-  const data = await fetchProductsByCategory(String(category.id), pageSize);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const products = (data.products?.items ?? []).filter(Boolean) as any[];
+  let products: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  try {
+    const catalog = await fetchCatalog();
+    const category = findCategoryByUrlKey(catalog.categoryList as Category[], urlKey);
+    if (!category) return null;
+    const data = await fetchProductsByCategory(String(category.id), pageSize);
+    products = (data.products?.items ?? []).filter(Boolean) as any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch {
+    return null;
+  }
 
   if (!products.length) return null;
 

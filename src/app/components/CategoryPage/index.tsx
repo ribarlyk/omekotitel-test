@@ -94,7 +94,10 @@ export default function CategoryPage({
 
       const items = (data.products?.items ?? []) as Product[];
       if (append) {
-        setProducts((prev) => [...prev, ...items]);
+        setProducts((prev) => {
+          const seen = new Set(prev.map((p) => p.id));
+          return [...prev, ...items.filter((p) => !seen.has(p.id))];
+        });
       } else {
         setProducts(items);
       }

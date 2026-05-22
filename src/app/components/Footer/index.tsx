@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FOOTER_COLUMNS, FOOTER_SOCIAL } from "@/src/app/constants";
+import { useAuth } from "@/src/app/contexts/AuthContext";
 
 const FacebookIcon = () => (
   <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
@@ -29,7 +32,9 @@ const SOCIAL_ICONS: Record<string, () => React.JSX.Element> = {
   tiktok: TikTokIcon,
 };
 
-export const Footer = () => (
+export const Footer = () => {
+  const { user } = useAuth();
+  return (
   <footer className="border-t border-gray-200 mt-16">
     {/* Columns */}
     <div className="container mx-auto px-8 py-12 grid grid-cols-2 lg:grid-cols-4 gap-8">
@@ -37,7 +42,7 @@ export const Footer = () => (
         <div key={col.heading}>
           <h3 className="font-bold text-gray-900 mb-4">{col.heading}</h3>
           <ul className="flex flex-col gap-2">
-            {col.links.map((link) => (
+            {col.links.filter((link) => !link.requiresAuth || !!user).map((link) => (
               <li key={link.href + link.label}>
                 <Link
                   href={link.href}
@@ -119,4 +124,5 @@ export const Footer = () => (
       </div>
     </div>
   </footer>
-);
+  );
+};

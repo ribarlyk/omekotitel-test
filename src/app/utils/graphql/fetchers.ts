@@ -64,6 +64,7 @@ async function gql<T>(
     });
   } catch (e) {
     clearTimeout(timeout);
+    if (e instanceof Error && e.name === "AbortError") throw e;
     const msg = e instanceof Error ? e.message : String(e);
     throw new Error(`GraphQL network error: ${msg}`);
   }

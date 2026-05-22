@@ -93,8 +93,8 @@ type AddStatus = "idle" | "loading" | "success" | "error";
 
 function parseDescriptionSections(html: string): { title: string; html: string }[] {
   const normalized = html
-    .replace(/<h2(\b[^>]*)>/gi, "<h3$1>")
-    .replace(/<\/h2>/gi, "</h3>");
+    .replace(/<h[12](\b[^>]*)>/gi, "<h3$1>")
+    .replace(/<\/h[12]>/gi, "</h3>");
   const parts = normalized.split(/(?=<h3[\s>])/i);
   const sections: { title: string; html: string }[] = [];
   for (const part of parts) {
@@ -109,36 +109,66 @@ function parseDescriptionSections(html: string): { title: string; html: string }
   return sections;
 }
 
+// ── Module-level cache so prefetch from ProductCard survives navigation ──────
+const _linksCache: Record<string, ProductLinksState> = {};
+const _linksInflight: Record<string, Promise<ProductLinksState>> = {};
+
+export function prefetchProductLinks(urlKey: string) {
+  if (_linksCache[urlKey] || _linksInflight[urlKey]) return;
+  _linksInflight[urlKey] = fetch(`/api/product-links?urlKey=${encodeURIComponent(urlKey)}`)
+    .then((r) => r.json())
+    .then((data) => {
+      const result: ProductLinksState = {
+        upsell: data.upsell ?? [],
+        crosssell: data.crosssell ?? [],
+        related: data.related ?? [],
+      };
+      _linksCache[urlKey] = result;
+      delete _linksInflight[urlKey];
+      return result;
+    })
+    .catch(() => {
+      delete _linksInflight[urlKey];
+      return { upsell: [], crosssell: [], related: [] };
+    });
+}
+
 export default function ProductDetail({ product, resolvedAttributes = [] }: ProductDetailProps) {
   const { setLastCrumbLabel } = useBreadcrumb();
   const { addToCart } = useCart();
 
-  const [productLinks, setProductLinks] = useState<ProductLinksState>({ upsell: [], crosssell: [], related: [] });
-  const [linksLoading, setLinksLoading] = useState(true);
+  const [productLinks, setProductLinks] = useState<ProductLinksState>(() => _linksCache[product.url_key] ?? { upsell: [], crosssell: [], related: [] });
+  const [linksLoading, setLinksLoading] = useState(!_linksCache[product.url_key]);
 
   useEffect(() => {
+    if (_linksCache[product.url_key]) {
+      setProductLinks(_linksCache[product.url_key]);
+      setLinksLoading(false);
+      return;
+    }
     setLinksLoading(true);
-    fetch(`/api/product-links?urlKey=${encodeURIComponent(product.url_key)}`)
-      .then((r) => r.json())
-      .then((data) => setProductLinks({ upsell: data.upsell ?? [], crosssell: data.crosssell ?? [], related: data.related ?? [] }))
-      .catch(() => {})
+    const p = _linksInflight[product.url_key] ?? (() => {
+      prefetchProductLinks(product.url_key);
+      return _linksInflight[product.url_key]!;
+    })();
+    p.then((data) => setProductLinks(data))
       .finally(() => setLinksLoading(false));
   }, [product.url_key]);
 
   const visibleSliders = useMemo(() => {
+    if (linksLoading) return [];
     const all = [
       { title: "Често купувани заедно", products: productLinks.crosssell },
       { title: "Може да ви хареса също", products: productLinks.upsell },
       { title: "Подобни продукти", products: productLinks.related },
     ];
-    if (linksLoading) return all.slice(0, 2);
     const nonEmpty = all.filter((s) => s.products.length > 0);
     if (nonEmpty.length <= 2) return nonEmpty;
     const i = Math.floor(Math.random() * nonEmpty.length);
     const j = (i + 1 + Math.floor(Math.random() * (nonEmpty.length - 1))) % nonEmpty.length;
     return [nonEmpty[i], nonEmpty[j]];
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [linksLoading]);
+  }, [linksLoading, productLinks]);
 
   const [imageIndex, setImageIndex] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
