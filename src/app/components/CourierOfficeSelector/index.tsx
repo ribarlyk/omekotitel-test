@@ -143,11 +143,13 @@ export function CourierOfficeSelector({
   }, [offices, query]);
 
   return (
-    <div ref={containerRef} className="relative">
-      <button
-        type="button"
+    <div ref={containerRef} className="relative w-full">
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen((p) => !p)}
-        className="w-full flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-left text-sm transition-colors hover:border-gray-300 focus:outline-none focus:border-brand-action focus:ring-2 focus:ring-brand-action/20"
+        onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && setOpen((p) => !p)}
+        className="w-full flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm cursor-pointer transition-colors hover:border-gray-300 select-none"
       >
         <span className={value ? "text-gray-900" : "text-gray-400"}>
           {value
@@ -160,7 +162,7 @@ export function CourierOfficeSelector({
           size={16}
           className={`shrink-0 text-gray-400 transition-transform ${open ? "rotate-180" : ""}`}
         />
-      </button>
+      </div>
 
       {open && (
         <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">

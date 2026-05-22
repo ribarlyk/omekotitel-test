@@ -1125,7 +1125,7 @@ export default function CheckoutPage() {
                     </div>
                   ) : null}
                   {isOfficeDelivery && (
-                    <div className="mt-4">
+                    <div className="relative z-10 mt-4">
                       <CourierOfficeSelector
                         value={selectedOffice}
                         onChange={setSelectedOffice}

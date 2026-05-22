@@ -24,7 +24,7 @@ const ViberIcon = () => (
 
 const ContactIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
-    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.35 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.96-.96a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 );
 
@@ -65,10 +65,10 @@ export const ScrollToTopButton = () => {
   }, []);
 
   return (
-    <div ref={ref} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
-      {/* Panel */}
+    <div ref={ref} className="fixed bottom-6 right-6 z-50 w-14 h-14">
+      {/* Panel — absolute so it floats above the button without expanding the wrapper */}
       <div
-        className={`bg-white rounded-2xl shadow-2xl border-2 border-brand-nav overflow-hidden w-72 transition-all duration-500 ease-in-out origin-bottom-right ${
+        className={`absolute bottom-16 right-0 bg-white rounded-2xl shadow-2xl border-2 border-brand-nav overflow-hidden w-72 transition-all duration-500 ease-in-out origin-bottom-right ${
           open
             ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
             : "opacity-0 scale-90 translate-y-4 pointer-events-none"
