@@ -114,7 +114,7 @@ const _linksCache: Record<string, ProductLinksState> = {};
 const _linksInflight: Record<string, Promise<ProductLinksState>> = {};
 
 export function prefetchProductLinks(urlKey: string) {
-  if (_linksCache[urlKey] || _linksInflight[urlKey]) return;
+  if (urlKey in _linksCache || urlKey in _linksInflight) return;
   _linksInflight[urlKey] = fetch(`/api/product-links?urlKey=${encodeURIComponent(urlKey)}`)
     .then((r) => r.json())
     .then((data) => {
