@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ProfileSidebar } from "@/src/app/components/Profile/Sidebar";
-import { ProfileWishlist } from "@/src/app/components/Profile/Wishlist";
 import { AccountDashboard } from "@/src/app/components/Profile/AccountDashboard";
 import { ProfileEdit } from "@/src/app/components/Profile/ProfileEdit";
 import { AddressBook } from "@/src/app/components/Profile/AddressBook";
@@ -56,11 +55,9 @@ export const AccountLayout = ({ customer }: Props) => {
         {section === ProfileSection.Addresses && (
           <AddressBook addresses={customer.addresses} />
         )}
-        {section === ProfileSection.Wishlist && <ProfileWishlist />}
         {section !== ProfileSection.Dashboard &&
           section !== ProfileSection.Details &&
-          section !== ProfileSection.Addresses &&
-          section !== ProfileSection.Wishlist && (
+          section !== ProfileSection.Addresses && (
             <p className="text-gray-400 text-sm">Тази секция предстои.</p>
           )}
       </main>

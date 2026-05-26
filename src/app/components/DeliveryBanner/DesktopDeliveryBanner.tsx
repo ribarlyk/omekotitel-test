@@ -1,5 +1,3 @@
-"use client";
-
 import { DeliveryBanner } from ".";
 
 export const DesktopDeliveryBanner = () => (

@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "./globals.css";
-import { ApolloWrapper } from "./ApolloWrapper";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
-import { WishlistProvider } from "./contexts/WishlistContext";
 import { Header } from "./components/Header";
 import { Navigation } from "./components/Navigation";
 import { DesktopDeliveryBanner } from "./components/DeliveryBanner/DesktopDeliveryBanner";
@@ -86,11 +84,9 @@ export default async function RootLayout({
         className={`${roboto.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <ApolloWrapper>
-          <AuthProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <BreadcrumbProvider>
+        <AuthProvider>
+          <CartProvider>
+            <BreadcrumbProvider>
                 <ScrollToTop />
                 <Toaster position="top-center" richColors />
                 {/* Mobile sticky header */}
@@ -108,11 +104,9 @@ export default async function RootLayout({
                 <main className="min-h-[70vh]">{children}</main>
                 <div className="print:hidden"><Footer /></div>
                 <ScrollToTopButton />
-                </BreadcrumbProvider>
-              </WishlistProvider>
-            </CartProvider>
-          </AuthProvider>
-        </ApolloWrapper>
+            </BreadcrumbProvider>
+          </CartProvider>
+        </AuthProvider>
         {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
         <Analytics />
         <SpeedInsights />

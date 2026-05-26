@@ -317,8 +317,15 @@ function OrderSummary({ shippingCost }: { shippingCost?: number }) {
     });
   };
 
-  const total = cart?.prices.grand_total;
   const subtotal = cart?.prices.subtotal_excluding_tax;
+  // Magento's grand_total doesn't include shipping until the method is set on the cart
+  // (we only store it locally until order placement), so compute displayed total client-side.
+  const total = subtotal
+    ? {
+        value: subtotal.value + (shippingCost ?? 0),
+        currency: subtotal.currency,
+      }
+    : undefined;
 
   return (
     <div className="space-y-4">
@@ -425,7 +432,7 @@ function OrderSummary({ shippingCost }: { shippingCost?: number }) {
             <span>
               {shippingCost === 0
                 ? "Безплатна"
-                : `${shippingCost.toFixed(2)} лв`}
+                : `${shippingCost.toFixed(2)} ${subtotal?.currency ?? "EUR"}`}
             </span>
           </div>
         )}

@@ -1,30 +1,25 @@
 "use client";
 
-import { User, Heart, ShoppingCart, Phone } from "lucide-react";
+import { User, ShoppingCart, Phone } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { SidePanel } from "@/src/app/components/SidePanel";
 import { CartPanel } from "./CartPanel";
 import { LoginPanel } from "./LoginPanel";
-import { WishlistPanel } from "./WishlistPanel";
 import { ProfileDropdown } from "./ProfileDropdown";
 import { useCart } from "@/src/app/contexts/CartContext";
-import { useWishlist } from "@/src/app/contexts/WishlistContext";
 import { useAuth } from "@/src/app/contexts/AuthContext";
 
 enum Panel {
   Cart = "cart",
   Profile = "profile",
-  Wishlist = "wishlist",
 }
 
 const PANEL_TITLES: Record<Panel, string> = {
   [Panel.Profile]: "Влез в профил",
   [Panel.Cart]: "Количка",
-  [Panel.Wishlist]: "Любими",
 };
 
 export const UserCartWishSection = ({
-  showWishlist = false,
   showPhone = true,
   showLabels = true,
   iconSize = 24,
@@ -39,7 +34,6 @@ export const UserCartWishSection = ({
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const { itemCount, loading: cartLoading, refreshCart } = useCart();
-  const { itemCount: wishlistCount, loading: wishlistLoading, refreshWishlist } = useWishlist();
   const { isLoggedIn, user } = useAuth();
 
   useEffect(() => {
@@ -99,27 +93,6 @@ export const UserCartWishSection = ({
           )}
         </div>
 
-        {showWishlist && (
-          <button
-            onClick={() => toggle(Panel.Wishlist)}
-            className="flex flex-col items-center cursor-pointer"
-          >
-            <div className="relative">
-              <Heart className="text-brand-action" strokeWidth={2} size={iconSize} />
-              {isLoggedIn && wishlistLoading ? (
-                <span className="absolute -top-2 -right-2 w-5 h-5 flex items-center justify-center">
-                  <span className="w-3.5 h-3.5 rounded-full border-2 border-brand-action/30 border-t-brand-action animate-spin" />
-                </span>
-              ) : wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-brand-action text-white text-[11px] w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                  {wishlistCount}
-                </span>
-              )}
-            </div>
-            {showLabels && <span className="text-xs text-gray-900">Любими</span>}
-          </button>
-        )}
-
         <button
           onClick={() => toggle(Panel.Cart)}
           className="flex flex-col items-center cursor-pointer"
@@ -150,14 +123,13 @@ export const UserCartWishSection = ({
         {openPanel === Panel.Cart && <CartPanel onClose={() => setOpenPanel(null)} />}
         {openPanel === Panel.Profile && (
           <LoginPanel
-            onSuccess={() => { setOpenPanel(null); refreshCart(); refreshWishlist(); }}
+            onSuccess={() => { setOpenPanel(null); refreshCart(); }}
             onViewChange={(view) => {
               const titles = { login: "Влез в профил", register: "Регистрация на профил", "forgot-password": "Забравена парола" };
               setAuthTitle(titles[view]);
             }}
           />
         )}
-        {openPanel === Panel.Wishlist && <WishlistPanel />}
       </SidePanel>
     </>
   );

@@ -124,7 +124,7 @@ export default function ProductSlider({
           <div ref={trackRef} className="flex gap-4 transition-transform duration-300 ease-in-out" style={{ willChange: "transform" }}>
             {products.map((product, i) => (
               <div key={product.id} className="w-[calc(25%-12px)] shrink-0 self-stretch">
-                <ProductCard product={product} index={i} view="grid" />
+                <ProductCard product={product} index={i} view="grid" imageSizes="320px" />
               </div>
             ))}
           </div>
@@ -151,7 +151,7 @@ export default function ProductSlider({
               className="shrink-0"
               style={{ width: 200, flex: "0 0 200px" }}
             >
-              <ProductCard product={product} index={i} view="grid" />
+              <ProductCard product={product} index={i} view="grid" imageSizes="200px" />
             </div>
           ))}
           <div className="w-4 shrink-0" />

@@ -20,8 +20,15 @@ import MagentoImage from "@/src/app/components/MagentoImage";
 import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
 import { useCart } from "@/src/app/contexts/CartContext";
 import ProductSlider from "@/src/app/components/ProductSlider";
-import type { ProductCardProduct } from "@/src/app/components/ProductCard";
 import type { ResolvedAttribute } from "@/src/app/utils/productAttributes";
+import {
+  prefetchProductLinks,
+  _linksCache,
+  type ProductLinksState,
+} from "./prefetchLinks";
+
+// Re-export so existing ProductCard imports keep working
+export { prefetchProductLinks };
 
 interface ConfigurableOptionValue {
   label: string;
@@ -53,12 +60,6 @@ interface VariantProduct {
 interface Variant {
   attributes: { code: string; value_index: number }[];
   product: VariantProduct;
-}
-
-interface ProductLinksState {
-  upsell: ProductCardProduct[];
-  crosssell: ProductCardProduct[];
-  related: ProductCardProduct[];
 }
 
 interface ProductDetailProps {
@@ -109,30 +110,6 @@ function parseDescriptionSections(html: string): { title: string; html: string }
   return sections;
 }
 
-// ── Module-level cache so prefetch from ProductCard survives navigation ──────
-const _linksCache: Record<string, ProductLinksState> = {};
-const _linksInflight: Record<string, Promise<ProductLinksState>> = {};
-
-export function prefetchProductLinks(urlKey: string) {
-  if (urlKey in _linksCache || urlKey in _linksInflight) return;
-  _linksInflight[urlKey] = fetch(`/api/product-links?urlKey=${encodeURIComponent(urlKey)}`)
-    .then((r) => r.json())
-    .then((data) => {
-      const result: ProductLinksState = {
-        upsell: data.upsell ?? [],
-        crosssell: data.crosssell ?? [],
-        related: data.related ?? [],
-      };
-      _linksCache[urlKey] = result;
-      delete _linksInflight[urlKey];
-      return result;
-    })
-    .catch(() => {
-      delete _linksInflight[urlKey];
-      return { upsell: [], crosssell: [], related: [] };
-    });
-}
-
 export default function ProductDetail({ product, resolvedAttributes = [] }: ProductDetailProps) {
   const { setLastCrumbLabel } = useBreadcrumb();
   const { addToCart } = useCart();
@@ -147,18 +124,16 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
       return;
     }
     setLinksLoading(true);
-    const p = _linksInflight[product.url_key] ?? (() => {
-      prefetchProductLinks(product.url_key);
-      return _linksInflight[product.url_key]!;
-    })();
-    p.then((data) => setProductLinks(data))
+    prefetchProductLinks(product.url_key)
+      .then((data) => setProductLinks(data))
       .finally(() => setLinksLoading(false));
   }, [product.url_key]);
+
 
   const visibleSliders = useMemo(() => {
     if (linksLoading) return [];
     const all = [
-      { title: "Често купувани заедно", products: productLinks.crosssell },
+      { title: "Честo купувани заедно", products: productLinks.crosssell },
       { title: "Може да ви хареса също", products: productLinks.upsell },
       { title: "Подобни продукти", products: productLinks.related },
     ];
@@ -374,6 +349,7 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
               style={{ objectFit: "contain" }}
               className="p-6 sm:p-10"
               priority
+              fetchPriority="high"
               sizes="(max-width: 1024px) 100vw, 50vw"
             />
 
@@ -688,9 +664,16 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
         </div>
       )}
       {/* ── Related sliders — 2 of 3 chosen randomly ── */}
-      {visibleSliders.map((s) => (
-        <ProductSlider key={s.title} title={s.title} products={s.products} loading={linksLoading} />
-      ))}
+      {linksLoading ? (
+        <>
+          <ProductSlider title="Честo купувани заедно" products={[]} loading={true} />
+          <ProductSlider title="Може да ви хареса също" products={[]} loading={true} />
+        </>
+      ) : (
+        visibleSliders.map((s) => (
+          <ProductSlider key={s.title} title={s.title} products={s.products} loading={false} />
+        ))
+      )}
 
       {/* ── Sticky bottom bar ── */}
       <div

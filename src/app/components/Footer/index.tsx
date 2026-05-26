@@ -1,10 +1,8 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { FOOTER_COLUMNS, FOOTER_SOCIAL } from "@/src/app/constants";
-import { useAuth } from "@/src/app/contexts/AuthContext";
+import { AuthLinks } from "./AuthLinks";
 
 const FacebookIcon = () => (
   <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
@@ -32,29 +30,34 @@ const SOCIAL_ICONS: Record<string, () => React.JSX.Element> = {
   tiktok: TikTokIcon,
 };
 
-export const Footer = () => {
-  const { user } = useAuth();
-  return (
+export const Footer = () => (
   <footer className="border-t border-gray-200 mt-16">
     {/* Columns */}
     <div className="container mx-auto px-8 py-12 grid grid-cols-2 lg:grid-cols-4 gap-8">
-      {FOOTER_COLUMNS.map((col) => (
-        <div key={col.heading}>
-          <h3 className="font-bold text-gray-900 mb-4">{col.heading}</h3>
-          <ul className="flex flex-col gap-2">
-            {col.links.filter((link) => !link.requiresAuth || !!user).map((link) => (
-              <li key={link.href + link.label}>
-                <Link
-                  href={link.href}
-                  className="text-sm text-gray-500 hover:text-brand-nav transition-colors"
-                >
-                  {link.label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      {FOOTER_COLUMNS.map((col) => {
+        const hasAuthLinks = col.links.some((l) => "requiresAuth" in l && l.requiresAuth);
+        return (
+          <div key={col.heading}>
+            <h3 className="font-bold text-gray-900 mb-4">{col.heading}</h3>
+            {hasAuthLinks ? (
+              <AuthLinks links={col.links} />
+            ) : (
+              <ul className="flex flex-col gap-2">
+                {col.links.map((link) => (
+                  <li key={link.href + link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-gray-500 hover:text-brand-nav transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
 
       {/* Contact column */}
       <div>
@@ -124,5 +127,4 @@ export const Footer = () => {
       </div>
     </div>
   </footer>
-  );
-};
+);

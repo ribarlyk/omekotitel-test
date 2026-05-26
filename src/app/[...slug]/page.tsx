@@ -24,7 +24,6 @@ import {
   SITE_NAME,
   PRICE_CURRENCY,
   stripHtml,
-  truncate,
   buildProductSchema,
   buildBreadcrumbSchema,
 } from "@/src/app/utils/seo";
@@ -144,8 +143,7 @@ export async function generateMetadata({
         stripHtml(product.short_description?.html) ||
         stripHtml(product.description?.html);
       const description = rawDesc
-        ? truncate(rawDesc, 160)
-        : `Поръчай ${product.name} онлайн с бърза доставка от ${SITE_NAME}.`;
+        || `Поръчай ${product.name} онлайн с бърза доставка от ${SITE_NAME}.`;
 
       const canonicalPath = `/${product.url_key}`;
       const ogImage = product.image?.url
@@ -181,11 +179,9 @@ export async function generateMetadata({
         ? `${category.name} - ${category.product_count} продукта`
         : category.name;
       const title = category.meta_title?.trim() || autoTitle;
-      const description = truncate(
+      const description =
         category.meta_description?.trim() ||
-          `Разгледай ${category.name} в ${SITE_NAME} — широк избор, бърза доставка в цяла България.`,
-        160,
-      );
+        `Разгледай ${category.name} в ${SITE_NAME} — широк избор, бърза доставка в цяла България.`;
       const ogImage = category.image
         ? magentoImageUrl(category.image)
         : DEFAULT_OG_IMAGE;

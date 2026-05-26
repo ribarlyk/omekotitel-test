@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/src/app/contexts/AuthContext";
 import { useCart } from "@/src/app/contexts/CartContext";
-import { useWishlist } from "@/src/app/contexts/WishlistContext";
 
 export interface UseAuthenticateReturns {
   loginLoading: boolean;
@@ -18,7 +17,6 @@ export const useAuthenticate = (): UseAuthenticateReturns => {
   const router = useRouter();
   const { logout, setUser } = useAuth();
   const { refreshCart } = useCart();
-  const { refreshWishlist } = useWishlist();
 
   const handleLogout = async () => {
     try {
@@ -33,7 +31,6 @@ export const useAuthenticate = (): UseAuthenticateReturns => {
       // Update auth state immediately
       logout();
       refreshCart();
-      refreshWishlist();
       toast.success("Излязохте успешно.");
       router.push("/");
     } catch (error) {
@@ -154,7 +151,6 @@ export const useAuthenticate = (): UseAuthenticateReturns => {
           setUser(userData);
         }
         refreshCart();
-        refreshWishlist();
       }
 
       toast.success("Регистрацията е успешна!");

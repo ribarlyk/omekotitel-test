@@ -194,7 +194,11 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div
+      className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative z-10 bg-white w-full sm:max-w-3xl shadow-2xl h-dvh sm:h-auto sm:max-h-[90dvh] flex flex-col sm:flex-row overflow-hidden sm:rounded-2xl">

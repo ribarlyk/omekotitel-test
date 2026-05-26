@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useAuth } from "@/src/app/contexts/AuthContext";
 import { useCart } from "@/src/app/contexts/CartContext";
-import { useWishlist } from "@/src/app/contexts/WishlistContext";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -40,7 +39,6 @@ export default function ResetPassword({ token }: Props) {
   const router = useRouter();
   const { setUser } = useAuth();
   const { refreshCart } = useCart();
-  const { refreshWishlist } = useWishlist();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repass, setRepass] = useState("");
@@ -108,7 +106,6 @@ export default function ResetPassword({ token }: Props) {
           const meRes = await fetch("/api/me", { credentials: "include" });
           if (meRes.ok) setUser(await meRes.json());
           refreshCart();
-          refreshWishlist();
         }
         toast.success("Паролата е променена успешно!");
         router.push("/");
