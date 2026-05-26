@@ -35,23 +35,25 @@ export function CatalogToggle({
 
   return (
     <>
-      <button
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="text-white flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-brand-action cursor-pointer"
-      >
-        <BurgerIcon isOpen={isOpen} />
-        {label}
-      </button>
-      {isOpen && (
-        <div
-          className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-0 h-0 z-51"
-          style={{
-            borderLeft: "8px solid transparent",
-            borderRight: "8px solid transparent",
-            borderTop: "10px solid #98ab3f",
-          }}
-        />
-      )}
+      <span className="relative inline-flex items-center">
+        <button
+          onClick={() => setIsOpen((prev) => !prev)}
+          className="text-white flex items-center gap-2.5 px-3 py-1.5 rounded-md bg-brand-action cursor-pointer"
+        >
+          <BurgerIcon isOpen={isOpen} />
+          {label}
+        </button>
+        {isOpen && (
+          <div
+            className="absolute left-1/2 -translate-x-1/2 -bottom-3 w-0 h-0 z-51"
+            style={{
+              borderLeft: "8px solid transparent",
+              borderRight: "8px solid transparent",
+              borderTop: "10px solid #98ab3f",
+            }}
+          />
+        )}
+      </span>
       {isOpen && (
         <>
           <div

@@ -9,7 +9,7 @@ export const Navigation = ({ categoryList }: { categoryList: NavCatalogCategory[
         <ul className="flex flex-row items-center justify-center gap-8 px-6 py-3 text-lg">
           {NAVGATIOM_ITEMS.map((item) =>
             item.main ? (
-              <li key={item.name} className="relative">
+              <li key={item.name}>
                 <CatalogToggle label={item.name} categoryList={categoryList} />
               </li>
             ) : (

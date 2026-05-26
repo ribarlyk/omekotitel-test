@@ -55,9 +55,9 @@ export const MobileNavPanel = ({
     }
   }, [isOpen]);
 
-  const topCategories = (categoryList[0]?.children ?? []).filter((c) =>
-    NAV_CATEGORY_IDS.has(c.id)
-  );
+  const topCategories = (categoryList[0]?.children ?? [])
+    .filter((c) => NAV_CATEGORY_IDS.has(c.id))
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
   const openCategory = (cat: NavCatalogCategory) => {
     setActiveCategory(cat);
@@ -184,7 +184,7 @@ export const MobileNavPanel = ({
           >
             {activeCategory && (
               <ul>
-                {(activeCategory.children ?? []).map((child) => {
+                {[...(activeCategory.children ?? [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).map((child) => {
                   const hasChildren = (child.children?.length ?? 0) > 0;
                   return (
                     <li key={child.id} className="border-b border-gray-100">
@@ -227,7 +227,7 @@ export const MobileNavPanel = ({
           >
             {activeSubCategory && (
               <ul>
-                {(activeSubCategory.children ?? []).map((grandchild) => (
+                {[...(activeSubCategory.children ?? [])].sort((a, b) => (a.position ?? 0) - (b.position ?? 0)).map((grandchild) => (
                   <li key={grandchild.id} className="border-b border-gray-100">
                     <button
                       onClick={() => navigate(categoryHref(grandchild))}

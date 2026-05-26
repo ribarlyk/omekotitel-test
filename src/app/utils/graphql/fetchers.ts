@@ -121,7 +121,7 @@ export async function fetchProductsByCategory(
   const filter = { category_id: { eq: categoryId }, ...extraFilters };
   return gql<{ products: { items: unknown[]; total_count: number; aggregations: unknown[] } }>(
     print(Queries.GET_PRODUCTS_BY_CATEGORY),
-    { filter, pageSize, currentPage },
+    { filter, pageSize, currentPage, sort: { position: "ASC" } },
     { revalidate: false, tags: ["products", `products:category:${categoryId}`] },
   );
 }

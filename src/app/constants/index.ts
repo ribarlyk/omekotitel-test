@@ -54,6 +54,7 @@ export interface NavCatalogCategory {
   name: string;
   url_key: string | null;
   url_path: string | null;
+  position?: number;
   image?: string | null;
   children?: NavCatalogCategory[];
 }

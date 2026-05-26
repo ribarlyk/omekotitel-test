@@ -23,9 +23,9 @@ export const NavCatalogDropdown = ({
 
   // categoryList[0] is the Magento root ("Default Category"); its children are the real nav categories
   const NAV_CATEGORY_IDS = new Set([9, 221, 4, 3, 10, 7, 48]);
-  const topCategories = (categoryList[0]?.children ?? []).filter((c) =>
-    NAV_CATEGORY_IDS.has(c.id)
-  );
+  const topCategories = (categoryList[0]?.children ?? [])
+    .filter((c) => NAV_CATEGORY_IDS.has(c.id))
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0));
 
   const firstSubWithChildren = (cat: NavCatalogCategory) =>
     cat.children?.find((c) => (c.children?.length ?? 0) > 0) ?? null;
@@ -42,8 +42,9 @@ export const NavCatalogDropdown = ({
     setActiveSub(firstSubWithChildren(cat));
   };
 
-  const displayChildren = active?.children ?? [];
-  const displayGrandChildren = activeSub?.children ?? [];
+  const byPosition = (a: NavCatalogCategory, b: NavCatalogCategory) => (a.position ?? 0) - (b.position ?? 0);
+  const displayChildren = [...(active?.children ?? [])].sort(byPosition);
+  const displayGrandChildren = [...(activeSub?.children ?? [])].sort(byPosition);
 
   return (
     <div className="absolute left-0 right-0 z-50 bg-white shadow-xl max-h-[75vh] overflow-y-auto lg:max-h-none lg:overflow-visible">
