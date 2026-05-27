@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { magentoImageUrl } from "@/src/app/utils/image";
+import { calcUnitPrice } from "@/src/app/utils/unitPrice";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
 import { useCart } from "@/src/app/contexts/CartContext";
@@ -222,8 +223,13 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
 
   const variant = selectedVariant();
 
-  // Always use the base product gallery — variant small_image is low-res and causes size jumps.
-  const images = baseImages;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setImageIndex(0); }, [variant?.product.id]);
+
+  const variantImage = variant?.product.small_image;
+  const images = variantImage
+    ? [{ url: variantImage.url, label: variantImage.label, position: -1 }, ...baseImages]
+    : baseImages;
 
   const displayPriceRange = variant?.product.price_range ?? product.price_range;
   const finalPrice = displayPriceRange.minimum_price.final_price;
@@ -415,10 +421,18 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
                 <span className={`w-1.5 h-1.5 rounded-full ${isInStock ? "bg-emerald-500" : "bg-red-400"}`} />
                 {isInStock ? "В наличност" : "Изчерпано"}
               </span>
-              <div className="flex items-baseline gap-2">
+              <div className="flex items-baseline gap-2 flex-wrap">
                 <span className="text-xl font-bold text-gray-900">
                   {finalPrice.value.toFixed(2)}&nbsp;{finalPrice.currency}
                 </span>
+                {isConfigurable && variant && product.configurable_options && (() => {
+                  const up = calcUnitPrice(selectedOptions, product.configurable_options, finalPrice.value, finalPrice.currency);
+                  return up ? (
+                    <span className="text-sm text-gray-400">
+                      ({up.formatted} {finalPrice.currency} / {up.unit})
+                    </span>
+                  ) : null;
+                })()}
                 {hasDiscount && regularPrice && (
                   <>
                     <span className="text-xs text-gray-400 line-through">

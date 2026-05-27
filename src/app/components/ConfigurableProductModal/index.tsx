@@ -9,6 +9,7 @@ import { magentoImageUrl } from "@/src/app/utils/image";
 import { useCart } from "@/src/app/contexts/CartContext";
 import { toast } from "sonner";
 import type { ProductCardProduct } from "@/src/app/components/ProductCard";
+import { calcUnitPrice } from "@/src/app/utils/unitPrice";
 
 interface ConfigurableOptionValue {
   label: string;
@@ -256,6 +257,16 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
                   {finalPrice ? `${finalPrice.value.toFixed(2)} ${finalPrice.currency}` : "—"}
                 </span>
               )}
+              {(() => {
+                if (!variant || !finalPrice || !extra?.configurable_options) return null;
+                const up = calcUnitPrice(selectedOptions, extra.configurable_options, finalPrice.value, finalPrice.currency);
+                if (!up) return null;
+                return (
+                  <span className="text-xs text-gray-400 mt-0.5">
+                    ({up.formatted} {finalPrice.currency} / {up.unit})
+                  </span>
+                );
+              })()}
             </div>
             {/* Quantity stepper — mobile only */}
             <div className="sm:hidden shrink-0 flex items-center gap-1">

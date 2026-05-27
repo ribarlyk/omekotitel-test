@@ -17,9 +17,9 @@ import { Breadcrumb } from "./components/Breadcrumb";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import { JsonLd } from "./components/JsonLd";
 import { buildOrganizationSchema, buildWebSiteSchema } from "./utils/seo";
-import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
-import { GoogleAnalytics } from "@next/third-parties/google"
+import { CookieConsentProvider } from "./contexts/CookieConsentContext";
+import { AnalyticsScripts } from "./components/AnalyticsScripts";
+import { CookieBanner } from "./components/CookieBanner";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -84,32 +84,33 @@ export default async function RootLayout({
         className={`${roboto.variable} antialiased`}
         suppressHydrationWarning={true}
       >
-        <AuthProvider>
-          <CartProvider>
-            <BreadcrumbProvider>
-                <ScrollToTop />
-                <Toaster position="top-center" richColors />
-                {/* Mobile sticky header */}
-                <div className="lg:hidden sticky top-0 z-30 shadow-md print:hidden">
-                  <MobileHeader categoryList={categoryList} />
-                </div>
-                {/* Desktop: delivery banner sticky on its own */}
-                <div className="print:hidden"><DesktopDeliveryBanner /></div>
-                {/* Desktop sticky header + nav */}
-                <div className="hidden lg:sticky lg:top-0 lg:z-30 lg:shadow-md lg:block print:hidden">
-                  <Header />
-                  <Navigation categoryList={categoryList} />
-                </div>
-                <Breadcrumb categoryList={categoryList} />
-                <main className="min-h-[70vh]">{children}</main>
-                <div className="print:hidden"><Footer /></div>
-                <ScrollToTopButton />
-            </BreadcrumbProvider>
-          </CartProvider>
-        </AuthProvider>
-        {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
-        <Analytics />
-        <SpeedInsights />
+        <CookieConsentProvider>
+          <AuthProvider>
+            <CartProvider>
+              <BreadcrumbProvider>
+                  <ScrollToTop />
+                  <Toaster position="top-center" richColors />
+                  {/* Mobile sticky header */}
+                  <div className="lg:hidden sticky top-0 z-30 shadow-md print:hidden">
+                    <MobileHeader categoryList={categoryList} />
+                  </div>
+                  {/* Desktop: delivery banner sticky on its own */}
+                  <div className="print:hidden"><DesktopDeliveryBanner /></div>
+                  {/* Desktop sticky header + nav */}
+                  <div className="hidden lg:sticky lg:top-0 lg:z-30 lg:shadow-md lg:block print:hidden">
+                    <Header />
+                    <Navigation categoryList={categoryList} />
+                  </div>
+                  <Breadcrumb categoryList={categoryList} />
+                  <main className="min-h-[70vh]">{children}</main>
+                  <div className="print:hidden"><Footer /></div>
+                  <ScrollToTopButton />
+              </BreadcrumbProvider>
+            </CartProvider>
+          </AuthProvider>
+          <AnalyticsScripts />
+          <CookieBanner />
+        </CookieConsentProvider>
       </body>
     </html>
   );

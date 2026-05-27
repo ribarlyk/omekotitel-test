@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FOOTER_COLUMNS, FOOTER_SOCIAL } from "@/src/app/constants";
 import { AuthLinks } from "./AuthLinks";
+import { CookieSettingsLink } from "./CookieSettingsLink";
 
 const FacebookIcon = () => (
   <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
@@ -122,8 +123,7 @@ export const Footer = () => (
           © {new Date().getFullYear()} omekotitel.bg. Всички права запазени.
         </p>
 
-        {/* Spacer to balance left side */}
-        <div className="hidden lg:block w-12" aria-hidden="true" />
+        <CookieSettingsLink />
       </div>
     </div>
   </footer>

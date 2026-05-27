@@ -1600,7 +1600,7 @@ export default function CheckoutPage() {
                 </button>
                 <p className="text-xs text-center text-gray-400 mt-3">
                   Като натиснете бутона, приемате нашите{" "}
-                  <Link href="/terms" className="underline hover:text-gray-600">
+                  <Link href="/obschi-uslovija" className="underline hover:text-gray-600">
                     Общи условия
                   </Link>
                   .
@@ -1663,7 +1663,7 @@ export default function CheckoutPage() {
                 </button>
                 <p className="text-xs text-center text-gray-400 mt-3">
                   Като натиснете бутона, приемате нашите{" "}
-                  <Link href="/terms" className="underline hover:text-gray-600">
+                  <Link href="/obschi-uslovija" className="underline hover:text-gray-600">
                     Общи условия
                   </Link>
                   .

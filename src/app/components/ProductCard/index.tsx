@@ -44,6 +44,7 @@ export default function ProductCard({ product, index = 0, view = "grid", imageSi
   const isOnSale = isProductOnSale(product);
   const discountPct = discountPercent(product);
   const isNew = isProductNew(product);
+  const isConfigurable = product.type_id === "configurable";
 
   // Eager-load the first row (grid is up to 4 columns on xl) so the LCP candidate
   // — whichever above-the-fold card the browser picks — isn't held back by lazy loading.
@@ -76,11 +77,13 @@ export default function ProductCard({ product, index = 0, view = "grid", imageSi
             {regularPrice!.value.toFixed(2)} {regularPrice!.currency}
           </span>
           <span className="text-lg font-bold text-rose-600 leading-tight">
+            {isConfigurable && <span className="font-normal text-base">от </span>}
             {finalPrice!.value.toFixed(2)} {finalPrice!.currency}
           </span>
         </div>
       ) : (
         <span className="text-lg font-bold text-brand-action leading-tight">
+          {isConfigurable && <span className="font-normal text-base">от </span>}
           {finalPrice ? `${finalPrice.value.toFixed(2)} ${finalPrice.currency}` : "—"}
         </span>
       )}
