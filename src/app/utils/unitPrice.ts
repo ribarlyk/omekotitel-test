@@ -30,8 +30,8 @@ const PATTERNS: { regex: RegExp; toBase: (n: number) => number; unit: string; mi
   // Kilograms → price per kg
   { regex: cyrUnit('кг'), toBase: (n) => n, unit: 'кг' },
   { regex: /(\d+(?:[.,]\d+)?)\s*kg\b/i, toBase: (n) => n, unit: 'кг' },
-  // Count — only useful when > 1
-  { regex: cyrUnit('бр\\.?'), toBase: (n) => n, unit: 'бр', minQty: 2 },
+  // Count — only useful when > 1 (matches: бр, бр., брой, броя, броят)
+  { regex: cyrUnit('бр(?:ой|оя|оят)?\\.?'), toBase: (n) => n, unit: 'бр', minQty: 2 },
 ];
 
 export function calcUnitPrice(
