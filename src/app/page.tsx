@@ -6,11 +6,7 @@ import HeroSlider from "@/src/app/components/HeroSlider";
 export default function Home() {
   return (
     <div className="flex flex-col">
-<<<<<<< HEAD
       <section className="w-full lg:-mt-16.25">
-=======
-      <section className="w-full">
->>>>>>> master
         <HeroSlider />
       </section>
 
