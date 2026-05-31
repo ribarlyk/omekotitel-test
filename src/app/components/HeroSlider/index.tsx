@@ -14,8 +14,7 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 const SLIDES = [
   {
     src: "/assets/hero/1.webp",
-    width: 1831,
-    height: 859,
+    mobileSrc: "/assets/hero/1m.webp",
     alt: "Омекотител — слайд 1",
     title: "Парфюми, Есенции и Перли за Пране",
     subtitle: "Ароматизирайте пранeто си с широката гама буустери за пране",
@@ -23,8 +22,7 @@ const SLIDES = [
   },
   {
     src: "/assets/hero/2.webp",
-    width: 1672,
-    height: 941,
+    mobileSrc: "/assets/hero/2m.webp",
     alt: "Омекотител — слайд 2",
     title: "Хипоалергенни продукти за мама и бебе",
     subtitle: "Нежна грижа и чистота за най-чувствителната кожа.",
@@ -32,12 +30,27 @@ const SLIDES = [
   },
   {
     src: "/assets/hero/3.webp",
-    width: 1672,
-    height: 941,
+    mobileSrc: "/assets/hero/3m.webp",
     alt: "Омекотител — слайд 3",
     title: "Есенции за прахоулавяне с антистатик",
     subtitle:
       "които забавят натрупването на прах и поддържат повърхностите чисти по-дълго.",
+    button: { label: "Разгледай", href: "/" },
+  },
+  {
+    src: "/assets/hero/4.webp",
+    mobileSrc: "/assets/hero/4m.webp",
+    alt: "Омекотител — слайд 4",
+    title: "Заглавие слайд 4",
+    subtitle: "Описание на продукта или промоцията за слайд 4.",
+    button: { label: "Разгледай", href: "/" },
+  },
+  {
+    src: "/assets/hero/5.webp",
+    mobileSrc: "/assets/hero/5m.webp",
+    alt: "Омекотител — слайд 5",
+    title: "Заглавие слайд 5",
+    subtitle: "Описание на продукта или промоцията за слайд 5.",
     button: { label: "Разгледай", href: "/" },
   },
 ];
@@ -85,7 +98,7 @@ export default function HeroSlider() {
 
   return (
     <div
-      className="relative w-full overflow-hidden h-94 md:h-94"
+      className="relative w-full overflow-hidden h-96 md:h-[500px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
@@ -103,16 +116,17 @@ export default function HeroSlider() {
           aria-hidden={i !== current}
         >
           <Image
-            src="/assets/hero/1.webp"
+            src={slide.src}
             alt={slide.alt}
             fill
-            className="object-contain hidden md:block"
+            className="object-fill md:object-fill hidden md:block"
             sizes="100vw"
-            fetchPriority={i === 0 ? "high" : "auto"}
+            fetchPriority="high"
             loading={i === 0 ? "eager" : "lazy"}
+            priority={i === 0}
           />
           <Image
-            src="/assets/hero/2.webp"
+            src={slide.mobileSrc}
             alt={slide.alt}
             fill
             className="object-cover md:hidden"

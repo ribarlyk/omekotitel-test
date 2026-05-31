@@ -58,6 +58,7 @@ export default function robots(): MetadataRoute.Robots {
         "/sales/",
         "/onestepcheckout/",
         "/api/",
+        "/admin-revalidate/",
         "/forgot-password/",
         "/search",
         // Faceted navigation: disallow every URL carrying one of these query params.

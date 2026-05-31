@@ -228,7 +228,7 @@ async function PageData({ slugs }: { slugs: string[] }) {
     fetchAttributeMetadata(),
   ]);
 
-  const rawProduct = productData?.products?.items?.[0] as Record<string, unknown> | undefined;
+const rawProduct = productData?.products?.items?.[0] as Record<string, unknown> | undefined;
   const product = rawProduct as Parameters<typeof ProductDetail>[0]["product"] | undefined;
 
   const optionMap = buildOptionMap(attrMetaItems);

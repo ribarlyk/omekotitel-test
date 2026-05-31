@@ -127,11 +127,12 @@ export async function fetchProductsByCategory(
 }
 
 export async function fetchProductDetail(urlKey: string) {
+  const productTag = `product:${urlKey}`;
+  const tags = productTag.length <= 256 ? ["products", productTag] : ["products"];
   return gql<{ products: { items: unknown[] } }>(
     print(Queries.GET_PRODUCT_DETAIL),
     { urlKey },
-    // Fine-grained tag: invalidate one product without busting all products.
-    { revalidate: false, tags: ["products", `product:${urlKey}`] },
+    { revalidate: false, tags },
   );
 }
 
