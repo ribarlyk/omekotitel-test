@@ -23,7 +23,7 @@ const ViberIcon = () => (
 );
 
 const ContactIcon = () => (
-  <Image src="/assets/contact_us_icon.svg" alt="Контакти" width={24} height={24} style={{ filter: "brightness(0) invert(1)" }} />
+  <Image src="/assets/support-chat-headset-icon (1).svg" alt="Контакти" width={44} height={44} style={{ filter: "brightness(0) invert(1)" }} />
 );
 
 const CONTACTS = [
@@ -50,7 +50,7 @@ const CONTACTS = [
   },
 ];
 
-export const ScrollToTopButton = () => {
+export const ChatButton = () => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

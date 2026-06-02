@@ -10,7 +10,7 @@ import { MobileHeader } from "./components/MobileHeader";
 import type { NavCatalogCategory } from "./constants";
 import { fetchCatalog } from "./utils/graphql/fetchers";
 import { Toaster } from "sonner";
-import { ScrollToTopButton } from "./components/ScrollToTopButton";
+import { ChatButton } from "./components/ChatButton";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { Footer } from "./components/Footer";
 import { Breadcrumb } from "./components/Breadcrumb";
@@ -104,7 +104,7 @@ export default async function RootLayout({
                   <Breadcrumb categoryList={categoryList} />
                   <main className="min-h-[70vh]">{children}</main>
                   <div className="print:hidden"><Footer /></div>
-                  <ScrollToTopButton />
+                  <ChatButton />
               </BreadcrumbProvider>
             </CartProvider>
           </AuthProvider>

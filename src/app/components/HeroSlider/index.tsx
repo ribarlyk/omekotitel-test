@@ -13,12 +13,44 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 const SLIDES = [
   {
-    src: "/assets/hero/1.webp",
-    mobileSrc: "/assets/hero/1m.webp",
+    src: "/assets/OmekotitelHeroBanners/1.webp",
+    mobileSrc: "/assets/OmekotitelHeroBanners/1m.webp",
     alt: "Омекотител — слайд 1",
     title: "Аромат, който остава",
     subtitle: "Парфюми, есенции и перли за свежо пране",
     button: { label: "Разгледай", href: "/prane-vsichko-neobhodimo/parfjumi-esencii-i-busteri-za-prane" },
+  },
+  {
+    src: "/assets/OmekotitelHeroBanners/2.webp",
+    mobileSrc: "/assets/OmekotitelHeroBanners/2m.webp",
+    alt: "Омекотител — слайд 2",
+    title: "Новото усещане след сушене",
+    subtitle: "Парфюми, листчета и аксесоари за сушилня",
+    button: { label: "Разгледай", href: "/cjalostna-grizha-za-drehi/produkti-za-sushilnja" },
+  },
+  {
+    src: "/assets/OmekotitelHeroBanners/3.webp",
+    mobileSrc: "/assets/OmekotitelHeroBanners/3m.webp",
+    alt: "Омекотител — слайд 3",
+    title: "Домът блести във всеки детайл",
+    subtitle: "Стъкла, прах, метали, камък и ароматизирана грижа",
+    button: { label: "Разгледай", href: "/grizha-za-doma/podove-povarhnosti" },
+  },
+  {
+    src: "/assets/OmekotitelHeroBanners/4.webp",
+    mobileSrc: "/assets/OmekotitelHeroBanners/4m.webp",
+    alt: "Омекотител — слайд 4",
+    title: "Правилната грижа за всеки под",
+    subtitle: "Препарати за паркет, плочки, мрамор, гранит и др",
+    button: { label: "Разгледай", href: "/grizha-za-doma/podove-povarhnosti/parket-podove-kilimi-tapicerii" },
+  },
+  {
+    src: "/assets/OmekotitelHeroBanners/5.webp",
+    mobileSrc: "/assets/OmekotitelHeroBanners/5m.webp",
+    alt: "Омекотител — слайд 5",
+    title: "Решение за всяко петно",
+    subtitle: "Препарати за дрехи, текстил, килими и тапицерии",
+    button: { label: "Разгледай", href: "/prane-vsichko-neobhodimo/preparati-za-prane" },
   },
 ];
 
@@ -86,7 +118,7 @@ export default function HeroSlider() {
             src={slide.src}
             alt={slide.alt}
             fill
-            className="object-fill md:object-fill hidden md:block"
+            className="object-contain md:object-contain hidden md:block"
             sizes="100vw"
             fetchPriority="high"
             loading={i === 0 ? "eager" : "lazy"}
@@ -98,24 +130,30 @@ export default function HeroSlider() {
             fill
             className="object-cover md:hidden"
             sizes="100vw"
+            fetchPriority="high"
             loading={i === 0 ? "eager" : "lazy"}
+            priority={i === 0}
           />
 
-          <div className="absolute inset-0 flex items-start md:items-center pointer-events-none justify-center md:justify-start md:pl-16 pt-5 md:pt-0">
-            <div className="w-[72%] md:max-w-sm px-4 md:px-8 py-3 md:py-7 bg-white/85 backdrop-blur-sm rounded-lg md:rounded-2xl shadow-md flex flex-col items-center md:items-start text-center md:text-left">
-              <h2 className="text-base md:text-3xl font-bold text-brand-nav leading-snug">
-                {slide.title}
-              </h2>
-              <div className="hidden md:block w-10 h-0.5 bg-brand-nav my-3" />
-              <p className="hidden md:block text-base text-gray-700 leading-snug">
-                {slide.subtitle}
-              </p>
+          <div className="absolute inset-0 flex items-start md:items-center pointer-events-none justify-center md:justify-start md:pl-32 pt-2 md:pt-0">
+            <div className="flex flex-col items-center md:items-start gap-2 md:gap-4">
+              {/* Text box with transparent background */}
+              <div className="w-[95%] md:max-w-sm px-3 md:px-8 py-3 md:py-6 bg-white/60 backdrop-blur-md rounded-xl md:rounded-3xl shadow-2xl border border-white/20 flex flex-col items-center md:items-start text-center md:text-left">
+                <h2 className="text-base md:text-3xl font-bold text-gray-900 leading-tight md:leading-snug">
+                  {slide.title}
+                </h2>
+                <div className="hidden md:block w-12 h-1 bg-gradient-to-r from-brand-nav to-brand-action rounded-full my-4" />
+                <p className="text-xs md:text-base text-gray-600 leading-tight md:leading-relaxed mt-0.5 md:mt-0 font-medium">
+                  {slide.subtitle}
+                </p>
+              </div>
+              {/* Button without background */}
               <Link
                 href={slide.button.href}
-                className="pointer-events-auto inline-flex mt-3 md:mt-4 items-center gap-2 bg-red-500 hover:bg-red-600 text-white font-bold px-5 md:px-8 py-2.5 md:py-3.5 rounded-xl shadow-md shadow-red-500/30 transition-colors duration-200 text-sm md:text-base"
+                className="pointer-events-auto inline-flex items-center gap-1.5 md:gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold px-4 md:px-9 py-2 md:py-4 rounded-lg md:rounded-xl shadow-lg shadow-red-500/40 hover:shadow-xl hover:shadow-red-500/50 transition-all duration-300 text-xs md:text-base hover:-translate-y-0.5"
               >
                 {slide.button.label}
-                <ArrowRight size={15} />
+                <ArrowRight size={14} className="md:w-5 md:h-5" />
               </Link>
             </div>
           </div>

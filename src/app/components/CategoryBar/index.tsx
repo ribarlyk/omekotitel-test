@@ -3,59 +3,49 @@ import Link from "next/link";
 
 const CATEGORIES = [
   {
-    label: "Почистващи артикули",
-    href: "/pochistvaschi-i-polezni-artikuli",
-    icon: "/assets/omekotitel-icon-cleaning-essentials.svg",
-  },
-  {
     label: "Грижа за дома",
     href: "/grizha-za-doma",
-    icon: "/assets/omekotitel-icon-home.svg",
+    icon: "/assets/OmekotitelIcons/grizha-za-doma-icon-v2.svg",
   },
   {
     label: "Грижа за дрехи",
     href: "/cjalostna-grizha-za-drehi",
-    icon: "/assets/omekotitel-icon-home-essentials.svg",
+    icon: "/assets/OmekotitelIcons/grizha-za-drehi-icon-v2-no-sparkles.svg",
   },
   {
     label: "Пране",
     href: "/prane-vsichko-neobhodimo",
-    icon: "/assets/omekotitel-icon-holiday-sparkles.svg",
+    icon: "/assets/OmekotitelIcons/prane-vsichko-neobhodimo-icon.svg",
   },
   {
     label: "Мама & Дете",
     href: "/mama-dete-produkti",
-    icon: "/assets/omekotitel-icon-baby-and-kids.svg",
+    icon: "/assets/OmekotitelIcons/mama-dete-produkti-icon.svg",
   },
   {
     label: "Професионални",
     href: "/profesionalni-produkti",
-    icon: "/assets/omekotitel-icon-health-and-wellness.svg",
+    icon: "/assets/OmekotitelIcons/profesionalni-produkti-icon-final.svg",
   },
   {
     label: "Домашни любимци",
     href: "/grizha-za-doma/domashni-lyubimci",
-    icon: "/assets/omekotitel-icon-pet-supplies.svg",
+    icon: "/assets/OmekotitelIcons/domashni-lyubimci-icon.svg",
   },
   {
     label: "Кухня",
     href: "/grizha-za-doma/kuhnja",
-    icon: "/assets/omekotitel-icon-kitchen.svg",
-  },
-  {
-    label: "Против вредители",
-    href: "/grizha-za-doma/protiv-komari-molci-grizachi-i-dr",
-    icon: "/assets/omekotitel-icon-gardening.svg",
+    icon: "/assets/OmekotitelIcons/kuhnja-icon.svg",
   },
   {
     label: "Грижа за тяло",
     href: "/pochistvaschi-i-polezni-artikuli/tjalo",
-    icon: "/assets/omekotitel-icon-personal-care.svg",
+    icon: "/assets/OmekotitelIcons/body-products-icon.svg",
   },
   {
     label: "Грижа за коса",
     href: "/pochistvaschi-i-polezni-artikuli/kosa",
-    icon: "/assets/omekotitel-icon-clean-beauty.svg",
+    icon: "/assets/OmekotitelIcons/hair-products-icon.svg",
   },
 ];
 
