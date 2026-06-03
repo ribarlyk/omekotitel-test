@@ -121,6 +121,7 @@ export default function HeroSlider() {
             className="object-contain md:object-contain hidden md:block"
             sizes="100vw"
             preload={i === 0}
+            fetchPriority={i === 0 ? "high" : "auto"}
             loading={i === 0 ? "eager" : "lazy"}
           />
           <Image
@@ -130,6 +131,7 @@ export default function HeroSlider() {
             className="object-cover md:hidden"
             sizes="100vw"
             preload={i === 0}
+            fetchPriority={i === 0 ? "high" : "auto"}
             loading={i === 0 ? "eager" : "lazy"}
           />
 
