@@ -43,7 +43,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [sortField, setSortField] = useState("relevance");
+  const [sortField, setSortField] = useState("name");
   const [sortDir, setSortDir] = useState<SortDir>("ASC");
   const [view, setView] = useState<ViewMode>("grid");
 
@@ -52,7 +52,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
     setTotalCount(initialTotalCount);
     setActiveFilters({});
     setCurrentPage(1);
-    setSortField("relevance");
+    setSortField("name");
     setSortDir("ASC");
   }, [query]);
 
@@ -84,8 +84,10 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
       url.searchParams.set("q", query);
       url.searchParams.set("pageSize", String(PAGE_SIZE));
       url.searchParams.set("currentPage", String(page));
-      url.searchParams.set("sortField", field);
-      url.searchParams.set("sortDir", dir);
+      if (field !== "relevance") {
+        url.searchParams.set("sortField", field);
+        url.searchParams.set("sortDir", dir);
+      }
       if (Object.keys(filters).length > 0) {
         url.searchParams.set("filters", JSON.stringify(filters));
       }

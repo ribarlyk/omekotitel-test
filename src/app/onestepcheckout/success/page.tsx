@@ -11,7 +11,7 @@ export default async function CheckoutSuccessPage({ searchParams }: Props) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Content */}
-      <div className="flex-1 flex items-center justify-center px-4 py-16">
+      <div className="flex-1 flex items-center justify-center px-4 pt-8 pb-16">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-10 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-brand-action/10 rounded-full flex items-center justify-center mx-auto mb-6">
             <CheckCircle2 className="w-9 h-9 text-brand-action" />

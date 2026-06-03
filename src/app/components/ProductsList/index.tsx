@@ -41,13 +41,13 @@ export default function ProductsList({
       {view === "grid" ? (
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4">
           {products.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} view="grid" />
+            <ProductCard key={product.id} product={product} index={index} view="grid" priority={index < 4} />
           ))}
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           {products.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} view="list" />
+            <ProductCard key={product.id} product={product} index={index} view="list" priority={index < 4} />
           ))}
         </div>
       )}

@@ -20,7 +20,7 @@ export async function GET() {
       );
     }
 
-    const query = `query { customer { email firstname lastname created_at is_subscribed} }`;
+    const query = `query { customer { email firstname lastname created_at is_subscribed addresses { default_shipping telephone street city postcode region { region } } } }`;
 
     const resp = await fetch(GRAPHQL_ENDPOINT, {
       method: "POST",
@@ -42,8 +42,10 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const { email, firstname, lastname, created_at, is_subscribed } =
+    const { email, firstname, lastname, created_at, is_subscribed, addresses } =
       data.data.customer;
+
+    const defaultAddress = (addresses ?? []).find((a: { default_shipping?: boolean }) => a.default_shipping) ?? addresses?.[0] ?? null;
 
     return NextResponse.json({
       email,
@@ -51,6 +53,11 @@ export async function GET() {
       lastname,
       created_at,
       is_subscribed,
+      telephone: defaultAddress?.telephone ?? null,
+      street: defaultAddress?.street?.[0] ?? null,
+      city: defaultAddress?.city ?? null,
+      postcode: defaultAddress?.postcode ?? null,
+      region: defaultAddress?.region?.region ?? null,
     });
   } catch (err) {
     console.error("/api/me error:", err);

@@ -41,7 +41,7 @@ interface Category {
   children?: Category[];
 }
 
-const DEFAULT_OG_IMAGE = `${SITE_URL}/assets/hero-omekotitel.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/assets/omekotitel-bg_1.avif`;
 
 interface ProductMeta {
   name: string;

@@ -5,6 +5,12 @@ import { createContext, useContext, useState, useEffect, ReactNode } from "react
 interface Customer {
   email: string;
   firstname: string;
+  lastname?: string;
+  telephone?: string | null;
+  street?: string | null;
+  city?: string | null;
+  postcode?: string | null;
+  region?: string | null;
 }
 
 interface AuthContextType {

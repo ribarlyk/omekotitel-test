@@ -17,7 +17,7 @@ interface ProductSliderProps {
   outerClassName?: string;
 }
 
-function SliderSkeleton({ title }: { title: string }) {
+export function SliderSkeleton({ title }: { title: string }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">

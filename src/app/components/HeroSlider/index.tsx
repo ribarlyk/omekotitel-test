@@ -120,9 +120,8 @@ export default function HeroSlider() {
             fill
             className="object-contain md:object-contain hidden md:block"
             sizes="100vw"
-            fetchPriority="high"
-            loading={i === 0 ? "eager" : "lazy"}
             priority={i === 0}
+            loading={i === 0 ? "eager" : "lazy"}
           />
           <Image
             src={slide.mobileSrc}
@@ -136,15 +135,18 @@ export default function HeroSlider() {
           />
 
           <div className="absolute inset-0 flex items-start md:items-center pointer-events-none justify-center md:justify-start md:pl-32 pt-2 md:pt-0">
-            <div className="flex flex-col items-center md:items-start gap-2 md:gap-4">
+            <div className="flex flex-col items-center md:items-start gap-1 md:gap-4">
               {/* Text box with transparent background */}
-              <div className="w-[95%] md:max-w-sm px-3 md:px-8 py-3 md:py-6 bg-white/60 backdrop-blur-md rounded-xl md:rounded-3xl shadow-2xl border border-white/20 flex flex-col items-center md:items-start text-center md:text-left">
+              <div className="w-[95%] md:max-w-sm px-3 md:px-8 py-3 md:py-6 bg-transparent backdrop-blur-[2px] rounded-xl md:rounded-3xl shadow-2xl flex flex-col items-center md:items-start text-center md:text-left">
                 <h2 className="text-base md:text-3xl font-bold text-gray-900 leading-tight md:leading-snug">
                   {slide.title}
                 </h2>
                 <div className="hidden md:block w-12 h-1 bg-gradient-to-r from-brand-nav to-brand-action rounded-full my-4" />
-                <p className="text-xs md:text-base text-gray-600 leading-tight md:leading-relaxed mt-0.5 md:mt-0 font-medium">
-                  {slide.subtitle}
+                <p className="text-xs md:text-base text-gray-700 leading-tight md:leading-relaxed mt-0.5 md:mt-0 font-medium">
+                  {(() => {
+                    const words = slide.subtitle.split(" ");
+                    return <><strong>{words.slice(0, 3).join(" ")}</strong>{" "}{words.slice(3).join(" ")}</>;
+                  })()}
                 </p>
               </div>
               {/* Button without background */}

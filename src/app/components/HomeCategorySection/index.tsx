@@ -47,8 +47,8 @@ export default async function HomeCategorySection({
   if (!products.length) return null;
 
   return (
-    <section className="max-w-7xl mx-auto px-4 pt-5 pb-6">
-      <ProductSlider title={title} products={products} viewAllHref={href ?? `/${urlKey}`} titleSize="text-lg lg:text-2xl" outerClassName="mt-4" />
+    <section className="max-w-7xl mx-auto px-4 pt-3 pb-6">
+      <ProductSlider title={title} products={products} viewAllHref={href ?? `/${urlKey}`} titleSize="text-lg lg:text-2xl" outerClassName="mt-2" />
     </section>
   );
 }

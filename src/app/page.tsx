@@ -2,25 +2,26 @@ import { Suspense } from "react";
 import CategoryBar from "@/src/app/components/CategoryBar";
 import HomeCategorySection from "@/src/app/components/HomeCategorySection";
 import HeroSlider from "@/src/app/components/HeroSlider";
+import { SliderSkeleton } from "@/src/app/components/ProductSlider";
 
 export default function Home() {
   return (
     <div className="flex flex-col">
-      <section className="w-full lg:-mt-16.25">
+<section className="w-full lg:-mt-16.25">
         <HeroSlider />
       </section>
 
       <CategoryBar />
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<SliderSkeleton title="Нови продукти" />}>
         <HomeCategorySection urlKey="novi-produkti" title="Нови продукти" />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<SliderSkeleton title="Оферти" />}>
         <HomeCategorySection urlKey="oferti-produkti" title="Оферти" />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<SliderSkeleton title="Омекотители" />}>
         <HomeCategorySection
           urlKey="omekotiteli"
           title="Омекотители"
@@ -28,7 +29,7 @@ export default function Home() {
         />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<SliderSkeleton title="Продукти за съдомиялни" />}>
         <HomeCategorySection
           urlKey="preparati-za-sadomiyalni"
           title="Продукти за съдомиялни"

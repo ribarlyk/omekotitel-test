@@ -31,13 +31,14 @@ interface ProductCardProps {
   index?: number;
   view?: ViewMode;
   imageSizes?: string;
+  priority?: boolean;
 }
 
 // Matches ProductsList grid: 2 cols default, 3 cols lg (≥1024px), 4 cols xl (≥1280px)
 const DEFAULT_GRID_SIZES =
   "(max-width: 1024px) calc(50vw - 1rem), (max-width: 1280px) calc(33vw - 1rem), calc(25vw - 1rem)";
 
-export default function ProductCard({ product, index = 0, view = "grid", imageSizes }: ProductCardProps) {
+export default function ProductCard({ product, index = 0, view = "grid", imageSizes, priority = false }: ProductCardProps) {
   const finalPrice = product.price_range?.minimum_price.final_price;
   const regularPrice = product.price_range?.minimum_price.regular_price;
 
@@ -46,12 +47,9 @@ export default function ProductCard({ product, index = 0, view = "grid", imageSi
   const isNew = isProductNew(product);
   const isConfigurable = product.type_id === "configurable";
 
-  // Eager-load the first row (grid is up to 4 columns on xl) so the LCP candidate
-  // — whichever above-the-fold card the browser picks — isn't held back by lazy loading.
-  // Only the very first card gets fetchPriority=high.
   const imageLoadingProps = {
-    loading: (index < 4 ? "eager" : "lazy") as "eager" | "lazy",
-    fetchPriority: (index === 0 ? "high" : "auto") as "high" | "auto",
+    loading: (priority ? "eager" : "lazy") as "eager" | "lazy",
+    fetchPriority: (priority ? "high" : "auto") as "high" | "auto",
   };
 
   const badges = (
@@ -137,8 +135,8 @@ export default function ProductCard({ product, index = 0, view = "grid", imageSi
             src={magentoImageUrl(product.small_image.url)}
             alt={product.small_image.label || product.name}
             width={200}
-            height={200}
-            style={{ width: "100%", height: "200px", objectFit: "contain" }}
+            height={240}
+            style={{ width: "100%", height: "240px", objectFit: "contain" }}
             className="transition-transform duration-300 group-hover:scale-105"
             sizes={imageSizes ?? DEFAULT_GRID_SIZES}
             {...imageLoadingProps}

@@ -568,7 +568,7 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
                           ? "Избери вариант"
                           : !isInStock
                             ? "Изчерпано"
-                            : `Добави в количката — ${(finalPrice.value * quantity).toFixed(2)} ${finalPrice.currency}`}
+                            : <>Добави в количката <span className="font-light opacity-70 text-sm">–</span> {(finalPrice.value * quantity).toFixed(2)} {finalPrice.currency}</>}
                 </button>
 
                 {/* Wishlist button hidden until backend integration is resolved */}

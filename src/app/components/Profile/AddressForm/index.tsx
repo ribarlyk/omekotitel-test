@@ -59,10 +59,14 @@ function toFormData(a: CustomerAddress): AddressFormData {
   };
 }
 
+const PHONE_RE = /^(\+359|00359|0)\d{9}$/;
+const validatePhone = (val: string) => PHONE_RE.test(val.replace(/[\s\-().]/g, ""));
+
 export const AddressForm = ({ initial, addressId }: Props) => {
   const router = useRouter();
   const [form, setForm] = useState<AddressFormData>(initial ? toFormData(initial) : empty);
   const [saving, setSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
 
   const set = (field: keyof AddressFormData, value: string | boolean) =>
     setForm((f) => ({ ...f, [field]: value }));
@@ -76,6 +80,11 @@ export const AddressForm = ({ initial, addressId }: Props) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validatePhone(form.telephone)) {
+      setPhoneError("Невалиден телефонен номер (пр. 0876123456, +359876123456 или 00359876123456)");
+      return;
+    }
+    setPhoneError("");
     setSaving(true);
 
     const input = {
@@ -161,13 +170,16 @@ export const AddressForm = ({ initial, addressId }: Props) => {
           <label className={labelClass}>
             Телефон <span className="text-red-500">*</span>
           </label>
-          <input
-            required
-            type="tel"
-            value={form.telephone}
-            onChange={(e) => set("telephone", e.target.value)}
-            className={inputClass}
-          />
+          <div className="flex flex-col gap-1">
+            <input
+              required
+              type="tel"
+              value={form.telephone}
+              onChange={(e) => { set("telephone", e.target.value); setPhoneError(""); }}
+              className={inputClass}
+            />
+            {phoneError && <p className="text-xs text-red-500">{phoneError}</p>}
+          </div>
         </div>
       </section>
 
@@ -176,7 +188,7 @@ export const AddressForm = ({ initial, addressId }: Props) => {
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Адрес</h2>
         <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-y-2 sm:gap-y-3 sm:items-center max-w-2xl">
           <label className={labelClass}>
-            Адрес на получател или офис на куриер
+            Адрес на получател или офис на куриер <span className="text-red-500">*</span>
           </label>
           <div className="flex flex-col gap-2">
             <input
@@ -184,18 +196,7 @@ export const AddressForm = ({ initial, addressId }: Props) => {
               value={form.street[0]}
               onChange={(e) => setStreet(0, e.target.value)}
               className={inputClass}
-            />
-            <input
-              type="text"
-              value={form.street[1]}
-              onChange={(e) => setStreet(1, e.target.value)}
-              className={inputClass}
-            />
-            <input
-              type="text"
-              value={form.street[2]}
-              onChange={(e) => setStreet(2, e.target.value)}
-              className={inputClass}
+              required
             />
           </div>
 

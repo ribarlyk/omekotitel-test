@@ -104,7 +104,7 @@ export function buildOrganizationSchema(): Record<string, unknown> {
     "@type": "Organization",
     name: SITE_NAME,
     url: SITE_URL,
-    logo: `${SITE_URL}/assets/hero-omekotitel.png`,
+    logo: `${SITE_URL}/assets/omekotitel-bg_1.avif`,
     sameAs: [
       "https://www.facebook.com/omekotitel",
       "https://www.instagram.com/omekotitel.bg",

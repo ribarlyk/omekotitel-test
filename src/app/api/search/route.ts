@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         query: print(Queries.SEARCH_PRODUCTS),
-        variables: { search, pageSize, currentPage, sort, filter },
+        variables: { search, pageSize, currentPage, ...(sort ? { sort } : {}), filter },
       }),
       cache: "no-store",
     });

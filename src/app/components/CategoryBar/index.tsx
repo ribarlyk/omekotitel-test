@@ -51,8 +51,8 @@ const CATEGORIES = [
 
 export default function CategoryBar() {
   return (
-    <section className="pt-3 pb-4 md:pb-8 px-4 border-b border-gray-100">
-      <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-900 mb-2 md:mb-3">
+    <section className="pt-3 pb-2 md:pb-4 px-4 border-b border-gray-100">
+      <p className="text-center text-xs font-bold uppercase tracking-widest text-gray-900 mb-4 md:mb-3">
         Пазарувай по категория
       </p>
       <div className="relative md:static">
@@ -61,18 +61,18 @@ export default function CategoryBar() {
             <Link
               key={cat.href}
               href={cat.href}
-              className="flex flex-col items-center gap-1.5 w-16 md:w-20 shrink-0 text-center group"
+              className="flex flex-col items-center gap-1.5 w-24 md:w-24 shrink-0 text-center group"
             >
-              <div className="w-10 h-10 md:w-14 md:h-14 flex items-center justify-center">
+              <div className="w-20 h-20 md:w-20 md:h-20 flex items-center justify-center">
                 <Image
                   src={cat.icon}
                   alt={cat.label}
-                  width={56}
-                  height={56}
+                  width={80}
+                  height={80}
                   className="group-hover:scale-110 transition-transform duration-200"
                 />
               </div>
-              <span className="text-xs text-gray-600 group-hover:text-brand-nav leading-tight transition-colors">
+              <span className="text-sm md:text-sm text-gray-600 group-hover:text-brand-nav leading-tight transition-colors">
                 {cat.label}
               </span>
             </Link>

@@ -14,6 +14,7 @@ import { z } from "zod";
 import RevolutCheckout from "@revolut/checkout";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/src/app/contexts/CartContext";
+import { useAuth } from "@/src/app/contexts/AuthContext";
 import {
   Loader2,
   Plus,
@@ -35,7 +36,12 @@ const addressSchema = z.object({
   email: z.string().min(1, "Въведете имейл").email("Невалиден имейл адрес"),
   firstname: z.string().min(1, "Въведете име"),
   lastname: z.string().min(1, "Въведете фамилия"),
-  telephone: z.string().min(6, "Въведете телефон"),
+  telephone: z.string()
+    .min(1, "Въведете телефон")
+    .refine(
+      (val) => /^(\+359|00359|0)\d{9}$/.test(val.replace(/[\s\-().]/g, "")),
+      "Невалиден телефонен номер (пр. 0876123456, +359876123456 или 00359876123456)"
+    ),
   street: z.string().min(1, "Въведете адрес"),
   city: z.string().min(1, "Въведете град"),
   postcode: z.string().min(1, "Въведете пощенски код"),
@@ -98,7 +104,7 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <label className="text-sm font-medium text-gray-700">
         {label}
-        {required && <span className="text-brand-action ml-0.5">*</span>}
+        {required && <span className="text-red-500 ml-0.5">*</span>}
       </label>
       {children}
       {error && <p className="text-xs text-red-500">{error}</p>}
@@ -509,6 +515,7 @@ function MethodsSkeleton() {
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, loading: cartLoading, itemCount, refreshCart } = useCart();
+  const { user, loading: authLoading } = useAuth();
 
   const {
     register,
@@ -571,6 +578,23 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Pre-fill from logged-in user — only fills empty fields so it doesn't overwrite what the user typed
+  useEffect(() => {
+    if (authLoading || !user) return;
+    const current = getShipping();
+    reset({
+      email: current.email || user.email || "",
+      firstname: current.firstname || user.firstname || "",
+      lastname: current.lastname || user.lastname || "",
+      telephone: current.telephone || user.telephone || "",
+      street: current.street || user.street || "",
+      city: current.city || user.city || "",
+      postcode: current.postcode || user.postcode || "",
+      region: current.region || user.region || "",
+    }, { keepErrors: false });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user]);
+
   // Validity as state — only changes when thresholds are crossed, not on every keystroke.
   // Using the subscription form of watch (callback-based) avoids re-rendering CheckoutPage
   // on every keystroke; startTransition defers validity re-renders so the browser paints
@@ -587,7 +611,7 @@ export default function CheckoutPage() {
         !!values.email?.trim() &&
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim()) &&
         !!values.telephone?.trim() &&
-        values.telephone.trim().length >= 6 &&
+        /^(\+359|00359|0)\d{9}$/.test(values.telephone.trim().replace(/[\s\-().]/g, "")) &&
         !!values.firstname?.trim() &&
         !!values.lastname?.trim();
       const sv =
@@ -883,8 +907,12 @@ export default function CheckoutPage() {
     selectedShipping !== "" &&
     !isAddressDelivery &&
     (methodLabel.includes("speedy") || methodLabel.includes("econt") || methodLabel.includes("еконт"));
+  const isDirectDelivery =
+    selectedShipping !== "" &&
+    !isAddressDelivery &&
+    !isOfficeDelivery;
   const selectedCourier = methodLabel.includes("speedy") ? "speedy" : "econt";
-  const effectiveShippingValid = isOfficeDelivery
+  const effectiveShippingValid = (isOfficeDelivery || isDirectDelivery)
     ? contactValid
     : shippingValid;
 
@@ -989,7 +1017,7 @@ export default function CheckoutPage() {
     selectedShipping !== "" &&
     selectedPayment !== "" &&
     (!isRevolutPay || cardFieldReady || revolutPublicId !== null) &&
-    (isAddressDelivery || !!selectedOffice) &&
+    (isAddressDelivery || !!selectedOffice || isDirectDelivery) &&
     !!cfToken &&
     !placing;
 
@@ -1074,8 +1102,7 @@ export default function CheckoutPage() {
                     error={shippingErrors.email?.message}
                   >
                     <input
-                      type="text"
-                      inputMode="email"
+                      type="email"
                       className={inputBase}
                       placeholder="you@example.com"
                       autoComplete="email"
@@ -1139,6 +1166,11 @@ export default function CheckoutPage() {
                         courier={selectedCourier}
                       />
                     </div>
+                  )}
+                  {isDirectDelivery && (
+                    <p className="mt-3 text-sm text-brand-nav bg-brand-nav/5 border border-brand-nav/20 rounded-lg px-4 py-3">
+                      Наш служител ще се свърже на посоченият от вас телефон за организиране на доставката.
+                    </p>
                   )}
                 </div>
               )}

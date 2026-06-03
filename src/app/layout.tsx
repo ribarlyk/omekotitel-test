@@ -13,6 +13,7 @@ import { Toaster } from "sonner";
 import { ChatButton } from "./components/ChatButton";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { Footer } from "./components/Footer";
+import TrustBar from "./components/TrustBar";
 import { Breadcrumb } from "./components/Breadcrumb";
 import { BreadcrumbProvider } from "./contexts/BreadcrumbContext";
 import { JsonLd } from "./components/JsonLd";
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "bg_BG",
     siteName: "Omekotitel.bg",
-    images: [{ url: "/assets/hero-omekotitel.png", width: 1200, height: 630, alt: "Omekotitel.bg" }],
+    images: [{ url: "/assets/omekotitel-bg_1.avif", width: 1200, height: 630, alt: "Omekotitel.bg" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -103,6 +104,7 @@ export default async function RootLayout({
                   </div>
                   <Breadcrumb categoryList={categoryList} />
                   <main className="min-h-[70vh]">{children}</main>
+                  <div className="print:hidden"><TrustBar /><Footer /></div>
                   <div className="print:hidden"><Footer /></div>
                   <ChatButton />
               </BreadcrumbProvider>

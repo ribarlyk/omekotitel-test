@@ -221,6 +221,6 @@ export async function fetchAllProductUrlKeys(): Promise<string[]> {
 export async function fetchSearchProducts(search: string, pageSize = 20) {
   return gql<{ products: { items: unknown[]; total_count: number; aggregations: unknown[] } }>(
     print(Queries.SEARCH_PRODUCTS),
-    { search, pageSize },
+    { search, pageSize, sort: { name: "ASC" } },
   );
 }
