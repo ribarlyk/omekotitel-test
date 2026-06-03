@@ -104,7 +104,7 @@ export default async function RootLayout({
                   </div>
                   <Breadcrumb categoryList={categoryList} />
                   <main className="min-h-[70vh]">{children}</main>
-                  <div className="print:hidden"><TrustBar /><Footer /></div>
+                  <div className="print:hidden"><TrustBar /></div>
                   <div className="print:hidden"><Footer /></div>
                   <ChatButton />
               </BreadcrumbProvider>

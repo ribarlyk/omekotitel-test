@@ -120,7 +120,7 @@ export default function HeroSlider() {
             fill
             className="object-contain md:object-contain hidden md:block"
             sizes="100vw"
-            priority={i === 0}
+            preload={i === 0}
             loading={i === 0 ? "eager" : "lazy"}
           />
           <Image
@@ -129,9 +129,8 @@ export default function HeroSlider() {
             fill
             className="object-cover md:hidden"
             sizes="100vw"
-            fetchPriority="high"
+            preload={i === 0}
             loading={i === 0 ? "eager" : "lazy"}
-            priority={i === 0}
           />
 
           <div className="absolute inset-0 flex items-start md:items-center pointer-events-none justify-center md:justify-start md:pl-32 pt-2 md:pt-0">
