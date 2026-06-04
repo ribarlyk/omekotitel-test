@@ -128,9 +128,10 @@ export async function fetchProductsByCategory(
 
 export async function fetchProductDetail(urlKey: string) {
   // Next.js does not decode non-ASCII percent-encoded path segments in params —
-  // decode here so Magento receives actual Cyrillic text, not "%D0%9F...".
+  // decode for the GraphQL variable (Magento needs actual Cyrillic text).
+  // Keep the original percent-encoded form for the cache tag — HTTP headers are ASCII-only.
   const decoded = decodeURIComponent(urlKey);
-  const productTag = `product:${decoded}`;
+  const productTag = `product:${urlKey}`;
   const tags = productTag.length <= 256 ? ["products", productTag] : ["products"];
   return gql<{ products: { items: unknown[] } }>(
     print(Queries.GET_PRODUCT_DETAIL),
