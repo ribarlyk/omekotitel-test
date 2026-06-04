@@ -127,11 +127,14 @@ export async function fetchProductsByCategory(
 }
 
 export async function fetchProductDetail(urlKey: string) {
-  const productTag = `product:${urlKey}`;
+  // Next.js does not decode non-ASCII percent-encoded path segments in params —
+  // decode here so Magento receives actual Cyrillic text, not "%D0%9F...".
+  const decoded = decodeURIComponent(urlKey);
+  const productTag = `product:${decoded}`;
   const tags = productTag.length <= 256 ? ["products", productTag] : ["products"];
   return gql<{ products: { items: unknown[] } }>(
     print(Queries.GET_PRODUCT_DETAIL),
-    { urlKey },
+    { urlKey: decoded },
     { revalidate: false, tags },
   );
 }

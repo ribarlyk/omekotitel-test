@@ -25,7 +25,7 @@ export const LoginPanel = ({ onSuccess, onViewChange }: Props) => {
   }
 
   if (view === "forgot-password") {
-    return <ForgotPassword onBack={() => switchView("login")} onSuccess={() => switchView("login")} />;
+    return <ForgotPassword onBack={() => switchView("login")} onSuccess={() => switchView("login")} onRegister={() => switchView("register")} />;
   }
 
   return (

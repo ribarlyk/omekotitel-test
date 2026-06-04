@@ -6,7 +6,14 @@ import { useState, useCallback } from "react";
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1500;
 
-export default function MagentoImage(props: ImageProps) {
+const BLUR_DATA_URL =
+  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAQAAAAnOwc2AAAAD0lEQVR42mNk+M9Qz0AHAARWAQBmOwh0AAAAAElFTkSuQmCC";
+
+export default function MagentoImage({
+  placeholder = "blur",
+  blurDataURL = BLUR_DATA_URL,
+  ...props
+}: ImageProps) {
   const [retries, setRetries] = useState(0);
   const [key, setKey] = useState(0);
 
@@ -19,5 +26,13 @@ export default function MagentoImage(props: ImageProps) {
     }
   }, [retries]);
 
-  return <Image key={key} {...props} onError={handleError} />;
+  return (
+    <Image
+      key={key}
+      placeholder={placeholder}
+      blurDataURL={blurDataURL}
+      {...props}
+      onError={handleError}
+    />
+  );
 }

@@ -29,9 +29,10 @@ function Rule({ ok, text }: { ok: boolean; text: string }) {
 interface Props {
   onBack?: () => void;
   onSuccess?: () => void;
+  onRegister?: () => void;
 }
 
-export default function ForgotPassword({ onBack, onSuccess }: Props) {
+export default function ForgotPassword({ onBack, onSuccess, onRegister }: Props) {
   const [email, setEmail] = useState("");
   const [touched, setTouched] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -128,9 +129,15 @@ export default function ForgotPassword({ onBack, onSuccess }: Props) {
             Обратно към вход
           </Link>
         )}
-        <Link href="/register" className="text-brand-action hover:underline uppercase">
-          Създай нов профил
-        </Link>
+        {onRegister ? (
+          <button type="button" onClick={onRegister} className="text-brand-action hover:underline uppercase cursor-pointer">
+            Създай нов профил
+          </button>
+        ) : (
+          <Link href="/register" className="text-brand-action hover:underline uppercase">
+            Създай нов профил
+          </Link>
+        )}
       </div>
     </form>
   );
