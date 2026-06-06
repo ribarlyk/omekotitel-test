@@ -24,7 +24,6 @@ export const UserCartWishSection = ({
   showLabels = true,
   iconSize = 24,
 }: {
-  showWishlist?: boolean;
   showPhone?: boolean;
   showLabels?: boolean;
   iconSize?: number;

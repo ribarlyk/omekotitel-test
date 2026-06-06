@@ -95,7 +95,7 @@ export const Footer = () => (
           })}
         </div>
         <Image
-          src="https://omekotitel.bg/pub/media/wysiwyg/payment_1.png"
+          src="https://api.omekotitel.bg/pub/media/wysiwyg/payment_1.png"
           alt="Начини на плащане"
           width={300}
           height={56}

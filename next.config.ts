@@ -11,13 +11,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "omekotitel.bg",
+        hostname: "api.omekotitel.bg",
         port: "",
         pathname: "/pub/media/**",
       },
     ],
-    // change to false on production to enable built-in optimizations (resizing, WebP conversion, etc.)
-    unoptimized:true,
+    // Built-in optimizations enabled (resizing, WebP conversion, etc.)
+    unoptimized: false,
     // Only generate WebP — avif doubles transformations with negligible visual gain
     formats: ["image/webp"],
     // 31 days: product images rarely change, so skip re-transforming on every request
@@ -71,7 +71,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/graphql",
-        destination: "https://omekotitel.bg/graphql",
+        destination: "https://api.omekotitel.bg/graphql",
       },
     ];
   },
