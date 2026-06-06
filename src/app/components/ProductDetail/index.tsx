@@ -538,7 +538,7 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
             <p className="text-sm text-red-500 font-medium mb-3">Избраният вариант е изчерпан</p>
           )}
 
-          {/* ── Add to cart + wishlist ── */}
+          {/* ── Add to cart ── */}
           {(() => {
             return (
               <div className="flex gap-2">
@@ -570,8 +570,6 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
                             ? "Изчерпано"
                             : <>Добави в количката <span className="font-light opacity-70 text-sm">–</span> {(finalPrice.value * quantity).toFixed(2)} {finalPrice.currency}</>}
                 </button>
-
-                {/* Wishlist button hidden until backend integration is resolved */}
               </div>
             );
           })()}

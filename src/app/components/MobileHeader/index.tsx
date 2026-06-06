@@ -80,7 +80,7 @@ export const MobileHeader = ({ categoryList }: { categoryList: NavCatalogCategor
           >
             <Search size={32} className="text-brand-action" strokeWidth={2} />
           </button>
-          <UserCartWishSection showWishlist={false} showPhone={false} showLabels={false} iconSize={32} />
+          <UserCartWishSection showPhone={false} showLabels={false} iconSize={32} />
         </div>
       </div>
 

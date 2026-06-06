@@ -7,7 +7,6 @@ export enum ProfileSection {
   Newsletter = "newsletter",
   Payments = "payments",
   Reviews = "reviews",
-  Wishlist = "wishlist",
 }
 
 export const SECTION_LABELS: Record<ProfileSection, string> = {
@@ -19,5 +18,4 @@ export const SECTION_LABELS: Record<ProfileSection, string> = {
   [ProfileSection.Newsletter]: "Абонамент за бюлетин",
   [ProfileSection.Payments]: "Съхранени методи за плащане",
   [ProfileSection.Reviews]: "Моите отзиви за продукти",
-  [ProfileSection.Wishlist]: "Моят списък с желани",
 };

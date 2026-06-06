@@ -7,13 +7,11 @@ export async function GET(req: NextRequest) {
 
   try {
     const { upsell: upsellSkus, crosssell: crosssellSkus, related: relatedSkus } = await fetchProductLinkSkus(urlKey);
-    console.log(`[product-links] urlKey=${urlKey} skus:`, { upsell: upsellSkus.length, crosssell: crosssellSkus.length, related: relatedSkus.length });
     const [upsellProducts, crosssellProducts, relatedProducts] = await Promise.all([
       fetchProductsBySku(upsellSkus),
       fetchProductsBySku(crosssellSkus),
       fetchProductsBySku(relatedSkus),
     ]);
-    console.log(`[product-links] urlKey=${urlKey} resolved:`, { upsell: upsellProducts.length, crosssell: crosssellProducts.length, related: relatedProducts.length });
 
     return NextResponse.json({ upsell: upsellProducts, crosssell: crosssellProducts, related: relatedProducts });
   } catch (e) {

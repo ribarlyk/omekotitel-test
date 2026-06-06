@@ -34,13 +34,9 @@ export async function POST() {
 
     try {
       cookieStore.delete("auth-token");
-      cookieStore.delete("mage-session");
-      cookieStore.delete("mage-form-key");
     } catch (e) {
       console.warn("Failed to delete cookies:", e);
       cookieStore.set("auth-token", "", { path: "/", maxAge: 0 });
-      cookieStore.set("mage-session", "", { path: "/", maxAge: 0 });
-      cookieStore.set("mage-form-key", "", { path: "/", maxAge: 0 });
     }
 
     return NextResponse.json({ success: true });

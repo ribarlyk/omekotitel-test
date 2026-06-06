@@ -61,6 +61,30 @@ function getStoredForm(): Partial<AddressFields> {
   }
 }
 
+// Single source of truth for step-gating validity. Used by every path that sets
+// form values (sessionStorage restore, logged-in pre-fill, live watch) so they
+// can't drift apart — reset() does not fire the watch subscription, so paths that
+// call reset() must recompute validity themselves via this helper.
+function computeValidity(v: Partial<AddressFields>): {
+  contactValid: boolean;
+  shippingValid: boolean;
+} {
+  const contactValid =
+    !!v.email?.trim() &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email.trim()) &&
+    !!v.telephone?.trim() &&
+    /^(\+359|00359|0)\d{9}$/.test(v.telephone.trim().replace(/[\s\-().]/g, "")) &&
+    !!v.firstname?.trim() &&
+    !!v.lastname?.trim();
+  const shippingValid =
+    contactValid &&
+    !!v.street?.trim() &&
+    !!v.city?.trim() &&
+    !!v.postcode?.trim() &&
+    !!v.region?.trim();
+  return { contactValid, shippingValid };
+}
+
 interface ShippingAddress {
   firstname: string;
   lastname: string;
@@ -558,19 +582,7 @@ export default function CheckoutPage() {
         },
         { keepErrors: false },
       );
-      const cv =
-        !!stored.email?.trim() &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(stored.email.trim()) &&
-        !!stored.telephone?.trim() &&
-        stored.telephone.trim().length >= 6 &&
-        !!stored.firstname?.trim() &&
-        !!stored.lastname?.trim();
-      const sv =
-        cv &&
-        !!stored.street?.trim() &&
-        !!stored.city?.trim() &&
-        !!stored.postcode?.trim() &&
-        !!stored.region?.trim();
+      const { contactValid: cv, shippingValid: sv } = computeValidity(stored);
       setContactValid(cv);
       setShippingValid(sv);
     }
@@ -582,7 +594,7 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (authLoading || !user) return;
     const current = getShipping();
-    reset({
+    const merged = {
       email: current.email || user.email || "",
       firstname: current.firstname || user.firstname || "",
       lastname: current.lastname || user.lastname || "",
@@ -591,7 +603,13 @@ export default function CheckoutPage() {
       city: current.city || user.city || "",
       postcode: current.postcode || user.postcode || "",
       region: current.region || user.region || "",
-    }, { keepErrors: false });
+    };
+    reset(merged, { keepErrors: false });
+    // reset() does not fire the watch subscription, so recompute validity here —
+    // otherwise the delivery step never unlocks for a pre-filled logged-in user.
+    const { contactValid: cv, shippingValid: sv } = computeValidity(merged);
+    setContactValid(cv);
+    setShippingValid(sv);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user]);
 
@@ -607,19 +625,7 @@ export default function CheckoutPage() {
       try {
         sessionStorage.setItem(FORM_KEY, JSON.stringify(values));
       } catch {}
-      const cv =
-        !!values.email?.trim() &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim()) &&
-        !!values.telephone?.trim() &&
-        /^(\+359|00359|0)\d{9}$/.test(values.telephone.trim().replace(/[\s\-().]/g, "")) &&
-        !!values.firstname?.trim() &&
-        !!values.lastname?.trim();
-      const sv =
-        cv &&
-        !!values.street?.trim() &&
-        !!values.city?.trim() &&
-        !!values.postcode?.trim() &&
-        !!values.region?.trim();
+      const { contactValid: cv, shippingValid: sv } = computeValidity(values);
       startTransition(() => {
         setContactValid(cv);
         setShippingValid(sv);
