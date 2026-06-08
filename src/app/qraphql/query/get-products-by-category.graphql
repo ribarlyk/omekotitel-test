@@ -31,6 +31,7 @@ query GetProductsByCategory($filter: ProductAttributeFilterInput!, $pageSize: In
       }
       url_key
       type_id
+      stock_status
       new_from_date
       new_to_date
       special_price

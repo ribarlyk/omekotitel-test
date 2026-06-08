@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { NavCatalogCategory } from "@/src/app/constants";
 import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
@@ -66,6 +66,10 @@ interface BreadcrumbProps {
 export function Breadcrumb({ categoryList }: BreadcrumbProps) {
   const pathname = usePathname();
   const { lastCrumbLabel, lastCategoryPath, setLastCategoryPath } = useBreadcrumb();
+  const [mounted, setMounted] = useState(false);
+
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional client-only gate: flip to mounted after hydration so the breadcrumb never server-renders (avoids the stale snapshot duplicating after on-demand revalidation)
+  useEffect(() => setMounted(true), []);
 
   // Save the current path as the category context, but only when it's not a product URL.
   // A single-segment path that isn't a known static page or category is almost certainly
@@ -80,6 +84,15 @@ export function Breadcrumb({ categoryList }: BreadcrumbProps) {
       setLastCategoryPath(pathname);
     }
   }, [pathname, setLastCategoryPath, categoryList]);
+
+  // Render client-side only. This breadcrumb's output depends on client-only state
+  // (sessionStorage category path, product label set after Suspense resolves), so
+  // server-rendering it bakes a transient snapshot into the cached / stale-while-revalidate
+  // HTML. After an on-demand revalidation that stale snapshot could linger in the DOM
+  // alongside the fresh render, showing a duplicate breadcrumb. Rendering purely on the
+  // client guarantees a single, correct instance. SEO is covered by the BreadcrumbList
+  // JSON-LD emitted on category/product pages.
+  if (!mounted) return null;
 
   if (pathname === "/") return null;
   if (

@@ -166,7 +166,13 @@ export default function CategoryPage({
     }
   };
 
-  const hasMore = products.length < totalCount;
+  // Bound "load more" by the authoritative page count, not by item count.
+  // total_count can exceed the number of items actually returned across pages, and the
+  // append-dedup below can drop duplicates — either makes products.length < totalCount
+  // permanently true, which previously caused requests for pages beyond the last one
+  // (Magento: "currentPage value N greater than the M page(s) available").
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const hasMore = currentPage < totalPages;
   const hasFilters = aggregations.filter((a) => !["category_id", "category_uid"].includes(a.attribute_code) && a.options.length > 0).length > 0;
 
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -291,8 +297,6 @@ export default function CategoryPage({
                 <SortToolbar
                   totalCount={totalCount}
                   currentCount={products.length}
-                  currentPage={currentPage}
-                  pageSize={PAGE_SIZE}
                   sortField={sortField}
                   sortDir={sortDir}
                   view={view}

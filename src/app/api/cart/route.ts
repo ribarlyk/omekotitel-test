@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { Mutations, Queries } from "@/src/app/utils/graphql";
 import { print } from "graphql";
+import { fetchWithRetry } from "@/src/app/utils/fetchWithRetry";
+import { isCartAuthError } from "@/src/app/utils/cartErrors";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
 
@@ -30,7 +32,7 @@ export async function GET() {
         headers.Authorization = `Bearer ${authToken}`;
       }
 
-      const createResp = await fetch(GRAPHQL_ENDPOINT, {
+      const createResp = await fetchWithRetry(GRAPHQL_ENDPOINT, {
         method: "POST",
         headers,
         body: JSON.stringify({ query: createCartQuery }),
@@ -71,7 +73,7 @@ export async function GET() {
         headers.Authorization = `Bearer ${authToken}`;
       }
 
-      const cartResp = await fetch(GRAPHQL_ENDPOINT, {
+      const cartResp = await fetchWithRetry(GRAPHQL_ENDPOINT, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -88,8 +90,12 @@ export async function GET() {
 
       if (cartData.errors) {
         console.error("GraphQL errors:", cartData.errors);
-        // Cart might be expired, clear cookie
-        cookieStore.delete("cart-id");
+        // Only drop the cart-id when it's genuinely unusable in this auth context
+        // (stale customer cart after logout / expired token). For transient Magento
+        // errors we keep the cookie so a blip doesn't wipe a still-valid cart.
+        if (isCartAuthError(cartData.errors)) {
+          cookieStore.delete("cart-id");
+        }
         return NextResponse.json({ cartId: null, cart: null });
       }
 

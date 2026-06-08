@@ -676,6 +676,13 @@ export default function CheckoutPage() {
   // Form restoring from sessionStorage (avoids flash of empty inputs on mount/Revolut redirect)
   const [formRestoring, setFormRestoring] = useState(true);
 
+  // Selected shipping method + its cost. Declared here (before the Revolut effects) so the
+  // card charge includes delivery — Magento's grand_total omits shipping until placement.
+  const selectedShippingMethod = shippingMethods.find(
+    (m) => `${m.carrier_code}|${m.method_code}` === selectedShipping,
+  );
+  const currentShippingAmount = selectedShippingMethod?.amount.value ?? 0;
+
   // ── Init card field when revolut_pay is selected and container is in DOM ─────
   useEffect(() => {
     const isRevolutSelected =
@@ -688,10 +695,12 @@ export default function CheckoutPage() {
 
     (async () => {
       try {
-        // Create Revolut order to get the token
+        // Create Revolut order to get the token (charge includes delivery)
         const res = await fetch("/api/checkout/revolut-order", {
           method: "POST",
           credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shippingAmount: currentShippingAmount }),
         });
         const data = await res.json();
         if (!res.ok || destroyed) return;
@@ -760,7 +769,8 @@ export default function CheckoutPage() {
       setRevolutPublicId(null);
       setRevolutOrderId(null);
     };
-  }, [selectedPayment, cardFieldContainer]);
+    // Recreate the order if the shipping cost changes so the charge stays in sync.
+  }, [selectedPayment, cardFieldContainer, currentShippingAmount]);
 
   // ── Payment request (Apple Pay / Google Pay) ────────────────────────────────
   useEffect(() => {
@@ -773,6 +783,8 @@ export default function CheckoutPage() {
         const res = await fetch("/api/checkout/revolut-order", {
           method: "POST",
           credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shippingAmount: currentShippingAmount }),
         });
         const data = await res.json();
         if (!res.ok || destroyed) return;
@@ -806,7 +818,8 @@ export default function CheckoutPage() {
         instance?.destroy();
       } catch {}
     };
-  }, [prContainer]);
+    // Rebuild the payment request if the shipping cost changes so the amount stays in sync.
+  }, [prContainer, currentShippingAmount]);
 
   // ── Auto-place order the moment card payment succeeds ────────────────────────
   useEffect(() => {
@@ -891,10 +904,7 @@ export default function CheckoutPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactValid, cartTotal]);
 
-  // ── Shipping cost for summary ───────────────────────────────────────────────
-  const selectedShippingMethod = shippingMethods.find(
-    (m) => `${m.carrier_code}|${m.method_code}` === selectedShipping,
-  );
+  // ── Shipping cost for summary (selectedShippingMethod is derived above) ──────
   const isAddressDelivery =
     !!selectedShippingMethod &&
     (

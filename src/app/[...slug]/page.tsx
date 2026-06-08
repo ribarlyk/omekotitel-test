@@ -28,6 +28,7 @@ import {
   buildBreadcrumbSchema,
 } from "@/src/app/utils/seo";
 import type { BreadcrumbItem } from "@/src/app/types/seo";
+import { buildBrandUrlMap } from "@/src/app/utils/fixBrandLinks";
 
 interface Category {
   id: number;
@@ -73,6 +74,19 @@ function collectUrlPaths(list: Category[]): string[] {
 }
 
 const EXCLUDED_STATIC_PREFIXES = ["marki-brands"];
+
+const BRANDS_CATEGORY_ID = 83;
+
+function findBrandsCategory(list: Category[]): Category | null {
+  for (const cat of list) {
+    if (cat.id === BRANDS_CATEGORY_ID) return cat;
+    if (cat.children?.length) {
+      const found = findBrandsCategory(cat.children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
 
 function findCategoryByUrlPath(
   list: Category[],
@@ -232,6 +246,11 @@ const rawProduct = productData?.products?.items?.[0] as Record<string, unknown> 
   const product = rawProduct as Parameters<typeof ProductDetail>[0]["product"] | undefined;
 
   const optionMap = buildOptionMap(attrMetaItems);
+  
+  // Find brand category for linking
+  const brandsCategory = catalog ? findBrandsCategory(catalog.categoryList as Category[]) : null;
+  const brandsList = brandsCategory?.children ?? [];
+  const brandUrlMap = buildBrandUrlMap(brandsList);
 
   // Single-segment product match
   if (product && rawProduct && slugs.length === 1) {
@@ -246,6 +265,12 @@ const rawProduct = productData?.products?.items?.[0] as Record<string, unknown> 
     const brandLabel = meta.marki
       ? (optionMap["marki"]?.[String(meta.marki)] ?? undefined)
       : undefined;
+    
+    // Find the brand category URL by matching the brand label
+    const brandCategory = brandLabel 
+      ? brandsList.find(b => b.name.toLowerCase() === brandLabel.toLowerCase())
+      : undefined;
+    const brandUrl = brandCategory?.url_path || undefined;
 
     // Use special_to_date as priceValidUntil only when a special price is active
     const priceValidUntil =
@@ -280,6 +305,9 @@ const rawProduct = productData?.products?.items?.[0] as Record<string, unknown> 
         <ProductDetail
           product={product}
           resolvedAttributes={resolvedAttributes}
+          brandName={brandLabel}
+          brandUrl={brandUrl}
+          brandUrlMap={brandUrlMap}
         />
       </>
     );
@@ -314,10 +342,24 @@ const rawProduct = productData?.products?.items?.[0] as Record<string, unknown> 
   // Multi-segment fallback — product under category path
   if (product && rawProduct && slugs.length > 1) {
     const resolvedAttributes = resolveProductAttributes(rawProduct, optionMap);
+    const meta = rawProduct as unknown as ProductMeta;
+    
+    const brandLabel = meta.marki
+      ? (optionMap["marki"]?.[String(meta.marki)] ?? undefined)
+      : undefined;
+    
+    const brandCategory = brandLabel 
+      ? brandsList.find(b => b.name.toLowerCase() === brandLabel.toLowerCase())
+      : undefined;
+    const brandUrl = brandCategory?.url_path || undefined;
+    
     return (
       <ProductDetail
         product={product}
         resolvedAttributes={resolvedAttributes}
+        brandName={brandLabel}
+        brandUrl={brandUrl}
+        brandUrlMap={brandUrlMap}
       />
     );
   }

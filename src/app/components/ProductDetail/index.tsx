@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { magentoImageUrl } from "@/src/app/utils/image";
 import { calcUnitPrice } from "@/src/app/utils/unitPrice";
+import { fixBrandLinks } from "@/src/app/utils/fixBrandLinks";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import { useBreadcrumb } from "@/src/app/contexts/BreadcrumbContext";
 import { useCart } from "@/src/app/contexts/CartContext";
@@ -89,6 +90,9 @@ interface ProductDetailProps {
     variants?: Variant[];
   };
   resolvedAttributes?: ResolvedAttribute[];
+  brandName?: string;
+  brandUrl?: string;
+  brandUrlMap?: Record<string, string>;
 }
 
 type AddStatus = "idle" | "loading" | "success" | "error";
@@ -111,7 +115,7 @@ function parseDescriptionSections(html: string): { title: string; html: string }
   return sections;
 }
 
-export default function ProductDetail({ product, resolvedAttributes = [] }: ProductDetailProps) {
+export default function ProductDetail({ product, resolvedAttributes = [], brandName, brandUrl, brandUrlMap = {} }: ProductDetailProps) {
   const { setLastCrumbLabel } = useBreadcrumb();
   const { addToCart } = useCart();
 
@@ -163,10 +167,23 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
   const [quantity, setQuantity] = useState(1);
   const [addStatus, setAddStatus] = useState<AddStatus>("idle");
   const [activeTab, setActiveTab] = useState<"description" | "short">("description");
-  const descSections = useMemo(
-    () => (product.description?.html ? parseDescriptionSections(product.description.html) : []),
-    [product.description?.html]
+  
+  // Fix brand links in descriptions
+  const fixedDescription = useMemo(
+    () => product.description?.html ? fixBrandLinks(product.description.html, brandUrlMap) : '',
+    [product.description?.html, brandUrlMap]
   );
+  
+  const fixedShortDescription = useMemo(
+    () => product.short_description?.html ? fixBrandLinks(product.short_description.html, brandUrlMap) : '',
+    [product.short_description?.html, brandUrlMap]
+  );
+  
+  const descSections = useMemo(
+    () => (fixedDescription ? parseDescriptionSections(fixedDescription) : []),
+    [fixedDescription]
+  );
+  
   const [descSection, setDescSection] = useState(0);
   const [cartBtnVisible, setCartBtnVisible] = useState(true);
   const cartBtnRef = useRef<HTMLButtonElement>(null);
@@ -402,10 +419,22 @@ export default function ProductDetail({ product, resolvedAttributes = [] }: Prod
             {product.name}
           </h1>
 
-          {product.short_description?.html && (
+          {brandName && brandUrl && (
+            <div className="mb-3">
+              <Link 
+                href={`/${brandUrl}`}
+                className="inline-flex items-center gap-1.5 text-sm text-brand-action hover:text-brand-nav font-medium transition-colors"
+              >
+                <span>Марка:</span>
+                <span className="underline">{brandName}</span>
+              </Link>
+            </div>
+          )}
+
+          {fixedShortDescription && (
             <div
               className="text-gray-500 text-xs leading-relaxed mb-6 [&>p]:mb-0.5"
-              dangerouslySetInnerHTML={{ __html: product.short_description.html }}
+              dangerouslySetInnerHTML={{ __html: fixedShortDescription }}
             />
           )}
 

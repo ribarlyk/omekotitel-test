@@ -18,6 +18,7 @@ export interface ProductCardProduct {
   } | null;
   small_image: { url: string; label: string } | null;
   url_key: string;
+  stock_status?: string | null;
   new_from_date?: string | null;
   new_to_date?: string | null;
   special_price?: number | null;

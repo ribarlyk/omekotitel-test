@@ -1,5 +1,6 @@
 import { print } from "graphql";
 import { Queries } from ".";
+import { fetchWithRetry } from "@/src/app/utils/fetchWithRetry";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
 const REST_BASE = GRAPHQL_ENDPOINT.replace(/\/graphql$/, "/rest/V1");
@@ -50,25 +51,25 @@ async function gql<T>(
 ): Promise<T> {
   if (!GRAPHQL_ENDPOINT) throw new Error("GRAPHQL_URL is not configured");
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
+  // fetchWithRetry adds a per-attempt timeout + one retry on transient failures
+  // (timeout/abort, network error, 5xx, 429) so a brief Magento blip doesn't 500.
   let res: Response;
   try {
-    res = await fetch(GRAPHQL_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query, variables }),
-      ...(cacheOptions ? { next: cacheOptions } : { cache: "no-store" }),
-      signal: controller.signal,
-    });
+    res = await fetchWithRetry(
+      GRAPHQL_ENDPOINT,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query, variables }),
+        ...(cacheOptions ? { next: cacheOptions } : { cache: "no-store" }),
+      },
+      { timeoutMs: FETCH_TIMEOUT_MS },
+    );
   } catch (e) {
-    clearTimeout(timeout);
     if (e instanceof Error && e.name === "AbortError") throw e;
     const msg = e instanceof Error ? e.message : String(e);
     throw new Error(`GraphQL network error: ${msg}`);
   }
-  clearTimeout(timeout);
 
   if (!res.ok) {
     throw new Error(`GraphQL HTTP ${res.status} from Magento`);
@@ -223,8 +224,10 @@ export async function fetchAllProductUrlKeys(): Promise<string[]> {
 
 // Search is intentionally uncached — results must reflect live inventory.
 export async function fetchSearchProducts(search: string, pageSize = 20) {
+  // No sort argument → Magento orders by search relevance (best matches first),
+  // matching the SearchPage default. Passing a sort here would override relevance.
   return gql<{ products: { items: unknown[]; total_count: number; aggregations: unknown[] } }>(
     print(Queries.SEARCH_PRODUCTS),
-    { search, pageSize, sort: { name: "ASC" } },
+    { search, pageSize },
   );
 }
