@@ -43,7 +43,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [sortField, setSortField] = useState("name");
+  const [sortField, setSortField] = useState("relevance");
   const [sortDir, setSortDir] = useState<SortDir>("ASC");
   const [view, setView] = useState<ViewMode>("grid");
 
@@ -52,7 +52,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
     setTotalCount(initialTotalCount);
     setActiveFilters({});
     setCurrentPage(1);
-    setSortField("name");
+    setSortField("relevance");
     setSortDir("ASC");
   }, [query]);
 
@@ -278,8 +278,6 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
                     <SortToolbar
                       totalCount={totalCount}
                       currentCount={products.length}
-                      currentPage={currentPage}
-                      pageSize={PAGE_SIZE}
                       sortField={sortField}
                       sortDir={sortDir}
                       view={view}

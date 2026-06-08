@@ -38,6 +38,21 @@ export function AddToCartActions({ product }: { product: ProductCardProduct }) {
   const [status, setStatus] = useState<ButtonStatus>("idle");
   const [modalOpen, setModalOpen] = useState(false);
   const isConfigurable = product.type_id === "configurable";
+  const isOutOfStock = product.stock_status === "OUT_OF_STOCK";
+
+  // Out-of-stock products stay listed (discoverable), but can't be added to the cart.
+  if (isOutOfStock) {
+    return (
+      <button
+        type="button"
+        disabled
+        aria-label="Изчерпано"
+        className="w-full py-2 px-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 bg-gray-100 text-gray-400 border-2 border-gray-200 cursor-not-allowed"
+      >
+        <span>Изчерпано</span>
+      </button>
+    );
+  }
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault();

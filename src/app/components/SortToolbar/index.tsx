@@ -21,8 +21,6 @@ export const SEARCH_SORT_OPTIONS = [
 interface SortToolbarProps {
   totalCount: number;
   currentCount: number;
-  currentPage: number;
-  pageSize: number;
   sortField: string;
   sortDir: SortDir;
   view: ViewMode;
@@ -34,8 +32,6 @@ interface SortToolbarProps {
 export default function SortToolbar({
   totalCount,
   currentCount,
-  currentPage,
-  pageSize,
   sortField,
   sortDir,
   view,
@@ -43,8 +39,10 @@ export default function SortToolbar({
   onViewChange,
   sortOptions = SORT_OPTIONS,
 }: SortToolbarProps) {
-  const from = (currentPage - 1) * pageSize + 1;
-  const to = Math.min(currentPage * pageSize, totalCount);
+  // Both category and search lists APPEND on "load more" (all loaded products stay on
+  // screen), so the range is cumulative — 1..currentCount — not a per-page window.
+  const from = currentCount > 0 ? 1 : 0;
+  const to = currentCount;
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

@@ -34,9 +34,14 @@ export async function POST() {
 
     try {
       cookieStore.delete("auth-token");
+      // The cart-id belongs to the now-signed-out customer's cart. A guest request
+      // can't operate on it ("current user cannot perform operations on cart"), so
+      // drop it — the next cart request creates a fresh guest cart.
+      cookieStore.delete("cart-id");
     } catch (e) {
       console.warn("Failed to delete cookies:", e);
       cookieStore.set("auth-token", "", { path: "/", maxAge: 0 });
+      cookieStore.set("cart-id", "", { path: "/", maxAge: 0 });
     }
 
     return NextResponse.json({ success: true });

@@ -12,7 +12,7 @@ const REVOLUT_API_BASE =
     ? "https://sandbox-merchant.revolut.com/api"
     : "https://merchant.revolut.com/api";
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     if (!REVOLUT_API_SECRET_KEY) {
       return NextResponse.json(
@@ -20,6 +20,16 @@ export async function POST() {
         { status: 500 }
       );
     }
+
+    // Magento's grand_total omits shipping until the method is set on the cart (deferred
+    // to order placement), so the client passes the selected method's cost to include it
+    // in the charge. Validated to a sane, non-negative number.
+    const body = await request.json().catch(() => ({}));
+    const rawShipping = (body as { shippingAmount?: unknown }).shippingAmount;
+    const shippingAmount =
+      typeof rawShipping === "number" && isFinite(rawShipping) && rawShipping >= 0 && rawShipping < 100000
+        ? rawShipping
+        : 0;
 
     const cookieStore = await cookies();
     const authToken = cookieStore.get("auth-token")?.value;
@@ -48,7 +58,7 @@ export async function POST() {
       return NextResponse.json({ message: "Could not fetch cart" }, { status: 400 });
     }
 
-    const amountMinor = Math.round(cart.prices.grand_total.value * 100);
+    const amountMinor = Math.round((cart.prices.grand_total.value + shippingAmount) * 100);
     const currency = cart.prices.grand_total.currency;
 
     // Create order via Revolut Merchant API to get the widget token
@@ -62,6 +72,9 @@ export async function POST() {
       body: JSON.stringify({
         amount: amountMinor,
         currency,
+        // Authorize only — funds are held, not charged. Capture happens later
+        // (manually in the Revolut dashboard). Card authorizations expire after ~7 days.
+        capture_mode: "manual",
         description: "Поръчка от omekotitel.bg",
       }),
     });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { Mutations } from "@/src/app/utils/graphql";
 import { print } from "graphql";
+import { fetchWithRetry } from "@/src/app/utils/fetchWithRetry";
 
 const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
 
@@ -44,7 +45,8 @@ export async function POST(request: NextRequest) {
       headers.Authorization = `Bearer ${authToken}`;
     }
 
-    const updateResp = await fetch(GRAPHQL_ENDPOINT, {
+    // Idempotent (setting quantity to N twice yields the same state) — safe to retry.
+    const updateResp = await fetchWithRetry(GRAPHQL_ENDPOINT, {
       method: "POST",
       headers,
       body: JSON.stringify({
