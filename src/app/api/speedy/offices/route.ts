@@ -1,8 +1,14 @@
 import { NextResponse } from "next/server";
 
+type MappedOffice = { id: number; name: string; address: { city: { name: string; postCode: string }; fullAddress: string } };
+let memCache: { offices: MappedOffice[]; expiresAt: number } | null = null;
+
 export async function GET() {
+  if (memCache && Date.now() < memCache.expiresAt) {
+    return NextResponse.json({ offices: memCache.offices });
+  }
+
   try {
-    // no next.revalidate — response is >2MB and can't be cached at fetch level
     const res = await fetch("https://api.speedy.bg/v1/location/office", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -21,7 +27,7 @@ export async function GET() {
       return NextResponse.json({ offices: [] }, { status: 502 });
     }
 
-    const offices = (data.offices as SpeedyOffice[]).map((o) => ({
+    const offices: MappedOffice[] = (data.offices as SpeedyOffice[]).map((o) => ({
       id: o.id,
       name: o.name,
       address: {
@@ -29,6 +35,8 @@ export async function GET() {
         fullAddress: o.address.fullAddressString ?? o.address.localAddressString ?? o.address.siteName,
       },
     }));
+
+    memCache = { offices, expiresAt: Date.now() + 10 * 60 * 60 * 1000 };
 
     return NextResponse.json({ offices });
   } catch (e) {
