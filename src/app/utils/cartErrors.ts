@@ -12,6 +12,11 @@ export function isCartAuthError(errors: unknown): boolean {
   return errors.some((e) => {
     const category = (e as { extensions?: { category?: string } })?.extensions?.category;
     const message = (e as { message?: string })?.message ?? "";
-    return category === "graphql-authorization" || /cannot perform operations on cart/i.test(message);
+    return (
+      category === "graphql-authorization" ||
+      category === "graphql-no-such-entity" ||
+      /cannot perform operations on cart/i.test(message) ||
+      /does not have an active cart/i.test(message)
+    );
   });
 }
