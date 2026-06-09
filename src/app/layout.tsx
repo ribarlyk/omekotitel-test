@@ -77,7 +77,7 @@ export default async function RootLayout({
   const categoryList = catalog.categoryList as NavCatalogCategory[];
 
   return (
-    <html lang="bg">
+    <html lang="bg" suppressHydrationWarning>
       <head>
         <JsonLd data={[buildOrganizationSchema(), buildWebSiteSchema()]} />
       </head>

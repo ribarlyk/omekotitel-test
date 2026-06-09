@@ -28,6 +28,7 @@ import {
   _linksCache,
   type ProductLinksState,
 } from "./prefetchLinks";
+import { trackViewItem, trackAddToCart } from "@/src/app/utils/analytics";
 
 // Re-export so existing ProductCard imports keep working
 export { prefetchProductLinks };
@@ -206,6 +207,11 @@ export default function ProductDetail({ product, resolvedAttributes = [], brandN
     return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    trackViewItem({ sku: product.sku, name: product.name, price: product.price_range.minimum_price.final_price.value, currency: product.price_range.minimum_price.final_price.currency });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.sku]);
+
   useLayoutEffect(() => {
     setLastCrumbLabel(product.sku);
     return () => setLastCrumbLabel(null);
@@ -304,6 +310,7 @@ export default function ProductDetail({ product, resolvedAttributes = [], brandN
       toast.success("Продуктът е добавен в количката", {
         description: product.name,
       });
+      trackAddToCart({ sku, name: product.name, price: finalPrice.value, currency: finalPrice.currency, quantity });
       setTimeout(() => setAddStatus("idle"), 2000);
     } catch {
       setAddStatus("error");

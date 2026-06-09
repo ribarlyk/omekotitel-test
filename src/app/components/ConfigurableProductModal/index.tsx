@@ -10,6 +10,7 @@ import { useCart } from "@/src/app/contexts/CartContext";
 import { toast } from "sonner";
 import type { ProductCardProduct } from "@/src/app/components/ProductCard";
 import { calcUnitPrice } from "@/src/app/utils/unitPrice";
+import { trackAddToCart } from "@/src/app/utils/analytics";
 
 interface ConfigurableOptionValue {
   label: string;
@@ -182,6 +183,9 @@ export default function ConfigurableProductModal({ urlKey, initialProduct, onClo
       await addToCart(variant.product.sku, quantity);
       setAddStatus("success");
       toast.success("Продуктът е добавен в количката", { description: initialProduct.name });
+      if (finalPrice) {
+        trackAddToCart({ sku: variant.product.sku, name: initialProduct.name, price: finalPrice.value, currency: finalPrice.currency, quantity });
+      }
       setTimeout(() => { setAddStatus("idle"); onClose(); }, 1200);
     } catch {
       setAddStatus("error");

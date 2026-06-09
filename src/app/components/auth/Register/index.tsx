@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthenticate } from "@/src/app/hooks/useAuthentication";
 import TurnstileWidget from "@/src/app/components/Turnstile";
+import { trackSignUp } from "@/src/app/utils/analytics";
 import { Eye, EyeOff } from "lucide-react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,6 +88,7 @@ export default function Register({ onLogin, onSuccess }: Props) {
   const onSubmit: React.ComponentProps<"form">["onSubmit"] = async (e) => {
     const success = await handleRegister(e, cfToken ?? undefined);
     if (success) {
+      trackSignUp();
       onSuccess?.();
       router.push("/");
     }

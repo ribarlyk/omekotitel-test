@@ -107,10 +107,5 @@ export async function POST(request: NextRequest) {
     tags.push(`products:category:${id}`);
   }
 
-  if (products.length > 0) {
-    revalidateTag("products", "max");
-    tags.push("products");
-  }
-
   return NextResponse.json({ revalidated: true, since: since.toISOString(), productCount: products.length, tags });
 }

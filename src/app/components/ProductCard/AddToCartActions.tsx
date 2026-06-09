@@ -5,6 +5,7 @@ import { useCart } from "@/src/app/contexts/CartContext";
 import { toast } from "sonner";
 import ConfigurableProductModal from "@/src/app/components/ConfigurableProductModal";
 import type { ProductCardProduct } from "./index";
+import { trackAddToCart } from "@/src/app/utils/analytics";
 
 type ButtonStatus = "idle" | "loading" | "success" | "error";
 
@@ -69,6 +70,10 @@ export function AddToCartActions({ product }: { product: ProductCardProduct }) {
       toast.success("Продуктът е добавен в количката", {
         description: product.name,
       });
+      const finalPrice = product.price_range?.minimum_price.final_price;
+      if (finalPrice) {
+        trackAddToCart({ sku: product.sku, name: product.name, price: finalPrice.value, currency: finalPrice.currency, quantity: 1 });
+      }
       setTimeout(() => setStatus("idle"), 2000);
     } catch {
       setStatus("error");

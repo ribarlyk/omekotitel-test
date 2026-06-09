@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useAuthenticate } from "@/src/app/hooks/useAuthentication";
 import TurnstileWidget from "@/src/app/components/Turnstile";
+import { trackLogin } from "@/src/app/utils/analytics";
 import { Eye, EyeOff } from "lucide-react";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,6 +36,7 @@ export default function Login({ onSuccess, onRegister, onForgotPassword }: Props
     const success = await handleLogin(e, cfToken ?? undefined);
     if (success) {
       toast.success("Влязохте успешно!");
+      trackLogin();
       onSuccess?.();
       router.push("/");
     } else {

@@ -50,7 +50,7 @@ const SLIDES = [
     alt: "Омекотител — слайд 5",
     title: "Решение за всяко петно",
     subtitle: "Препарати за дрехи, текстил, килими и тапицерии",
-    button: { label: "Разгледай", href: "/prane-vsichko-neobhodimo/preparati-za-prane" },
+    button: { label: "Разгледай", href: "/cjalostna-grizha-za-drehi/petna-po-drehi-i-tekstil" },
   },
 ];
 

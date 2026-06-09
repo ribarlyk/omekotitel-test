@@ -9,6 +9,7 @@ import debounce from "lodash/debounce";
 import { toast } from "sonner";
 import { useCart } from "@/src/app/contexts/CartContext";
 import { magentoImageUrl } from "@/src/app/utils/image";
+import { trackRemoveFromCart } from "@/src/app/utils/analytics";
 import { CartPanelLayout } from "@/src/app/components/CartPanelLayout";
 
 interface QuantityInputProps {
@@ -79,9 +80,14 @@ export const CartPanel = ({ onClose }: { onClose: () => void }) => {
 
   const handleRemove = async (id: string) => {
     setRemovingId(id);
+    const item = optimisticItems.find((i) => i.id === id);
     try {
       await removeFromCart(id);
       toast.success("Продуктът е премахнат от количката ви");
+      if (item) {
+        const price = item.prices?.price ?? item.product.price_range.minimum_price.final_price;
+        trackRemoveFromCart({ sku: item.product.sku, name: item.product.name, price: price.value, currency: price.currency, quantity: item.quantity });
+      }
     } catch {
       toast.error("Грешка при премахване");
     } finally {

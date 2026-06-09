@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import debounce from "lodash/debounce";
+import { trackSearch } from "@/src/app/utils/analytics";
 
 export const SearchBar = ({ inputRef }: { inputRef?: React.RefObject<HTMLInputElement | null> } = {}) => {
   const [value, setValue] = useState("");
@@ -21,8 +22,8 @@ export const SearchBar = ({ inputRef }: { inputRef?: React.RefObject<HTMLInputEl
     e.preventDefault();
     debouncedNavigateRef.current.cancel();
     if (value.trim()) {
+      trackSearch(value.trim());
       router.push(`/search?q=${encodeURIComponent(value.trim())}`);
-      setValue("");
     }
   };
 

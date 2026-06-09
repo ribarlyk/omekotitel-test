@@ -30,6 +30,7 @@ import { magentoImageUrl } from "@/src/app/utils/image";
 import debounce from "lodash/debounce";
 import { toast } from "sonner";
 import TurnstileWidget from "@/src/app/components/Turnstile";
+import { trackBeginCheckout, trackPurchase, trackRemoveFromCart, trackAddShippingInfo, trackAddPaymentInfo } from "@/src/app/utils/analytics";
 
 // ─── Form schema ──────────────────────────────────────────────────────────────
 const addressSchema = z.object({
@@ -322,9 +323,14 @@ function OrderSummary({ shippingCost }: { shippingCost?: number }) {
 
   const handleRemove = async (id: string) => {
     setRemovingId(id);
+    const item = optimisticItems.find((i) => i.id === id);
     try {
       await removeFromCart(id);
       toast.success("Продуктът е премахнат от количката ви");
+      if (item) {
+        const price = item.product.price_range.minimum_price.final_price;
+        trackRemoveFromCart({ sku: item.product.sku, name: item.product.name, price: price.value, currency: price.currency, quantity: item.quantity });
+      }
     } catch {
       toast.error("Грешка при премахване");
     } finally {
@@ -634,6 +640,25 @@ export default function CheckoutPage() {
     return () => sub.unsubscribe();
   }, [watchForm]);
 
+  const beginCheckoutFiredRef = useRef(false);
+  useEffect(() => {
+    if (beginCheckoutFiredRef.current || cartLoading || !cart?.items?.length) return;
+    beginCheckoutFiredRef.current = true;
+    const subtotal = cart.prices.subtotal_excluding_tax;
+    const validItems = cart.items.filter((i) => i.product?.price_range?.minimum_price.final_price);
+    trackBeginCheckout({
+      value: subtotal?.value ?? 0,
+      currency: subtotal?.currency ?? "BGN",
+      items: validItems.map((i) => ({
+        sku: i.product.sku,
+        name: i.product.name,
+        price: i.product.price_range.minimum_price.final_price.value,
+        quantity: i.quantity,
+      })),
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartLoading, cart]);
+
   const [shippingMethods, setShippingMethods] = useState<ShippingMethod[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [selectedShipping, setSelectedShipping] = useState("");
@@ -644,6 +669,44 @@ export default function CheckoutPage() {
     address: { city: { name: string; postCode: string }; fullAddress: string };
   } | null>(null);
   const [methodsLoading, setMethodsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!selectedShipping || !cart?.items?.length) return;
+    const method = shippingMethods.find((m) => `${m.carrier_code}|${m.method_code}` === selectedShipping);
+    if (!method) return;
+    const subtotal = cart.prices.subtotal_excluding_tax;
+    const validItems = cart.items.filter((i) => i.product?.price_range?.minimum_price.final_price);
+    trackAddShippingInfo({
+      value: subtotal?.value ?? 0,
+      currency: subtotal?.currency ?? "BGN",
+      shippingTier: `${method.carrier_title} ${method.method_title}`,
+      items: validItems.map((i) => ({
+        sku: i.product.sku,
+        name: i.product.name,
+        price: i.product.price_range.minimum_price.final_price.value,
+        quantity: i.quantity,
+      })),
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedShipping]);
+
+  useEffect(() => {
+    if (!selectedPayment || !cart?.items?.length) return;
+    const subtotal = cart.prices.subtotal_excluding_tax;
+    const validItems = cart.items.filter((i) => i.product?.price_range?.minimum_price.final_price);
+    trackAddPaymentInfo({
+      value: subtotal?.value ?? 0,
+      currency: subtotal?.currency ?? "BGN",
+      paymentType: selectedPayment,
+      items: validItems.map((i) => ({
+        sku: i.product.sku,
+        name: i.product.name,
+        price: i.product.price_range.minimum_price.final_price.value,
+        quantity: i.quantity,
+      })),
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPayment]);
 
   const [billingSameAsShipping, setBillingSameAsShipping] = useState(true);
   const [billingAddress, setBillingAddress] = useState<ShippingAddress>({
@@ -995,6 +1058,22 @@ export default function CheckoutPage() {
         sessionStorage.removeItem("revolut_checkout_state");
         sessionStorage.removeItem(FORM_KEY);
       } catch {}
+      if (cart?.items?.length) {
+        const subtotal = cart.prices.subtotal_excluding_tax;
+        const validItems = cart.items.filter((i) => i.product?.price_range?.minimum_price.final_price);
+        trackPurchase({
+          orderId: String(data.orderNumber),
+          value: (subtotal?.value ?? 0) + currentShippingAmount,
+          currency: subtotal?.currency ?? "BGN",
+          shipping: currentShippingAmount,
+          items: validItems.map((i) => ({
+            sku: i.product.sku,
+            name: i.product.name,
+            price: i.product.price_range.minimum_price.final_price.value,
+            quantity: i.quantity,
+          })),
+        });
+      }
       router.push(
         `/onestepcheckout/success?order=${encodeURIComponent(data.orderNumber)}`,
       );
