@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { magentoImageUrl } from "@/src/app/utils/image";
 import MagentoImage from "@/src/app/components/MagentoImage";
 import { isProductNew, isProductOnSale, discountPercent } from "@/src/app/utils/productBadges";
@@ -39,7 +40,7 @@ interface ProductCardProps {
 const DEFAULT_GRID_SIZES =
   "(max-width: 1024px) calc(50vw - 1rem), (max-width: 1280px) calc(33vw - 1rem), calc(25vw - 1rem)";
 
-export default function ProductCard({ product, index = 0, view = "grid", imageSizes, priority = false }: ProductCardProps) {
+function ProductCard({ product, index = 0, view = "grid", imageSizes, priority = false }: ProductCardProps) {
   const finalPrice = product.price_range?.minimum_price.final_price;
   const regularPrice = product.price_range?.minimum_price.regular_price;
 
@@ -158,3 +159,5 @@ export default function ProductCard({ product, index = 0, view = "grid", imageSi
     </ProductLink>
   );
 }
+
+export default memo(ProductCard);
