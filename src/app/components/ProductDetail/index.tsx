@@ -519,7 +519,7 @@ export default function ProductDetail({ product, resolvedAttributes = [], brandN
           {isConfigurable &&
             product.configurable_options?.map((option) => (
               <div key={option.attribute_code} className="mb-3 pb-3 border-b border-gray-100">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
+                <p className="text-[13px] font-semibold uppercase tracking-wider text-gray-500 mb-2">
                   {option.label}
                   {selectedOptions[option.attribute_code] !== undefined && (
                     <span className="normal-case font-normal text-gray-700 ml-1.5">

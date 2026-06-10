@@ -109,9 +109,11 @@ export const Footer = () => (
       <div className="container mx-auto px-8 py-5 flex flex-col items-center gap-2 lg:flex-row lg:justify-between lg:gap-4">
         {/* Made by */}
         <p className="text-xs text-gray-400">
-          Уеб дизайн{" "}
+          Уеб разработка от{" "}
           <a
-            href="#"
+            href="https://www.pavelhristov.dev/"
+            target="_blank"
+            rel="noopener noreferrer"
             className="font-semibold text-gray-500 hover:text-brand-nav transition-colors"
           >
             ПХ Дизайн

@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from "react";
 import { Cart } from "../types/cart";
 import { useAuth } from "./AuthContext";
 
@@ -25,15 +25,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch cart for both guests and logged-in users
-  useEffect(() => {
-    if (!authLoading) {
-      fetchCart();
-    }
-  }, [authLoading, isLoggedIn]);
-
-  const fetchCart = async () => {
-    
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -56,10 +48,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const addToCart = async (sku: string, quantity: number) => {
-    
+  // Fetch cart for both guests and logged-in users
+  useEffect(() => {
+    if (!authLoading) {
+      fetchCart();
+    }
+  }, [authLoading, isLoggedIn, fetchCart]);
+
+  const addToCart = useCallback(async (sku: string, quantity: number) => {
     try {
       setLoading(true);
       setError(null);
@@ -88,10 +86,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const removeFromCart = async (cartItemId: string) => {
-
+  const removeFromCart = useCallback(async (cartItemId: string) => {
     try {
       setError(null);
 
@@ -124,10 +121,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       console.error("Error removing from cart:", err);
       throw err;
     }
-  };
+  }, []);
 
-  const updateQuantity = async (cartItemId: string, quantity: number) => {
-
+  const updateQuantity = useCallback(async (cartItemId: string, quantity: number) => {
     try {
       setError(null);
 
@@ -163,15 +159,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       console.error("Error updating quantity:", err);
       throw err;
     }
-  };
+  }, []);
 
-  const refreshCart = async () => {
+  const refreshCart = useCallback(async () => {
     await fetchCart();
-  };
+  }, [fetchCart]);
 
   const itemCount = cart?.total_quantity || 0;
 
-  const value: CartContextType = {
+  const value = useMemo<CartContextType>(() => ({
     cartId,
     cart,
     loading,
@@ -181,7 +177,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     updateQuantity,
     refreshCart,
     itemCount,
-  };
+  }), [cartId, cart, loading, error, addToCart, removeFromCart, updateQuantity, refreshCart, itemCount]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

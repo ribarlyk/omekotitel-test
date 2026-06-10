@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef, startTransition } from "react";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
 import ProductsList from "@/src/app/components/ProductsList";
 import FilterSidebar, { Aggregation, ActiveFilters } from "@/src/app/components/FilterSidebar";
@@ -46,6 +46,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
   const [sortField, setSortField] = useState("relevance");
   const [sortDir, setSortDir] = useState<SortDir>("ASC");
   const [view, setView] = useState<ViewMode>("grid");
+  const [loadMoreError, setLoadMoreError] = useState(false);
 
   useEffect(() => {
     setProducts(initialProducts);
@@ -54,6 +55,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
     setCurrentPage(1);
     setSortField("relevance");
     setSortDir("ASC");
+    setLoadMoreError(false);
   }, [query]);
 
   useEffect(() => {
@@ -91,21 +93,21 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
       if (Object.keys(filters).length > 0) {
         url.searchParams.set("filters", JSON.stringify(filters));
       }
-
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error("Failed to fetch search results");
       const data = await res.json();
-
       const items = (data.products?.items ?? []) as Product[];
-      if (append) {
-        setProducts((prev) => {
-          const seen = new Set(prev.map((p) => p.id));
-          return [...prev, ...items.filter((p) => !seen.has(p.id))];
-        });
-      } else {
-        setProducts(items);
-      }
-      setTotalCount(data.products?.total_count ?? 0);
+      startTransition(() => {
+        if (append) {
+          setProducts((prev) => {
+            const seen = new Set(prev.map((p) => p.id));
+            return [...prev, ...items.filter((p) => !seen.has(p.id))];
+          });
+        } else {
+          setProducts(items);
+        }
+        setTotalCount(data.products?.total_count ?? 0);
+      });
     },
     [query]
   );
@@ -125,6 +127,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
 
     setActiveFilters(newFilters);
     setCurrentPage(1);
+    setLoadMoreError(false);
     setLoading(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
     try {
@@ -137,6 +140,7 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
   const clearAll = async () => {
     setActiveFilters({});
     setCurrentPage(1);
+    setLoadMoreError(false);
     setLoading(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
     try {
@@ -146,21 +150,29 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
     }
   };
 
-  const loadMore = async () => {
-    const next = currentPage + 1;
+  const isLoadingMoreRef = useRef(false);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMoreRef.current) return;
+    isLoadingMoreRef.current = true;
     setLoadingMore(true);
+    const next = currentPage + 1;
     try {
       await fetchProducts(activeFilters, next, sortField, sortDir, true);
       setCurrentPage(next);
+    } catch {
+      setLoadMoreError(true);
     } finally {
       setLoadingMore(false);
+      isLoadingMoreRef.current = false;
     }
-  };
+  }, [currentPage, fetchProducts, activeFilters, sortField, sortDir]);
 
   const handleSortChange = async (field: string, dir: SortDir) => {
     setSortField(field);
     setSortDir(dir);
     setCurrentPage(1);
+    setLoadMoreError(false);
     setLoading(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
     try {
@@ -170,7 +182,8 @@ export default function SearchPage({ query, initialProducts, initialTotalCount, 
     }
   };
 
-  const hasMore = products.length < totalCount;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const hasMore = !loadMoreError && currentPage < totalPages;
   const hasFilters = aggregations.filter(
     (a) => !["category_id", "category_uid"].includes(a.attribute_code) && a.options.length > 0
   ).length > 0;

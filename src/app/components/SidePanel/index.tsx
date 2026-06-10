@@ -45,7 +45,7 @@ export const SidePanel = ({ isOpen, onClose, title, children, width = "w-96", cu
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-brand-nav">{title}</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+          <button onClick={onClose} aria-label="Затвори" className="text-gray-400 hover:text-gray-600 cursor-pointer">
             <X size={22} />
           </button>
         </div>

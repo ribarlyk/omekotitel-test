@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, startTransition } from "react";
 import { Loader2, SlidersHorizontal, X } from "lucide-react";
 import ProductsList from "@/src/app/components/ProductsList";
 import FilterSidebar, { Aggregation, ActiveFilters } from "@/src/app/components/FilterSidebar";
@@ -93,15 +93,17 @@ export default function CategoryPage({
       const data = await res.json();
 
       const items = (data.products?.items ?? []) as Product[];
-      if (append) {
-        setProducts((prev) => {
-          const seen = new Set(prev.map((p) => p.id));
-          return [...prev, ...items.filter((p) => !seen.has(p.id))];
-        });
-      } else {
-        setProducts(items);
-      }
-      setTotalCount(data.products?.total_count ?? 0);
+      startTransition(() => {
+        if (append) {
+          setProducts((prev) => {
+            const seen = new Set(prev.map((p) => p.id));
+            return [...prev, ...items.filter((p) => !seen.has(p.id))];
+          });
+        } else {
+          setProducts(items);
+        }
+        setTotalCount(data.products?.total_count ?? 0);
+      });
     },
     [categoryId]
   );
@@ -142,7 +144,11 @@ export default function CategoryPage({
     }
   };
 
-  const loadMore = async () => {
+  const isLoadingMoreRef = useRef(false);
+
+  const loadMore = useCallback(async () => {
+    if (isLoadingMoreRef.current) return;
+    isLoadingMoreRef.current = true;
     const next = currentPage + 1;
     setLoadingMore(true);
     try {
@@ -150,8 +156,10 @@ export default function CategoryPage({
       setCurrentPage(next);
     } finally {
       setLoadingMore(false);
+      // Delay resetting so the observer doesn't fire again before new products push sentinel out of view
+      setTimeout(() => { isLoadingMoreRef.current = false; }, 500);
     }
-  };
+  }, [currentPage, fetchProducts, activeFilters, sortField, sortDir]);
 
   const handleSortChange = async (field: string, dir: SortDir) => {
     setSortField(field);
@@ -178,10 +186,10 @@ export default function CategoryPage({
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el) return;
+    if (!el || !hasMore) return;
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore && !loadingMore && !loading && window.innerWidth < 1024) {
+        if (entry.isIntersecting && !isLoadingMoreRef.current && !loading && window.innerWidth < 1024) {
           loadMore();
         }
       },
@@ -189,9 +197,7 @@ export default function CategoryPage({
     );
     obs.observe(el);
     return () => obs.disconnect();
-  // loadMore is stable via useCallback but eslint can't see that — deps are correct
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasMore, loadingMore, loading]);
+  }, [hasMore, loading, loadMore]);
 
   return (
     <div>

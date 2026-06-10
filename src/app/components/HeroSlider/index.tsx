@@ -112,7 +112,7 @@ export default function HeroSlider() {
             zIndex: i === current ? 10 : 0,
             transition: `opacity ${FADE_MS}ms ease-in-out`,
           }}
-          aria-hidden={i !== current}
+          aria-hidden={i !== current ? true : undefined}
         >
           <Image
             src={slide.src}
@@ -153,6 +153,7 @@ export default function HeroSlider() {
               {/* Button without background */}
               <Link
                 href={slide.button.href}
+                tabIndex={i === current ? undefined : -1}
                 className="pointer-events-auto inline-flex items-center gap-1.5 md:gap-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold px-4 md:px-9 py-2 md:py-4 rounded-lg md:rounded-xl shadow-lg shadow-red-500/40 hover:shadow-xl hover:shadow-red-500/50 transition-all duration-300 text-xs md:text-base hover:-translate-y-0.5"
               >
                 {slide.button.label}
@@ -178,20 +179,14 @@ export default function HeroSlider() {
         <ChevronRight size={18} />
       </button>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2" aria-hidden="true">
         {SLIDES.map((_, i) => (
-          <button
+          <div
             key={i}
-            onClick={() => {
-              setCurrent(i);
-              setPaused(true);
-              setTimeout(() => setPaused(false), 8000);
-            }}
-            aria-label={`Слайд ${i + 1}`}
             className={`rounded-full transition-all duration-300 ${
               i === current
                 ? "w-6 h-2 bg-brand-nav"
-                : "w-2 h-2 bg-brand-nav/40 hover:bg-brand-nav/70"
+                : "w-2 h-2 bg-brand-nav/40"
             }`}
           />
         ))}

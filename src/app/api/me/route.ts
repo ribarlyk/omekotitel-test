@@ -8,7 +8,7 @@ export async function GET() {
     const token = auth?.value;
 
     if (!token) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json(null);
     }
 
     const GRAPHQL_ENDPOINT = process.env.GRAPHQL_URL ?? "";
@@ -33,13 +33,13 @@ export async function GET() {
 
     if (!resp.ok) {
       console.error("/api/me GraphQL HTTP error", resp.status);
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json(null);
     }
 
     const data = await resp.json();
 
     if (data.errors || !data?.data?.customer) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      return NextResponse.json(null);
     }
 
     const { email, firstname, lastname, created_at, is_subscribed, addresses } =

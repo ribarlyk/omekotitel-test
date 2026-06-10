@@ -117,7 +117,7 @@ export const MobileNavPanel = ({
           ) : (
             <Logo imgClassName="h-12 w-auto" />
           )}
-          <button onClick={onClose} className="text-brand-action cursor-pointer shrink-0">
+          <button onClick={onClose} aria-label="Затвори менюто" className="text-brand-action cursor-pointer shrink-0">
             <X size={32} />
           </button>
         </div>
