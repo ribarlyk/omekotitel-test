@@ -8,6 +8,7 @@ mutation SetShippingAddressesOnCart(
   $postcode: String!
   $country_code: String!
   $telephone: String!
+  $company: String
 ) {
   setShippingAddressesOnCart(
     input: {
@@ -23,6 +24,7 @@ mutation SetShippingAddressesOnCart(
             postcode: $postcode
             country_code: $country_code
             telephone: $telephone
+            company: $company
           }
         }
       ]

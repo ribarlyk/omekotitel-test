@@ -8,6 +8,7 @@ mutation SetBillingAddressOnCart(
   $postcode: String!
   $country_code: String!
   $telephone: String!
+  $company: String
 ) {
   setBillingAddressOnCart(
     input: {
@@ -22,6 +23,7 @@ mutation SetBillingAddressOnCart(
           postcode: $postcode
           country_code: $country_code
           telephone: $telephone
+          company: $company
         }
       }
     }
@@ -31,6 +33,7 @@ mutation SetBillingAddressOnCart(
         firstname
         lastname
         city
+        company
       }
     }
   }

@@ -4,10 +4,8 @@ import {
   useState,
   useEffect,
   useCallback,
-  useSyncExternalStore,
   useRef,
 } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
@@ -61,11 +59,11 @@ const SWIPE_THRESHOLD = 50;
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
-  const mounted = useSyncExternalStore(
-    () => () => {},
-    () => true,
-    () => false,
-  );
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true);
+  }, []);
   const touchStartX = useRef(0);
 
   const next = useCallback(
@@ -114,26 +112,21 @@ export default function HeroSlider() {
           }}
           aria-hidden={i !== current ? true : undefined}
         >
-          <Image
-            src={slide.src}
-            alt={slide.alt}
-            fill
-            className="object-contain md:object-contain hidden md:block"
-            sizes="100vw"
-            preload={i === 0}
-            fetchPriority={i === 0 ? "high" : "auto"}
-            loading={i === 0 ? "eager" : "lazy"}
-          />
-          <Image
-            src={slide.mobileSrc}
-            alt={slide.alt}
-            fill
-            className="object-cover md:hidden"
-            sizes="100vw"
-            preload={i === 0}
-            fetchPriority={i === 0 ? "high" : "auto"}
-            loading={i === 0 ? "eager" : "lazy"}
-          />
+          {/* Art-directed hero: <source media> makes the browser download exactly ONE
+              image (desktop OR mobile), never both. The first slide is server-rendered,
+              so the preload scanner finds it during HTML parse — fetchPriority="high"
+              prioritises it like a preload link, without the double-fetch. */}
+          <picture>
+            <source media="(min-width: 768px)" srcSet={slide.src} />
+            <img
+              src={slide.mobileSrc}
+              alt={slide.alt}
+              className="absolute inset-0 w-full h-full object-cover md:object-contain"
+              fetchPriority={i === 0 ? "high" : "auto"}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+            />
+          </picture>
 
           <div className="absolute inset-0 flex items-start md:items-center pointer-events-none justify-center md:justify-start md:pl-32 pt-2 md:pt-0">
             <div className="flex flex-col items-center md:items-start gap-1 md:gap-4">

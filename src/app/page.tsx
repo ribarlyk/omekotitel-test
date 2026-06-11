@@ -14,7 +14,7 @@ export default function Home() {
       <CategoryBar />
 
       <Suspense fallback={<SliderSkeleton title="Нови продукти" />}>
-        <HomeCategorySection urlKey="novi-produkti" title="Нови продукти" />
+        <HomeCategorySection urlKey="novi-produkti" title="Нови продукти" priorityFirst />
       </Suspense>
 
       <Suspense fallback={<SliderSkeleton title="Оферти" />}>
