@@ -90,7 +90,7 @@ export default async function RootLayout({
             <CartProvider>
               <BreadcrumbProvider>
                   <ScrollToTop />
-                  <Toaster position="top-center" richColors />
+                  <Toaster position="top-center" richColors closeButton />
                   {/* Mobile sticky header */}
                   <div className="lg:hidden sticky top-0 z-30 shadow-md print:hidden">
                     <MobileHeader categoryList={categoryList} />

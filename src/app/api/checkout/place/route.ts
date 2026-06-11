@@ -24,6 +24,7 @@ interface ShippingAddress {
   postcode: string;
   country_code: string;
   telephone: string;
+  company?: string;
 }
 
 export async function POST(request: NextRequest) {
@@ -130,6 +131,9 @@ export async function POST(request: NextRequest) {
           postcode: shippingAddress.postcode,
           country_code: shippingAddress.country_code,
           telephone: shippingAddress.telephone,
+          // Carry the company invoice line on the shipping address too (matches
+          // the legacy checkout, which sent the VAT on both addresses).
+          company: shippingAddress.company?.trim() || null,
         },
       }),
     });
@@ -185,6 +189,9 @@ export async function POST(request: NextRequest) {
           postcode: billingAddress.postcode,
           country_code: billingAddress.country_code,
           telephone: billingAddress.telephone,
+          // Magento 2.3.7 GraphQL CartAddressInput has no vat_id field, so the
+          // company invoice details (name + ЕИК/ДДС) are carried in `company`.
+          company: billingAddress.company?.trim() || null,
         },
       }),
     });

@@ -12,10 +12,19 @@ const FacebookIcon = () => (
 );
 
 const InstagramIcon = () => (
-  <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="url(#instagram-gradient)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <defs>
+      <linearGradient id="instagram-gradient" x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0%" stopColor="#FEDA75" />
+        <stop offset="25%" stopColor="#FA7E1E" />
+        <stop offset="50%" stopColor="#D62976" />
+        <stop offset="75%" stopColor="#962FBF" />
+        <stop offset="100%" stopColor="#4F5BD5" />
+      </linearGradient>
+    </defs>
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
     <circle cx="12" cy="12" r="4" />
-    <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    <circle cx="17.5" cy="6.5" r="1" fill="url(#instagram-gradient)" stroke="none" />
   </svg>
 );
 
@@ -31,10 +40,37 @@ const SOCIAL_ICONS: Record<string, () => React.JSX.Element> = {
   tiktok: TikTokIcon,
 };
 
+// Instagram uses its own gradient fill, so its color here is irrelevant.
+const SOCIAL_COLORS: Record<string, string> = {
+  facebook: "#1877F2",
+  instagram: "#D62976",
+  tiktok: "#010101",
+};
+
 export const Footer = () => (
   <footer className="border-t border-gray-200">
+    {/* Social icons — centered at the top */}
+    <div className="container mx-auto px-8 pt-10 flex items-center justify-center gap-5">
+      {FOOTER_SOCIAL.map((s) => {
+        const Icon = SOCIAL_ICONS[s.icon];
+        return (
+          <Link
+            key={s.icon}
+            href={s.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={s.label}
+            style={{ color: SOCIAL_COLORS[s.icon] }}
+            className="hover:opacity-75 transition-opacity"
+          >
+            {Icon && <Icon />}
+          </Link>
+        );
+      })}
+    </div>
+
     {/* Columns */}
-    <div className="container mx-auto px-8 py-12 grid grid-cols-2 lg:grid-cols-4 gap-8">
+    <div className="container mx-auto px-8 pt-8 pb-12 grid grid-cols-2 lg:grid-cols-4 gap-8">
       {FOOTER_COLUMNS.map((col) => {
         const hasAuthLinks = col.links.some((l) => "requiresAuth" in l && l.requiresAuth);
         return (
@@ -76,23 +112,6 @@ export const Footer = () => (
               info@omekotitel.bg
             </a>
           </p>
-        </div>
-        <div className="flex items-center gap-4 mb-4">
-          {FOOTER_SOCIAL.map((s) => {
-            const Icon = SOCIAL_ICONS[s.icon];
-            return (
-              <Link
-                key={s.icon}
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label}
-                className="text-gray-400 hover:text-brand-nav transition-colors"
-              >
-                {Icon && <Icon />}
-              </Link>
-            );
-          })}
         </div>
         <Image
           src="https://api.omekotitel.bg/pub/media/wysiwyg/payment_1.png"

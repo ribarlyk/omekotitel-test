@@ -25,6 +25,7 @@ interface HomeCategorySectionProps {
   title: string;
   pageSize?: number;
   href?: string;
+  priorityFirst?: boolean;
 }
 
 export default async function HomeCategorySection({
@@ -32,6 +33,7 @@ export default async function HomeCategorySection({
   title,
   pageSize = 10,
   href,
+  priorityFirst = false,
 }: HomeCategorySectionProps) {
   let products: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   try {
@@ -48,7 +50,7 @@ export default async function HomeCategorySection({
 
   return (
     <section className="max-w-7xl mx-auto px-4 pt-3 pb-6">
-      <ProductSlider title={title} products={products} viewAllHref={href ?? `/${urlKey}`} titleSize="text-lg lg:text-2xl" outerClassName="mt-2" />
+      <ProductSlider title={title} products={products} viewAllHref={href ?? `/${urlKey}`} titleSize="text-lg lg:text-2xl" outerClassName="mt-2" priorityFirst={priorityFirst} />
     </section>
   );
 }

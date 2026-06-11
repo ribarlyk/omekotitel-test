@@ -15,6 +15,7 @@ interface ProductSliderProps {
   viewAllHref?: string;
   titleSize?: string;
   outerClassName?: string;
+  priorityFirst?: boolean;
 }
 
 export function SliderSkeleton({ title }: { title: string }) {
@@ -45,6 +46,7 @@ export default function ProductSlider({
   viewAllHref,
   titleSize = "text-base",
   outerClassName = "mt-16",
+  priorityFirst = false,
 }: ProductSliderProps) {
   const [index, setIndex] = useState(0);
   const [activeDot, setActiveDot] = useState(0);
@@ -124,7 +126,7 @@ export default function ProductSlider({
           <div ref={trackRef} className="flex gap-4 transition-transform duration-300 ease-in-out" style={{ willChange: "transform" }}>
             {products.map((product, i) => (
               <div key={product.id} className="w-[calc(25%-12px)] shrink-0 self-stretch">
-                <ProductCard product={product} index={i} view="grid" imageSizes="320px" />
+                <ProductCard product={product} index={i} view="grid" imageSizes="320px" priority={priorityFirst && i === 0} />
               </div>
             ))}
           </div>
@@ -151,7 +153,7 @@ export default function ProductSlider({
               className="shrink-0"
               style={{ width: 200, flex: "0 0 200px" }}
             >
-              <ProductCard product={product} index={i} view="grid" imageSizes="200px" />
+              <ProductCard product={product} index={i} view="grid" imageSizes="200px" priority={priorityFirst && i === 0} />
             </div>
           ))}
           <div className="w-4 shrink-0" />
