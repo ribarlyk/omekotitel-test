@@ -720,6 +720,12 @@ export default function CheckoutPage() {
     telephone: "",
   });
 
+  // Company invoice (фактура) — optional. When enabled, company name + VAT/EIK
+  // are attached to the billing address.
+  const [wantsInvoice, setWantsInvoice] = useState(false);
+  const [invoiceCompany, setInvoiceCompany] = useState("");
+  const [invoiceVatId, setInvoiceVatId] = useState("");
+
   const [placing, setPlacing] = useState(false);
   const [placeError, setPlaceError] = useState<string | null>(null);
   const [cfToken, setCfToken] = useState<string | null>(null);
@@ -734,6 +740,7 @@ export default function CheckoutPage() {
     useState<HTMLDivElement | null>(null);
   const [cardholderName, setCardholderName] = useState("");
   const [prContainer, setPrContainer] = useState<HTMLDivElement | null>(null);
+  const [revolutPayContainer, setRevolutPayContainer] = useState<HTMLDivElement | null>(null);
   const cardSubmittingRef = useRef(false);
 
   // Form restoring from sessionStorage (avoids flash of empty inputs on mount/Revolut redirect)
@@ -873,6 +880,10 @@ export default function CheckoutPage() {
           },
           onCancel() {},
         });
+        const supported = await instance.canMakePayment();
+        if (supported && !destroyed) {
+          await instance.render();
+        }
       } catch {}
     })();
     return () => {
@@ -883,6 +894,58 @@ export default function CheckoutPage() {
     };
     // Rebuild the payment request if the shipping cost changes so the amount stays in sync.
   }, [prContainer, currentShippingAmount]);
+
+  // ── Revolut Pay button (v2 payments module) ─────────────────────────────────
+  useEffect(() => {
+    if (!revolutPayContainer) return;
+    let destroyed = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let paymentsModule: any = null;
+    (async () => {
+      try {
+        const res = await fetch("/api/checkout/revolut-order", {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ shippingAmount: currentShippingAmount }),
+        });
+        const data = await res.json();
+        if (!res.ok || destroyed) return;
+        const token: string = data.publicId;
+        const orderId: string = data.orderId;
+        const env =
+          process.env.NEXT_PUBLIC_REVOLUT_ENV === "sandbox"
+            ? "sandbox"
+            : "prod";
+        const publicToken = process.env.NEXT_PUBLIC_REVOLUT_PUBLIC_KEY ?? "";
+        const RC = await RevolutCheckout(token, env);
+        if (destroyed) return;
+        paymentsModule = RC.payments({ publicToken, locale: "bg" });
+        paymentsModule.revolutPay.mount(revolutPayContainer, {
+          sessionToken: token,
+          createOrder: async () => ({ publicId: token }),
+        });
+        // The "payment" callback receives the payload directly (not a wrapper event):
+        // { type: 'success' | 'error' | 'cancel', ... }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        paymentsModule.revolutPay.on("payment", (payload: any) => {
+          if (payload?.type === "success") {
+            setRevolutOrderId(orderId);
+            setSelectedPayment("revolut_pay");
+            setRevolutPublicId(token);
+          } else if (payload?.type === "error") {
+            setPlaceError(payload.error?.message ?? "Грешка при Revolut Pay");
+          }
+        });
+      } catch {}
+    })();
+    return () => {
+      destroyed = true;
+      try {
+        paymentsModule?.destroy();
+      } catch {}
+    };
+  }, [revolutPayContainer, currentShippingAmount]);
 
   // ── Auto-place order the moment card payment succeeds ────────────────────────
   useEffect(() => {
@@ -1025,20 +1088,28 @@ export default function CheckoutPage() {
               country_code: "BG",
             }
           : currentShippingAddress;
+      // Magento 2.3.7 GraphQL has no vat_id on cart addresses — carry the invoice
+      // details (company + ЕИК/ДДС) in the company field, on BOTH addresses to
+      // match the legacy checkout.
+      const invoiceFields =
+        wantsInvoice && invoiceCompany.trim() && invoiceVatId.trim()
+          ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
+          : {};
       const res = await fetch("/api/checkout/place", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
           email: currentEmail,
-          shippingAddress: effectiveShippingAddress,
+          shippingAddress: { ...effectiveShippingAddress, ...invoiceFields },
           shippingMethod: {
             carrier_code: carrierCode,
             method_code: methodCode,
           },
-          billingAddress: billingSameAsShipping
-            ? effectiveShippingAddress
-            : billingAddress,
+          billingAddress: {
+            ...(billingSameAsShipping ? effectiveShippingAddress : billingAddress),
+            ...invoiceFields,
+          },
           paymentMethod:
             revolutPublicId && isRevolutPay
               ? {
@@ -1105,9 +1176,13 @@ export default function CheckoutPage() {
       billingAddress.city.trim() !== "" &&
       billingAddress.postcode.trim() !== "" &&
       billingAddress.region.trim() !== "");
+  const invoiceValid =
+    !wantsInvoice ||
+    (invoiceCompany.trim() !== "" && invoiceVatId.trim() !== "");
   const canPlaceOrder =
     effectiveShippingValid &&
     billingValid &&
+    invoiceValid &&
     methodsReady &&
     selectedShipping !== "" &&
     selectedPayment !== "" &&
@@ -1479,6 +1554,58 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                   )}
+
+                  {/* Company invoice (фактура) */}
+                  <div className="mt-5 pt-5 border-t border-gray-100">
+                    <label className="flex items-center gap-3 cursor-pointer group">
+                      <div
+                        onClick={() => setWantsInvoice((p) => !p)}
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 transition-colors cursor-pointer ${
+                          wantsInvoice
+                            ? "bg-brand-action border-brand-action"
+                            : "border-gray-300 bg-white"
+                        }`}
+                      >
+                        {wantsInvoice && (
+                          <svg viewBox="0 0 10 8" className="w-3 h-3 text-white fill-current">
+                            <path
+                              d="M1 4l3 3 5-6"
+                              stroke="white"
+                              strokeWidth="1.5"
+                              fill="none"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">
+                        Желая фактура
+                      </span>
+                    </label>
+
+                    {wantsInvoice && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                        <Field label="Фирма" required>
+                          <input
+                            className={inputBase}
+                            value={invoiceCompany}
+                            onChange={(e) => setInvoiceCompany(e.target.value)}
+                            placeholder="Фирма ЕООД"
+                            autoComplete="organization"
+                          />
+                        </Field>
+                        <Field label="ЕИК / ДДС №" required>
+                          <input
+                            className={inputBase}
+                            value={invoiceVatId}
+                            onChange={(e) => setInvoiceVatId(e.target.value)}
+                            placeholder="BG123456789"
+                          />
+                        </Field>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -1493,7 +1620,10 @@ export default function CheckoutPage() {
                   ) : (
                     <div className="space-y-2">
                       {/* Apple Pay / Google Pay — self-hides if not supported on this device/browser */}
-                      <div ref={setPrContainer} className="w-full" />
+                      {/* <div ref={setPrContainer} className="w-full" /> */}
+
+                      {/* Revolut Pay button */}
+                      {/* <div ref={setRevolutPayContainer} className="w-full" /> */}
 
                       {/* Revolut card field — standalone (не зависи от Magento revolut_pay метод) */}
                       <div>
