@@ -79,6 +79,9 @@ export default async function RootLayout({
   return (
     <html lang="bg" suppressHydrationWarning>
       <head>
+        {/* Product images are served cross-origin from api.omekotitel.bg. Opening the
+            connection early removes the DNS + TLS handshake from their critical path. */}
+        <link rel="preconnect" href="https://api.omekotitel.bg" crossOrigin="" />
         <JsonLd data={[buildOrganizationSchema(), buildWebSiteSchema()]} />
       </head>
       <body
