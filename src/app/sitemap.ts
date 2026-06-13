@@ -4,17 +4,13 @@ import { magentoImageUrl } from "@/src/app/utils/image";
 
 const BASE = "https://omekotitel.bg";
 
-// ─── Chunk IDs ─────────────────────────────────────────────────────────────
-// Next.js renders /sitemap.xml as an index referencing /sitemap/0.xml, /sitemap/1.xml …
-// Each id maps to one chunk below.
-
-export async function generateSitemaps() {
-  return [
-    { id: "static" },
-    { id: "categories" },
-    { id: "products" },
-  ];
-}
+// Single sitemap served at /sitemap.xml.
+//
+// NOTE: we deliberately do NOT use `generateSitemaps()`. With that export Next.js
+// only serves the chunks at /sitemap/<id>.xml and never creates /sitemap.xml — so
+// requests to /sitemap.xml 404 and fall through to the HTML not-found page, which
+// is exactly what Google Search Console flagged ("Sitemap is HTML"). The whole
+// catalog is well under the 50,000-URL / 50 MB single-file limit, so one file is fine.
 
 // ─── Static pages ──────────────────────────────────────────────────────────
 
@@ -58,45 +54,41 @@ function collectCategories(list: CatalogCategory[]): CategoryEntry[] {
   return entries;
 }
 
-// ─── Default export — called per chunk ────────────────────────────────────
-
-export default async function sitemap({
-  id,
-}: {
-  id: string;
-}): Promise<MetadataRoute.Sitemap> {
-  if (id === "static") {
-    return STATIC;
+async function categoryEntries(): Promise<MetadataRoute.Sitemap> {
+  try {
+    const catalog = await fetchCatalog();
+    const root = catalog.categoryList as CatalogCategory[];
+    const realCats = (root[0]?.children ?? root) as CatalogCategory[];
+    return collectCategories(realCats).map(({ urlPath, image }) => ({
+      url: `${BASE}/${urlPath}`,
+      priority: 0.8,
+      changeFrequency: "weekly" as const,
+      ...(image ? { images: [image] } : {}),
+    }));
+  } catch {
+    return [];
   }
+}
 
-  if (id === "categories") {
-    try {
-      const catalog = await fetchCatalog();
-      const root = catalog.categoryList as CatalogCategory[];
-      const realCats = (root[0]?.children ?? root) as CatalogCategory[];
-      return collectCategories(realCats).map(({ urlPath, image }) => ({
-        url: `${BASE}/${urlPath}`,
-        priority: 0.8,
-        changeFrequency: "weekly" as const,
-        ...(image ? { images: [image] } : {}),
-      }));
-    } catch {
-      return [];
-    }
+async function productEntries(): Promise<MetadataRoute.Sitemap> {
+  try {
+    const urlKeys = await fetchAllProductUrlKeys();
+    return urlKeys.map((key) => ({
+      url: `${BASE}/${key}`,
+      priority: 0.9,
+      changeFrequency: "weekly" as const,
+    }));
+  } catch {
+    return [];
   }
+}
 
-  if (id === "products") {
-    try {
-      const urlKeys = await fetchAllProductUrlKeys();
-      return urlKeys.map((key) => ({
-        url: `${BASE}/${key}`,
-        priority: 0.9,
-        changeFrequency: "weekly" as const,
-      }));
-    } catch {
-      return [];
-    }
-  }
+// ─── Default export — one combined sitemap ─────────────────────────────────
 
-  return [];
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [categories, products] = await Promise.all([
+    categoryEntries(),
+    productEntries(),
+  ]);
+  return [...STATIC, ...categories, ...products];
 }
