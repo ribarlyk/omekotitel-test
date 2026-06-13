@@ -153,7 +153,10 @@ export default function ProductSlider({
               className="shrink-0"
               style={{ width: 200, flex: "0 0 200px" }}
             >
-              <ProductCard product={product} index={i} view="grid" imageSizes="200px" priority={priorityFirst && i === 0} />
+              {/* No priority on mobile: the high-priority preload this would emit competes
+                  with the hero image (the mobile LCP element) for the download queue. The
+                  product slider is below the fold here, so it loads lazily instead. */}
+              <ProductCard product={product} index={i} view="grid" imageSizes="200px" />
             </div>
           ))}
           <div className="w-4 shrink-0" />
