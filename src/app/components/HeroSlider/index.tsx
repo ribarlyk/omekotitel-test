@@ -2,7 +2,6 @@
 
 import {
   useState,
-  useEffect,
   useCallback,
   useRef,
 } from "react";
@@ -52,34 +51,33 @@ const SLIDES = [
   },
 ];
 
-const INTERVAL = 5000;
 const FADE_MS = 700;
 const SWIPE_THRESHOLD = 50;
 
 export default function HeroSlider() {
   const [current, setCurrent] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
-  }, []);
+  // Only slides whose index is in this set get their <img> rendered (and downloaded).
+  // Every slide is absolutely positioned at inset-0, so it counts as "in the viewport"
+  // even when invisible — meaning loading="lazy" does NOT defer the hidden ones. Without
+  // this gate the browser eagerly fetches all 5 hero images at once, starving the LCP
+  // image of bandwidth. Start with slide 0 only; load the others the first time they're shown.
+  const [loaded, setLoaded] = useState<Set<number>>(() => new Set([0]));
+  const currentRef = useRef(0);
   const touchStartX = useRef(0);
 
+  const go = useCallback((index: number) => {
+    currentRef.current = index;
+    setCurrent(index);
+    setLoaded((prev) => (prev.has(index) ? prev : new Set(prev).add(index)));
+  }, []);
   const next = useCallback(
-    () => setCurrent((i) => (i + 1) % SLIDES.length),
-    [],
+    () => go((currentRef.current + 1) % SLIDES.length),
+    [go],
   );
   const prev = useCallback(
-    () => setCurrent((i) => (i - 1 + SLIDES.length) % SLIDES.length),
-    [],
+    () => go((currentRef.current - 1 + SLIDES.length) % SLIDES.length),
+    [go],
   );
-
-  useEffect(() => {
-    if (paused) return;
-    const id = setInterval(next, INTERVAL);
-    return () => clearInterval(id);
-  }, [paused, next]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -91,17 +89,13 @@ export default function HeroSlider() {
     else if (delta < -SWIPE_THRESHOLD) next();
   };
 
-  const slidesToRender = mounted ? SLIDES : SLIDES.slice(0, 1);
-
   return (
     <div
       className="relative w-full overflow-hidden h-96 md:h-[500px]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      {slidesToRender.map((slide, i) => (
+      {SLIDES.map((slide, i) => (
         <div
           key={slide.src}
           className="absolute inset-0"
@@ -113,20 +107,23 @@ export default function HeroSlider() {
           aria-hidden={i !== current ? true : undefined}
         >
           {/* Art-directed hero: <source media> makes the browser download exactly ONE
-              image (desktop OR mobile), never both. The first slide is server-rendered,
-              so the preload scanner finds it during HTML parse — fetchPriority="high"
-              prioritises it like a preload link, without the double-fetch. */}
-          <picture>
-            <source media="(min-width: 768px)" srcSet={slide.src} />
-            <img
-              src={slide.mobileSrc}
-              alt={slide.alt}
-              className="absolute inset-0 w-full h-full object-cover md:object-contain"
-              fetchPriority={i === 0 ? "high" : "auto"}
-              loading={i === 0 ? "eager" : "lazy"}
-              decoding="async"
-            />
-          </picture>
+              image (desktop OR mobile), never both. Slide 0 is server-rendered, so the
+              preload scanner finds it during HTML parse — fetchPriority="high" prioritises
+              it like a preload link. Other slides' <img> only mount once visited (see
+              `loaded`), so they don't compete with the LCP image for bandwidth. */}
+          {loaded.has(i) && (
+            <picture>
+              <source media="(min-width: 768px)" srcSet={slide.src} />
+              <img
+                src={slide.mobileSrc}
+                alt={slide.alt}
+                className="absolute inset-0 w-full h-full object-cover md:object-contain"
+                fetchPriority={i === 0 ? "high" : "auto"}
+                loading="eager"
+                decoding="async"
+              />
+            </picture>
+          )}
 
           <div className="absolute inset-0 flex items-start md:items-center pointer-events-none justify-center md:justify-start md:pl-32 pt-2 md:pt-0">
             <div className="flex flex-col items-center md:items-start gap-1 md:gap-4">
@@ -172,10 +169,13 @@ export default function HeroSlider() {
         <ChevronRight size={18} />
       </button>
 
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2" aria-hidden="true">
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
         {SLIDES.map((_, i) => (
-          <div
+          <button
             key={i}
+            onClick={() => go(i)}
+            aria-label={`Към слайд ${i + 1}`}
+            aria-current={i === current}
             className={`rounded-full transition-all duration-300 ${
               i === current
                 ? "w-6 h-2 bg-brand-nav"

@@ -210,10 +210,13 @@ export async function POST(request: NextRequest) {
       paymentMethod.method === "revolut_pay_later";
     const hasPublicId = !!paymentMethod.additional_data?.public_id;
 
-    // The Revolut Magento module is incompatible with Pay 2.0 SDK — place with
-    // cashondelivery as a bridge method, then auto-invoice via admin REST.
+    // The Revolut Magento module is incompatible with Pay 2.0 SDK. The card is
+    // charged through Revolut's widget; in Magento we record the order under the
+    // offline "banktransfer" method (titled "Платено с Revolut" in admin) as a
+    // bridge, then auto-invoice via admin REST. Keeps card-paid orders distinct
+    // from real cashondelivery orders.
     const placeAsMethod =
-      isRevolut && hasPublicId ? "cashondelivery" : paymentMethod.method;
+      isRevolut && hasPublicId ? "banktransfer" : paymentMethod.method;
 
     const pmResp = await fetch(GRAPHQL_ENDPOINT, {
       method: "POST",
