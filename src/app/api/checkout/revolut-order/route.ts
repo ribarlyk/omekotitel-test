@@ -83,6 +83,10 @@ export async function POST(request: Request) {
             enforce: true,
           },
         },
+        // Settlement details to ensure proper 3DS flow
+        settlement_details: {
+          reference: `OMEKOTITEL-${Date.now()}`,
+        },
       }),
     });
 
