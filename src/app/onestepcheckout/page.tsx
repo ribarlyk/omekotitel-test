@@ -981,7 +981,6 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!revolutPublicId) return;
     if (orderPlacedRef.current) return;
-    if (!canPlaceOrder) return; // Wait until form is valid
     orderPlacedRef.current = true;
     // Small delay to ensure all state updates have propagated
     const timer = setTimeout(() => {
@@ -989,7 +988,7 @@ export default function CheckoutPage() {
     }, 100);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revolutPublicId, canPlaceOrder]);
+  }, [revolutPublicId]);
 
   // ── Fallback: poll Revolut for the card result ───────────────────────────────
   // After a 3DS challenge the SDK's onSuccess sometimes never fires (the challenge
@@ -1088,6 +1087,10 @@ export default function CheckoutPage() {
   useEffect(() => {
     prefetchOffices("econt");
     prefetchOffices("speedy");
+    
+    // Clear any stuck loading states from previous session
+    setPlacing(false);
+    setAwaitingCard(false);
     
     // Detect mobile redirect return from Revolut
     // If we have saved payment state but no revolutPublicId set yet, restore it
