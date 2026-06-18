@@ -997,16 +997,15 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (!revolutPublicId) return;
     if (orderPlacedRef.current) return;
-    if (formRestoring) return; // Wait for form restoration to complete
     orderPlacedRef.current = true;
-    // Longer delay to ensure form data is fully populated after redirect
+    // Small delay to ensure state updates have propagated
     const timer = setTimeout(() => {
       console.log("Auto-placing order after redirect...");
       handlePlaceOrder();
-    }, 500);
+    }, 300);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [revolutPublicId, formRestoring]);
+  }, [revolutPublicId]);
 
   // ── Fallback: poll Revolut for the card result ───────────────────────────────
   // After a 3DS challenge the SDK's onSuccess sometimes never fires (the challenge
@@ -1110,43 +1109,29 @@ export default function CheckoutPage() {
     setPlacing(false);
     setAwaitingCard(false);
     
-    // Detect mobile redirect return from Revolut
-    // If we have saved payment state but no revolutPublicId set yet, restore it
+    // Simple redirect detection: if we have saved payment state, restore ONLY payment info and trigger order
     try {
       const saved = sessionStorage.getItem("revolut_checkout_state");
       if (saved) {
         const state = JSON.parse(saved);
         if (state.revolutPublicId && !revolutPublicId) {
-          console.log("Detected return from mobile redirect, restoring payment state");
+          console.log("Detected return from redirect - triggering order placement");
+          
+          // Set only the payment-related state needed to place the order
+          setRevolutOrderId(state.revolutOrderId);
+          setSelectedPayment(state.selectedPayment || "revolut_pay");
           setRevolutPublicId(state.revolutPublicId);
-          if (state.revolutOrderId) {
-            setRevolutOrderId(state.revolutOrderId);
-          }
-          if (state.selectedPayment) {
-            setSelectedPayment(state.selectedPayment);
-          }
-          // Restore shipping, billing, and invoice state
-          if (state.selectedShipping) {
-            setSelectedShipping(state.selectedShipping);
-          }
-          if (state.selectedOffice) {
-            setSelectedOffice(state.selectedOffice);
-          }
-          if (typeof state.billingSameAsShipping === 'boolean') {
-            setBillingSameAsShipping(state.billingSameAsShipping);
-          }
-          if (state.billingAddress) {
-            setBillingAddress(state.billingAddress);
-          }
-          if (typeof state.wantsInvoice === 'boolean') {
-            setWantsInvoice(state.wantsInvoice);
-          }
-          if (state.invoiceCompany) {
-            setInvoiceCompany(state.invoiceCompany);
-          }
-          if (state.invoiceVatId) {
-            setInvoiceVatId(state.invoiceVatId);
-          }
+          
+          // The form data is already in sessionStorage (checkout_form)
+          // The shipping/billing selections are already in sessionStorage (revolut_checkout_state)
+          // Just need to restore them for the order placement
+          if (state.selectedShipping) setSelectedShipping(state.selectedShipping);
+          if (state.selectedOffice) setSelectedOffice(state.selectedOffice);
+          if (typeof state.billingSameAsShipping === 'boolean') setBillingSameAsShipping(state.billingSameAsShipping);
+          if (state.billingAddress) setBillingAddress(state.billingAddress);
+          if (typeof state.wantsInvoice === 'boolean') setWantsInvoice(state.wantsInvoice);
+          if (state.invoiceCompany) setInvoiceCompany(state.invoiceCompany);
+          if (state.invoiceVatId) setInvoiceVatId(state.invoiceVatId);
         }
       }
     } catch (e) {
