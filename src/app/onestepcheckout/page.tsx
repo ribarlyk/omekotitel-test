@@ -43,11 +43,10 @@ const addressSchema = z.object({
       (val) => /^(\+359|00359|0)\d{9}$/.test(val.replace(/[\s\-().]/g, "")),
       "Невалиден телефонен номер (пр. 0876123456, +359876123456 или 00359876123456)"
     ),
-  // Address fields optional - only required for address delivery
-  street: z.string().optional(),
-  city: z.string().optional(),
-  postcode: z.string().optional(),
-  region: z.string().optional(),
+  street: z.string().min(1, "Въведете адрес"),
+  city: z.string().min(1, "Въведете град"),
+  postcode: z.string().min(1, "Въведете пощенски код"),
+  region: z.string().min(1, "Въведете област"),
 });
 type AddressFields = z.infer<typeof addressSchema>;
 
@@ -1065,6 +1064,66 @@ export default function CheckoutPage() {
       } catch {}
     };
   }, [revolutPayContainer, currentShippingAmount]);
+
+  // ── Update saved data when office selection changes ──────────────────────────
+  useEffect(() => {
+    // Only update if we have a saved Revolut order (payment widget is active)
+    const saved = sessionStorage.getItem("revolut_checkout_state");
+    if (!saved) return;
+    
+    try {
+      const state = JSON.parse(saved);
+      if (!state.revolutPublicId) return; // Not a valid saved state
+      
+      // Rebuild address data with current form state
+      const { email: rawEmail, ...currentAddressFields } = getShipping();
+      const currentEmail = rawEmail?.trim();
+      const currentShippingAddress: ShippingAddress = {
+        ...currentAddressFields,
+        country_code: "BG",
+      };
+      
+      const effectiveShippingAddress: ShippingAddress =
+        !isAddressDelivery && selectedOffice
+          ? {
+              firstname: currentShippingAddress.firstname,
+              lastname: currentShippingAddress.lastname,
+              telephone: currentShippingAddress.telephone,
+              street: [
+                selectedShippingMethod?.carrier_title ?? "",
+                selectedOffice.address.fullAddress
+                  .replace(selectedOffice.address.city.name, "")
+                  .trim(),
+              ],
+              city: selectedOffice.address.city.name,
+              postcode: selectedOffice.address.city.postCode || "0000",
+              region: selectedOffice.address.city.name,
+              country_code: "BG",
+            }
+          : currentShippingAddress;
+      
+      const invoiceFields =
+        wantsInvoice && invoiceCompany.trim() && invoiceVatId.trim()
+          ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
+          : {};
+      
+      // Update saved data
+      const updatedData = {
+        ...state,
+        email: currentEmail,
+        effectiveShippingAddress: { ...effectiveShippingAddress, ...invoiceFields },
+        selectedShipping,
+        billingAddress: billingSameAsShipping ? effectiveShippingAddress : billingAddress,
+        invoiceFields,
+      };
+      
+      sessionStorage.setItem("revolut_checkout_state", JSON.stringify(updatedData));
+      console.log("🔄 Updated saved order data with office:", selectedOffice?.name);
+    } catch (e) {
+      console.error("Failed to update saved data:", e);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedOffice, billingSameAsShipping, wantsInvoice, invoiceCompany, invoiceVatId]);
 
   // ── Auto-place order the moment card payment succeeds ────────────────────────
   useEffect(() => {
