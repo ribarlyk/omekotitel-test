@@ -573,6 +573,7 @@ export default function CheckoutPage() {
   // isn't active yet when reset() fires, so validity would otherwise stay false.
   useEffect(() => {
     const stored = getStoredForm();
+    console.log("Form restoration - stored data:", stored);
     if (Object.keys(stored).length > 0) {
       reset(
         {
@@ -591,6 +592,7 @@ export default function CheckoutPage() {
       const { contactValid: cv, shippingValid: sv } = computeValidity(stored);
       setContactValid(cv);
       setShippingValid(sv);
+      console.log("Form restored with validity:", { contactValid: cv, shippingValid: sv });
     }
     setFormRestoring(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -997,10 +999,11 @@ export default function CheckoutPage() {
     if (orderPlacedRef.current) return;
     if (formRestoring) return; // Wait for form restoration to complete
     orderPlacedRef.current = true;
-    // Small delay to ensure all state updates have propagated
+    // Longer delay to ensure form data is fully populated after redirect
     const timer = setTimeout(() => {
+      console.log("Auto-placing order after redirect...");
       handlePlaceOrder();
-    }, 100);
+    }, 500);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [revolutPublicId, formRestoring]);
@@ -1223,6 +1226,18 @@ export default function CheckoutPage() {
     setPlacing(true);
     try {
       const { email: rawEmail, ...currentAddressFields } = getShipping();
+      
+      // Debug: Log form data
+      console.log("handlePlaceOrder - Form data:", currentAddressFields);
+      
+      // Validate required fields before proceeding
+      if (!currentAddressFields.street || !currentAddressFields.city || !currentAddressFields.firstname) {
+        console.error("Form data incomplete:", currentAddressFields);
+        setPlaceError("Моля попълнете всички задължителни полета");
+        setPlacing(false);
+        return;
+      }
+      
       const currentEmail = rawEmail?.trim();
       const currentShippingAddress: ShippingAddress = {
         ...currentAddressFields,
