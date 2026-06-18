@@ -1173,25 +1173,51 @@ export default function CheckoutPage() {
     setPlacing(false);
     setAwaitingCard(false);
     
-    // Simple redirect detection: if we have saved payment state, restore ONLY payment info and trigger order
-    try {
-      const saved = sessionStorage.getItem("revolut_checkout_state");
-      if (saved) {
-        const state = JSON.parse(saved);
-        if (state.revolutPublicId && !revolutPublicId) {
-          console.log("Detected return from redirect - triggering order placement with saved data");
-          
-          // Set payment-related state to trigger auto-placement
-          setRevolutOrderId(state.revolutOrderId);
-          setSelectedPayment(state.selectedPayment || "revolut_pay");
-          if (state.selectedShipping) setSelectedShipping(state.selectedShipping);
-          
-          // Set revolutPublicId last to trigger the auto-place effect
-          setRevolutPublicId(state.revolutPublicId);
+    // ═══ PRIMARY: Check Revolut URL params as source of truth ═══
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      const revolutOrderId = url.searchParams.get('_rp_oid');
+      const isSuccess = url.searchParams.get('_rp_s') === 'true';
+      
+      // If Revolut sent us back with success, process the payment
+      if (revolutOrderId && isSuccess) {
+        console.log(`✅ Revolut redirect detected: Order ${revolutOrderId}, Success: ${isSuccess}`);
+        
+        // Try to restore saved order data from sessionStorage
+        try {
+          const saved = sessionStorage.getItem("revolut_checkout_state");
+          if (saved) {
+            const state = JSON.parse(saved);
+            console.log("📦 Found saved order data in sessionStorage");
+            
+            // Verify the order ID matches (safety check)
+            if (state.revolutOrderId === revolutOrderId) {
+              console.log("✓ Order ID matches, restoring payment state and triggering placement");
+              
+              // Set payment-related state to trigger auto-placement
+              setRevolutOrderId(state.revolutOrderId);
+              setSelectedPayment(state.selectedPayment || "revolut_pay");
+              if (state.selectedShipping) setSelectedShipping(state.selectedShipping);
+              
+              // Set revolutPublicId last to trigger the auto-place effect
+              setRevolutPublicId(state.revolutPublicId);
+            } else {
+              console.warn("⚠️ Order ID mismatch:", state.revolutOrderId, "vs", revolutOrderId);
+            }
+          } else {
+            console.warn("⚠️ No saved order data found in sessionStorage");
+            // TODO: Could fetch order status from Revolut API here as fallback
+          }
+        } catch (e) {
+          console.error("❌ Failed to restore payment state from redirect:", e);
         }
+        
+        // Clean URL params after processing
+        url.searchParams.delete('_rp_oid');
+        url.searchParams.delete('_rp_s');
+        window.history.replaceState({}, '', url.toString());
+        console.log("🧹 Cleaned redirect parameters from URL");
       }
-    } catch (e) {
-      console.error("Failed to restore payment state from mobile redirect:", e);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
