@@ -1708,10 +1708,10 @@ export default function CheckoutPage() {
                   ) : (
                     <div className="space-y-2">
                       {/* Apple Pay / Google Pay — self-hides if not supported on this device/browser */}
-                      {/* <div ref={setPrContainer} className="w-full" /> */}
+                      <div ref={setPrContainer} className="w-full" />
 
                       {/* Revolut Pay button */}
-                      {/* <div ref={setRevolutPayContainer} className="w-full" /> */}
+                      <div ref={setRevolutPayContainer} className="w-full" />
 
                       {/* Revolut card field — standalone (не зависи от Magento revolut_pay метод) */}
                       <div>
