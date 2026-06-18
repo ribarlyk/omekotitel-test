@@ -1088,6 +1088,28 @@ export default function CheckoutPage() {
   useEffect(() => {
     prefetchOffices("econt");
     prefetchOffices("speedy");
+    
+    // Detect mobile redirect return from Revolut
+    // If we have saved payment state but no revolutPublicId set yet, restore it
+    try {
+      const saved = sessionStorage.getItem("revolut_checkout_state");
+      if (saved) {
+        const state = JSON.parse(saved);
+        if (state.revolutPublicId && !revolutPublicId) {
+          console.log("Detected return from mobile redirect, restoring payment state");
+          setRevolutPublicId(state.revolutPublicId);
+          if (state.revolutOrderId) {
+            setRevolutOrderId(state.revolutOrderId);
+          }
+          if (state.selectedPayment) {
+            setSelectedPayment(state.selectedPayment);
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to restore payment state from mobile redirect:", e);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function fetchShippingMethods() {
