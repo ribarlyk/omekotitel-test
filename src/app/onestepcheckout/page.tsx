@@ -1066,7 +1066,17 @@ export default function CheckoutPage() {
   }, [revolutPayContainer, currentShippingAmount]);
 
   // ── Update saved data when office selection changes ──────────────────────────
+  // Skip the mount run: after a Revolut redirect the page remounts with
+  // selectedOffice=null and empty address fields, and this effect would otherwise
+  // rebuild effectiveShippingAddress from that empty state and clobber the complete
+  // office data saved just before the redirect. We only want to refresh the saved
+  // data on genuine user edits to office/billing/invoice, which happen after mount.
+  const officeUpdateMounted = useRef(false);
   useEffect(() => {
+    if (!officeUpdateMounted.current) {
+      officeUpdateMounted.current = true;
+      return;
+    }
     // Only update if we have a saved Revolut order (payment widget is active)
     const saved = sessionStorage.getItem("revolut_checkout_state");
     if (!saved) return;
