@@ -1186,7 +1186,7 @@ export default function CheckoutPage() {
                   },
                 }
               : { method: selectedPayment },
-          cfToken,
+          // cfToken removed for test environment
         }),
       });
       const data = await res.json();
