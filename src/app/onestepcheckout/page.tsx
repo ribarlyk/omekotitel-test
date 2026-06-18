@@ -894,6 +894,13 @@ export default function CheckoutPage() {
                 revolutPublicId: token,
                 revolutOrderId: orderId,
                 selectedPayment: "revolut_pay",
+                selectedShipping,
+                selectedOffice,
+                billingSameAsShipping,
+                billingAddress,
+                wantsInvoice,
+                invoiceCompany,
+                invoiceVatId,
               }));
             } catch {}
           },
@@ -961,6 +968,13 @@ export default function CheckoutPage() {
                 revolutPublicId: token,
                 revolutOrderId: orderId,
                 selectedPayment: "revolut_pay",
+                selectedShipping,
+                selectedOffice,
+                billingSameAsShipping,
+                billingAddress,
+                wantsInvoice,
+                invoiceCompany,
+                invoiceVatId,
               }));
             } catch {}
           } else if (payload?.type === "error") {
@@ -1106,6 +1120,28 @@ export default function CheckoutPage() {
           }
           if (state.selectedPayment) {
             setSelectedPayment(state.selectedPayment);
+          }
+          // Restore shipping, billing, and invoice state
+          if (state.selectedShipping) {
+            setSelectedShipping(state.selectedShipping);
+          }
+          if (state.selectedOffice) {
+            setSelectedOffice(state.selectedOffice);
+          }
+          if (typeof state.billingSameAsShipping === 'boolean') {
+            setBillingSameAsShipping(state.billingSameAsShipping);
+          }
+          if (state.billingAddress) {
+            setBillingAddress(state.billingAddress);
+          }
+          if (typeof state.wantsInvoice === 'boolean') {
+            setWantsInvoice(state.wantsInvoice);
+          }
+          if (state.invoiceCompany) {
+            setInvoiceCompany(state.invoiceCompany);
+          }
+          if (state.invoiceVatId) {
+            setInvoiceVatId(state.invoiceVatId);
           }
         }
       }
