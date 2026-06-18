@@ -890,21 +890,54 @@ export default function CheckoutPage() {
             setRevolutOrderId(orderId);
             setSelectedPayment("revolut_pay");
             setRevolutPublicId(token);
-            // Save to sessionStorage for redirect persistence
+            // Save complete order data for redirect persistence
             try {
+              // Build the complete order data that will be sent to Magento
+              const { email: rawEmail, ...currentAddressFields } = getShipping();
+              const currentEmail = rawEmail?.trim();
+              const currentShippingAddress: ShippingAddress = {
+                ...currentAddressFields,
+                country_code: "BG",
+              };
+              const effectiveShippingAddress: ShippingAddress =
+                !isAddressDelivery && selectedOffice
+                  ? {
+                      firstname: currentShippingAddress.firstname,
+                      lastname: currentShippingAddress.lastname,
+                      telephone: currentShippingAddress.telephone,
+                      street: [
+                        selectedShippingMethod?.carrier_title ?? "",
+                        selectedOffice.address.fullAddress
+                          .replace(selectedOffice.address.city.name, "")
+                          .trim(),
+                      ],
+                      city: selectedOffice.address.city.name,
+                      postcode: selectedOffice.address.city.postCode || "0000",
+                      region: selectedOffice.address.city.name,
+                      country_code: "BG",
+                    }
+                  : currentShippingAddress;
+              
+              const invoiceFields =
+                wantsInvoice && invoiceCompany.trim() && invoiceVatId.trim()
+                  ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
+                  : {};
+              
               sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
                 revolutPublicId: token,
                 revolutOrderId: orderId,
                 selectedPayment: "revolut_pay",
+                // Save complete order data
+                email: currentEmail,
+                effectiveShippingAddress: { ...effectiveShippingAddress, ...invoiceFields },
                 selectedShipping,
-                selectedOffice,
+                billingAddress: billingSameAsShipping ? effectiveShippingAddress : billingAddress,
                 billingSameAsShipping,
-                billingAddress,
-                wantsInvoice,
-                invoiceCompany,
-                invoiceVatId,
+                invoiceFields,
               }));
-            } catch {}
+            } catch (err) {
+              console.error("Failed to save checkout state:", err);
+            }
           },
           onError(error: { message?: string }) {
             setPlaceError(error?.message ?? "Грешка при Apple/Google Pay");
@@ -964,21 +997,52 @@ export default function CheckoutPage() {
             setRevolutOrderId(orderId);
             setSelectedPayment("revolut_pay");
             setRevolutPublicId(token);
-            // Save to sessionStorage for redirect persistence
+            // Save complete order data for redirect persistence
             try {
+              const { email: rawEmail, ...currentAddressFields } = getShipping();
+              const currentEmail = rawEmail?.trim();
+              const currentShippingAddress: ShippingAddress = {
+                ...currentAddressFields,
+                country_code: "BG",
+              };
+              const effectiveShippingAddress: ShippingAddress =
+                !isAddressDelivery && selectedOffice
+                  ? {
+                      firstname: currentShippingAddress.firstname,
+                      lastname: currentShippingAddress.lastname,
+                      telephone: currentShippingAddress.telephone,
+                      street: [
+                        selectedShippingMethod?.carrier_title ?? "",
+                        selectedOffice.address.fullAddress
+                          .replace(selectedOffice.address.city.name, "")
+                          .trim(),
+                      ],
+                      city: selectedOffice.address.city.name,
+                      postcode: selectedOffice.address.city.postCode || "0000",
+                      region: selectedOffice.address.city.name,
+                      country_code: "BG",
+                    }
+                  : currentShippingAddress;
+              
+              const invoiceFields =
+                wantsInvoice && invoiceCompany.trim() && invoiceVatId.trim()
+                  ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
+                  : {};
+              
               sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
                 revolutPublicId: token,
                 revolutOrderId: orderId,
                 selectedPayment: "revolut_pay",
+                email: currentEmail,
+                effectiveShippingAddress: { ...effectiveShippingAddress, ...invoiceFields },
                 selectedShipping,
-                selectedOffice,
+                billingAddress: billingSameAsShipping ? effectiveShippingAddress : billingAddress,
                 billingSameAsShipping,
-                billingAddress,
-                wantsInvoice,
-                invoiceCompany,
-                invoiceVatId,
+                invoiceFields,
               }));
-            } catch {}
+            } catch (err) {
+              console.error("Failed to save checkout state:", err);
+            }
           } else if (payload?.type === "error") {
             setPlaceError(payload.error?.message ?? "Грешка при Revolut Pay");
           }
@@ -1115,23 +1179,15 @@ export default function CheckoutPage() {
       if (saved) {
         const state = JSON.parse(saved);
         if (state.revolutPublicId && !revolutPublicId) {
-          console.log("Detected return from redirect - triggering order placement");
+          console.log("Detected return from redirect - triggering order placement with saved data");
           
-          // Set only the payment-related state needed to place the order
+          // Set payment-related state to trigger auto-placement
           setRevolutOrderId(state.revolutOrderId);
           setSelectedPayment(state.selectedPayment || "revolut_pay");
-          setRevolutPublicId(state.revolutPublicId);
-          
-          // The form data is already in sessionStorage (checkout_form)
-          // The shipping/billing selections are already in sessionStorage (revolut_checkout_state)
-          // Just need to restore them for the order placement
           if (state.selectedShipping) setSelectedShipping(state.selectedShipping);
-          if (state.selectedOffice) setSelectedOffice(state.selectedOffice);
-          if (typeof state.billingSameAsShipping === 'boolean') setBillingSameAsShipping(state.billingSameAsShipping);
-          if (state.billingAddress) setBillingAddress(state.billingAddress);
-          if (typeof state.wantsInvoice === 'boolean') setWantsInvoice(state.wantsInvoice);
-          if (state.invoiceCompany) setInvoiceCompany(state.invoiceCompany);
-          if (state.invoiceVatId) setInvoiceVatId(state.invoiceVatId);
+          
+          // Set revolutPublicId last to trigger the auto-place effect
+          setRevolutPublicId(state.revolutPublicId);
         }
       }
     } catch (e) {
@@ -1210,61 +1266,80 @@ export default function CheckoutPage() {
     setPlaceError(null);
     setPlacing(true);
     try {
-      const { email: rawEmail, ...currentAddressFields } = getShipping();
+      // Check if we have saved complete order data from redirect
+      let orderData;
+      try {
+        const saved = sessionStorage.getItem("revolut_checkout_state");
+        if (saved) {
+          const state = JSON.parse(saved);
+          if (state.effectiveShippingAddress) {
+            console.log("Using saved complete order data from redirect");
+            const [carrierCode, methodCode] = state.selectedShipping.split("|");
+            orderData = {
+              email: state.email,
+              shippingAddress: state.effectiveShippingAddress,
+              shippingMethod: { carrier_code: carrierCode, method_code: methodCode },
+              billingAddress: { ...state.billingAddress, ...state.invoiceFields },
+              paymentMethod: {
+                method: state.selectedPayment,
+                additional_data: {
+                  public_id: state.revolutPublicId,
+                  order_id: state.revolutOrderId,
+                },
+              },
+            };
+          }
+        }
+      } catch {}
       
-      // Debug: Log form data
-      console.log("handlePlaceOrder - Form data:", currentAddressFields);
-      
-      // Validate required fields before proceeding
-      if (!currentAddressFields.street || !currentAddressFields.city || !currentAddressFields.firstname) {
-        console.error("Form data incomplete:", currentAddressFields);
-        setPlaceError("Моля попълнете всички задължителни полета");
-        setPlacing(false);
-        return;
-      }
-      
-      const currentEmail = rawEmail?.trim();
-      const currentShippingAddress: ShippingAddress = {
-        ...currentAddressFields,
-        country_code: "BG",
-      };
-      const [carrierCode, methodCode] = selectedShipping.split("|");
-      const effectiveShippingAddress: ShippingAddress =
-        !isAddressDelivery && selectedOffice
-          ? {
-              firstname: currentShippingAddress.firstname,
-              lastname: currentShippingAddress.lastname,
-              telephone: currentShippingAddress.telephone,
-              street: [
-                selectedShippingMethod?.carrier_title ?? "",
-                selectedOffice.address.fullAddress
-                  .replace(selectedOffice.address.city.name, "")
-                  .trim(),
-              ],
-              city: selectedOffice.address.city.name,
-              postcode: selectedOffice.address.city.postCode || "0000",
-              region: selectedOffice.address.city.name,
-              country_code: "BG",
-            }
-          : currentShippingAddress;
-      // Magento 2.3.7 GraphQL has no vat_id on cart addresses — carry the invoice
-      // details (company + ЕИК/ДДС) in the company field, on BOTH addresses to
-      // match the legacy checkout.
-      const invoiceFields =
-        wantsInvoice && invoiceCompany.trim() && invoiceVatId.trim()
-          ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
-          : {};
-      const res = await fetch("/api/checkout/place", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
+      // If no saved data, build from current form state
+      if (!orderData) {
+        const { email: rawEmail, ...currentAddressFields } = getShipping();
+        
+        console.log("handlePlaceOrder - Form data:", currentAddressFields);
+        
+        // Validate required fields
+        if (!currentAddressFields.street || !currentAddressFields.city || !currentAddressFields.firstname) {
+          console.error("Form data incomplete:", currentAddressFields);
+          setPlaceError("Моля попълнете всички задължителни полета");
+          setPlacing(false);
+          return;
+        }
+        
+        const currentEmail = rawEmail?.trim();
+        const currentShippingAddress: ShippingAddress = {
+          ...currentAddressFields,
+          country_code: "BG",
+        };
+        const [carrierCode, methodCode] = selectedShipping.split("|");
+        const effectiveShippingAddress: ShippingAddress =
+          !isAddressDelivery && selectedOffice
+            ? {
+                firstname: currentShippingAddress.firstname,
+                lastname: currentShippingAddress.lastname,
+                telephone: currentShippingAddress.telephone,
+                street: [
+                  selectedShippingMethod?.carrier_title ?? "",
+                  selectedOffice.address.fullAddress
+                    .replace(selectedOffice.address.city.name, "")
+                    .trim(),
+                ],
+                city: selectedOffice.address.city.name,
+                postcode: selectedOffice.address.city.postCode || "0000",
+                region: selectedOffice.address.city.name,
+                country_code: "BG",
+              }
+            : currentShippingAddress;
+        
+        const invoiceFields =
+          wantsInvoice && invoiceCompany.trim() && invoiceVatId.trim()
+            ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
+            : {};
+        
+        orderData = {
           email: currentEmail,
           shippingAddress: { ...effectiveShippingAddress, ...invoiceFields },
-          shippingMethod: {
-            carrier_code: carrierCode,
-            method_code: methodCode,
-          },
+          shippingMethod: { carrier_code: carrierCode, method_code: methodCode },
           billingAddress: {
             ...(billingSameAsShipping ? effectiveShippingAddress : billingAddress),
             ...invoiceFields,
@@ -1279,6 +1354,15 @@ export default function CheckoutPage() {
                   },
                 }
               : { method: selectedPayment },
+        };
+      }
+      
+      const res = await fetch("/api/checkout/place", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          ...orderData,
           // cfToken removed for test environment
         }),
       });
