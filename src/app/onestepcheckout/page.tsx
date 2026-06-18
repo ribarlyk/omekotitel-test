@@ -888,6 +888,14 @@ export default function CheckoutPage() {
             setRevolutOrderId(orderId);
             setSelectedPayment("revolut_pay");
             setRevolutPublicId(token);
+            // Save to sessionStorage for redirect persistence
+            try {
+              sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
+                revolutPublicId: token,
+                revolutOrderId: orderId,
+                selectedPayment: "revolut_pay",
+              }));
+            } catch {}
           },
           onError(error: { message?: string }) {
             setPlaceError(error?.message ?? "Грешка при Apple/Google Pay");
@@ -947,6 +955,14 @@ export default function CheckoutPage() {
             setRevolutOrderId(orderId);
             setSelectedPayment("revolut_pay");
             setRevolutPublicId(token);
+            // Save to sessionStorage for redirect persistence
+            try {
+              sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
+                revolutPublicId: token,
+                revolutOrderId: orderId,
+                selectedPayment: "revolut_pay",
+              }));
+            } catch {}
           } else if (payload?.type === "error") {
             setPlaceError(payload.error?.message ?? "Грешка при Revolut Pay");
           }
@@ -1044,7 +1060,17 @@ export default function CheckoutPage() {
       let savedPayment: string | null = null;
       try {
         const saved = sessionStorage.getItem("revolut_checkout_state");
-        if (saved) savedPayment = JSON.parse(saved).selectedPayment ?? null;
+        if (saved) {
+          const state = JSON.parse(saved);
+          savedPayment = state.selectedPayment ?? null;
+          // Restore payment state after redirect
+          if (state.revolutPublicId) {
+            setRevolutPublicId(state.revolutPublicId);
+          }
+          if (state.revolutOrderId) {
+            setRevolutOrderId(state.revolutOrderId);
+          }
+        }
       } catch {}
       const preferred =
         savedPayment ??
