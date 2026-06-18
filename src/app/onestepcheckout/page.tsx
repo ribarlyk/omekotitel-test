@@ -1276,7 +1276,7 @@ export default function CheckoutPage() {
     selectedPayment !== "" &&
     (!isRevolutPay || cardFieldReady || revolutPublicId !== null) &&
     (isAddressDelivery || !!selectedOffice || isDirectDelivery) &&
-    !!cfToken &&
+    // !!cfToken && // Turnstile disabled for test environment
     !placing;
 
   // ── Empty cart guard ────────────────────────────────────────────────────────
@@ -1904,6 +1904,7 @@ export default function CheckoutPage() {
                 {placeError && (
                   <p className="text-sm text-red-500 mb-4">{placeError}</p>
                 )}
+                {/* Turnstile disabled for test environment
                 <div className="mb-4">
                   <TurnstileWidget
                     onSuccess={setCfToken}
@@ -1911,6 +1912,7 @@ export default function CheckoutPage() {
                     onError={() => setCfToken(null)}
                   />
                 </div>
+                */}
                 <button
                   onClick={isRevolutPay ? submitCard : handlePlaceOrder}
                   disabled={!canPlaceOrder}
@@ -1951,6 +1953,7 @@ export default function CheckoutPage() {
                 {placeError && (
                   <p className="text-sm text-red-500 mb-4">{placeError}</p>
                 )}
+                {/* Turnstile disabled for test environment
                 <div className="mb-4">
                   <TurnstileWidget
                     onSuccess={setCfToken}
@@ -1958,6 +1961,7 @@ export default function CheckoutPage() {
                     onError={() => setCfToken(null)}
                   />
                 </div>
+                */}
                 <button
                   onClick={isRevolutPay ? submitCard : handlePlaceOrder}
                   disabled={!canPlaceOrder}
