@@ -43,10 +43,11 @@ const addressSchema = z.object({
       (val) => /^(\+359|00359|0)\d{9}$/.test(val.replace(/[\s\-().]/g, "")),
       "Невалиден телефонен номер (пр. 0876123456, +359876123456 или 00359876123456)"
     ),
-  street: z.string().min(1, "Въведете адрес"),
-  city: z.string().min(1, "Въведете град"),
-  postcode: z.string().min(1, "Въведете пощенски код"),
-  region: z.string().min(1, "Въведете област"),
+  // Address fields optional - only required for address delivery
+  street: z.string().optional(),
+  city: z.string().optional(),
+  postcode: z.string().optional(),
+  region: z.string().optional(),
 });
 type AddressFields = z.infer<typeof addressSchema>;
 
@@ -909,7 +910,7 @@ export default function CheckoutPage() {
               ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
               : {};
           
-          sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
+          const savedData = {
             revolutPublicId: token,
             revolutOrderId: orderId,
             selectedPayment: "revolut_pay",
@@ -919,8 +920,9 @@ export default function CheckoutPage() {
             billingAddress: billingSameAsShipping ? effectiveShippingAddress : billingAddress,
             billingSameAsShipping,
             invoiceFields,
-          }));
-          console.log("💾 Saved complete order data for Google Pay redirect");
+          };
+          sessionStorage.setItem("revolut_checkout_state", JSON.stringify(savedData));
+          console.log("💾 Saved complete order data for Google Pay redirect:", savedData);
         } catch (err) {
           console.error("❌ Failed to save checkout state:", err);
         }
@@ -1012,7 +1014,7 @@ export default function CheckoutPage() {
               ? { company: `${invoiceCompany.trim()} · ЕИК/ДДС: ${invoiceVatId.trim()}` }
               : {};
           
-          sessionStorage.setItem("revolut_checkout_state", JSON.stringify({
+          const savedData = {
             revolutPublicId: token,
             revolutOrderId: orderId,
             selectedPayment: "revolut_pay",
@@ -1022,8 +1024,9 @@ export default function CheckoutPage() {
             billingAddress: billingSameAsShipping ? effectiveShippingAddress : billingAddress,
             billingSameAsShipping,
             invoiceFields,
-          }));
-          console.log("💾 Saved complete order data for Revolut Pay redirect");
+          };
+          sessionStorage.setItem("revolut_checkout_state", JSON.stringify(savedData));
+          console.log("💾 Saved complete order data for Revolut Pay redirect:", savedData);
         } catch (err) {
           console.error("❌ Failed to save checkout state:", err);
         }
@@ -1305,7 +1308,7 @@ export default function CheckoutPage() {
         if (saved) {
           const state = JSON.parse(saved);
           if (state.effectiveShippingAddress) {
-            console.log("Using saved complete order data from redirect");
+            console.log("📦 Restored saved data:", state);
             const [carrierCode, methodCode] = state.selectedShipping.split("|");
             orderData = {
               email: state.email,
@@ -1320,6 +1323,7 @@ export default function CheckoutPage() {
                 },
               },
             };
+            console.log("📤 Sending order payload:", orderData);
           }
         }
       } catch {}
