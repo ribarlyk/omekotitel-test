@@ -76,6 +76,13 @@ export async function POST(request: Request) {
         // (manually in the Revolut dashboard). Card authorizations expire after ~7 days.
         capture_mode: "manual",
         description: "Поръчка от omekotitel.bg",
+        // Force 3D Secure authentication for testing
+        enforcement_options: {
+          three_d_secure: {
+            enabled: true,
+            enforce: true,
+          },
+        },
       }),
     });
 
